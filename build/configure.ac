@@ -44,6 +44,22 @@ AC_PROG_GCC_TRADITIONAL
 AC_HEADER_MAJOR
 AC_TYPE_SIGNAL
 
+AC_MSG_CHECKING([for sed -r/-E option])
+if sed -r -e 's/(c|o)+/\1/g' > /dev/null < /dev/null ; then
+    local_sed="gnu"
+    AC_MSG_RESULT([GNU sed, using -r option for regex])
+else
+   if sed -E -e 's/(c|o)+/\1/g' > /dev/null < /dev/null ; then
+     local_sed="bsd"
+     AC_MSG_RESULT([BSD sed, using -E option for regex])
+   else
+     local_sed=unknown
+     AC_MSG_ERROR([unknown switch to use with sed to support regex])
+   fi
+fi
+
+
+AM_CONDITIONAL([BSD_SED], [test "$local_sed" = "bsd"])
 
 # defaults
 AC_PREFIX_DEFAULT(/usr/local)
