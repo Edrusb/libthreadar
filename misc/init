@@ -17,8 +17,8 @@ export NLSPATH
 #
 #
 
-cp src/build/configure.ac .
-cp src/build/Makefile.am .
+cp build/configure.ac .
+cp build/Makefile.am .
 
 libtoolize --automake
 gettextize --force

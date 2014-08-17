@@ -3,7 +3,7 @@ AC_PREREQ(2.69)
 AC_INIT([LIBTHREADAR], [1.0.0], [])
 AC_CONFIG_HEADERS([config.h])
 AC_LANG([C++])
-AC_CONFIG_SRCDIR([tampon.cpp])
+AC_CONFIG_SRCDIR([src/tampon.hpp])
 
 AM_INIT_AUTOMAKE
 AM_GNU_GETTEXT([external])
@@ -72,6 +72,6 @@ AC_CONFIG_COMMANDS([hack-libtool], [
 ])
 
 
-AC_CONFIG_FILES([Makefile libthreadar.pc.tmpl])
+AC_CONFIG_FILES([Makefile src/Makefile src/libthreadar.pc.tmpl])
 
 AC_OUTPUT
