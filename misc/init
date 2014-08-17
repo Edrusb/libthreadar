@@ -28,10 +28,10 @@ autoconf
 autoheader
 automake --add-missing --gnu
 
-cp src/build/ChangeLog .
+cp build/ChangeLog .
 chmod a-w configure.ac Makefile.am ChangeLog
 if [ ! -e mkinstalldirs ]; then
-cp src/build/mkinstalldirs .
+cp build/mkinstalldirs .
 fi
 
 
