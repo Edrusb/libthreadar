@@ -21,29 +21,29 @@
 //  to contact the author: dar.linux@free.fr
 /*********************************************************************/
 
-#ifndef LIBTHREADAR_HPP
-#define LIBTHREADAR_HPP
+    // C system headers
+extern "C"
+{
 
-    /// \file libthreadar.hpp
-    /// \brief only that file should be included from libthreadar
-    ///
-    /// libthreadar provide access to different C++ classes:
-    //. class mutex
-    //. class semaphore
-    //. class tampon (i.e.: buffer)
-    //. class thread
+}
+    // C++ standard headers
 
-#include "mutex.hpp"
-#include "semaphore.hpp"
-#include "tampon.hpp"
-#include "thread.hpp"
+
+    // libthreadar headers
+
+
+    // this module's header
+#include "libthreadar.hpp"
+
 
 namespace libthreadar
 {
 
-	/// provides the version of libthreadar
-    extern void get_version(U_I & major, U_I & medium, U_I & minor);
+    void get_version(U_I & major, U_I & medium, U_I & minor)
+    {
+	major = 1;
+	medium = 0;
+	minor = 0;
+    }
 
 } // end of namespace
-
-#endif
