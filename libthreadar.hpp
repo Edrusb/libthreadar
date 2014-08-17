@@ -33,6 +33,8 @@
     //. class tampon (i.e.: buffer)
     //. class thread
 
+#include "config.h"
+
 #include "mutex.hpp"
 #include "semaphore.hpp"
 #include "tampon.hpp"

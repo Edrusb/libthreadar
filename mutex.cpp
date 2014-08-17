@@ -21,10 +21,14 @@
 //  to contact the author: dar.linux@free.fr
 /*********************************************************************/
 
+#include "config.h"
+
     // C system headers
 extern "C"
 {
+#if HAVE_ERRNO_H
 #include <errno.h>
+#endif
 }
     // C++ standard headers
 

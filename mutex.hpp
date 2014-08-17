@@ -27,10 +27,14 @@
     /// \file mutex.hpp
     /// \brief defines a mutex C++ class, using pthread_mutex_t C object
 
+#include "config.h"
+
     // C system headers
 extern "C"
 {
+#if HAVE_PTHREAD_H
 #include <pthread.h>
+#endif
 }
     // C++ standard headers
 #include <string>

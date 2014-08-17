@@ -27,6 +27,7 @@
     /// \file tampoh.hpp
     /// \brief holds a datastructure that provides asynchronous pipe-like (unidirectional) communication between two threads
 
+#include "config.h"
 
     // C system headers
 extern "C"

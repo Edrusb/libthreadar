@@ -1,0 +1,38 @@
+#!/bin/sh
+
+if [ ! -f AUTHORS ] ; then
+  echo "Script must be ran from the package root directory"
+  exit 1
+fi
+
+# if 'make' fails because of a lack of 'Makefile' in the po subdirectory
+# you probably have to tune the following environment variable according
+# to your system.
+NLSPATH='/usr/share/locale/%L/LC_MESSAGES/%N.cat'
+export NLSPATH
+# if you can't figure out the problem and can avoid having
+# translated messages do the following
+#
+#    cp po/Makefile.sos po/Makefile
+#
+#
+
+cp src/build/configure.ac .
+cp src/build/Makefile.am .
+
+libtoolize --automake
+gettextize --force
+po/generate_POTFILES.in
+aclocal -I m4
+autoconf
+autoheader
+automake --add-missing --gnu
+
+cp src/build/ChangeLog .
+chmod a-w configure.ac Makefile.am ChangeLog
+if [ ! -e mkinstalldirs ]; then
+cp src/build/mkinstalldirs .
+fi
+
+
+

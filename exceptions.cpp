@@ -21,10 +21,12 @@
 //  to contact the author: dar.linux@free.fr
 /*********************************************************************/
 
+#include "config.h"
+
     // C system headers
 extern "C"
 {
-#include <string.h>
+
 }
     // C++ standard headers
 

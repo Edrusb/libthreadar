@@ -21,6 +21,8 @@
 //  to contact the author: dar.linux@free.fr
 /*********************************************************************/
 
+#include "config.h"
+
     // C system headers
 extern "C"
 {
@@ -35,15 +37,18 @@ extern "C"
     // this module's header
 #include "libthreadar.hpp"
 
+const unsigned int LIBTHREADAR_MAJOR = 1;
+const unsigned int LIBTHREADAR_MEDIUM = 0;
+const unsigned int LIBTHREADAR_MINOR = 0;
 
 namespace libthreadar
 {
 
     void get_version(U_I & major, U_I & medium, U_I & minor)
     {
-	major = 1;
-	medium = 0;
-	minor = 0;
+	major = LIBTHREADAR_MAJOR;
+	medium = LIBTHREADAR_MEDIUM;
+	minor = LIBTHREADAR_MINOR;
     }
 
 } // end of namespace

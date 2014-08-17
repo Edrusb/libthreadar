@@ -40,10 +40,14 @@
     /// the number of such message is given by size() and messages are accessible by the operator []
     /// of the exception object.
 
+#include "config.h"
+
     // C system headers
 extern "C"
 {
+#if HAVE_STRING_H
 #include <string.h>
+#endif
 }
     // C++ standard headers
 #include <string>

@@ -28,6 +28,8 @@
     /// \brief defines a semaphore class
     ///
 
+#include "config.h"
+
     // C system headers
 extern "C"
 {

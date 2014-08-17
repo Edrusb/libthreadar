@@ -32,11 +32,17 @@
     /// threaded work is done in inherited classes. Also has been added exception transmission
     /// support from sub threaded back to parent thread using the join() method of destructor
 
+#include "config.h"
+
     // C system headers
 extern "C"
 {
+#if HAVE_PTHREAD_H
 #include <pthread.h>
+#endif
+#if HAVE_SIGNAL_H
 #include <signal.h>
+#endif
 }
     // C++ standard headers
 
