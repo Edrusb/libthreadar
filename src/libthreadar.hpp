@@ -44,7 +44,7 @@ namespace libthreadar
 {
 
 	/// provides the version of libthreadar
-    extern void get_version(U_I & major, U_I & medium, U_I & minor);
+    extern void get_version(unsigned int & major, unsigned int & medium, unsigned int & minor);
 
 } // end of namespace
 

@@ -54,7 +54,7 @@ extern "C"
 #include <vector>
 #include <new>
 #include <iostream>
-
+#include <sstream>
 
     // libthreadar headers
 
@@ -62,6 +62,8 @@ extern "C"
 
 namespace libthreadar
 {
+    std::string local_to_string(int val);
+
 
     /// pure virtual class parent of all webdar exceptions
     class exception_base
@@ -110,7 +112,7 @@ namespace libthreadar
     class exception_bug : public exception_base
     {
     public:
-	exception_bug(const std::string & file, int line) : exception_base(std::string("WEBDAR: BUG MET IN File " + file + " line " + std::to_string(line))) {};
+	exception_bug(const std::string & file, int line) : exception_base("WEBDAR: BUG MET IN File " + file + " line " + std::to_string(line)) {};
 
     protected:
 	virtual exception_base *clone() const { return cloner<exception_bug>((void *)this); };

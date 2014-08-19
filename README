@@ -1,0 +1,18 @@
+
+	libthreadar is provides C++ classes for
+	manipulating threads easily and propagating
+	back exception from thread to parent thread
+
+	libthreadar relies on posix thread which and
+	does not require C++11 support from the compiler
+
+	libthreadar has been setup from code initially
+	part of webdar and also to be used by dar and
+	libdar, where from its name.
+
+	It is a simple implementation for simple things
+	but as it may be of interest to any other C++ project
+	it has been released under the Lesser GPL.
+
+	For details about this license see the
+	COPYING and COPYING.LESSER files.

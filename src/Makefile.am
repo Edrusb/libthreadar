@@ -11,10 +11,10 @@ AM_LDFLAGS = @LTLIBINTL@
 LDADD =
 lib_LTLIBRARIES = libthreadar.la
 
-LIBTHREADAR_MAJOR=`grep LIBTHREADAR_MAJOR libthreadar.cpp | cut -f 2 -d "=" | cut -f 1 -d ';' | sed -e 's% %%g'`
-LIBTHREADAR_MEDIUM=`grep LIBTHREADAR_MEDIUM libthreadar.cpp | cut -f 2 -d "=" | cut -f 1 -d ';' | sed -e 's% %%g'`
-LIBTHREADAR_MEDIUM_000=`grep LIBTHREADAR_MEDIUM libthreadar.cpp | cut -f 2 -d "=" | cut -f 1 -d ';' | sed $(SED_REGEX) -e 's% %%g' -e 's%([^0-9]|^)([0-9]{1})([^0-9]|$$)%0\2%' -e 's%([^0-9]|^)([0-9]{2})([^0-9]|$$)%0\2%'`
-LIBTHREADAR_MINOR=`grep LIBTHREADAR_MINOR libthreadar.cpp | cut -f 2 -d "=" | cut -f 1 -d ';' | sed -e 's% %%g'`
+LIBTHREADAR_MAJOR=`sed -$(SED_REGEX) -n -e 's/^.*LIBTHREADAR_MAJOR\s*=\s+([^\s;]+).*/\1/p' libthreadar.cpp`
+LIBTHREADAR_MEDIUM=`sed -$(SED_REGEX) -n -e 's/^.*LIBTHREADAR_MEDIUM\s*=\s+([^\s;]+).*/\1/p' libthreadar.cpp`
+LIBTHREADAR_MEDIUM_000=`echo $(LIBDTHREADAR_MEDIUM) | sed $(SED_REGEX) -e 's% %%g' -e 's%([^0-9]|^)([0-9]{1})([^0-9]|$$)%0\2%' -e 's%([^0-9]|^)([0-9]{2})([^0-9]|$$)%0\2%'`
+LIBTHREADAR_MINOR=`sed -$(SED_REGEX) -n -e 's/^.*LIBTHREADAR_MINOR\s*=\s+([^\s;]+).*/\1/p' libthreadar.cpp`
 LIBTHREADAR_LIBTOOL_CURRENT=$(LIBTHREADAR_MAJOR)$(LIBTHREADAR_MEDIUM_000)
 LIBTHREADAR_LIBTOOL_REVISION=$(LIBTHREADAR_MINOR)
 LIBTHREADAR_LIBTOOL_AGE=$(LIBTHREADAR_MEDIUM)
@@ -32,18 +32,18 @@ install-data-local:
 	mv  $(DESTDIR)$(pkgincludedir)/config.h.tmp  $(DESTDIR)$(pkgincludedir)/libthreadar_config.h
 	chmod 0644 $(DESTDIR)$(pkgincludedir)/*
 	$(INSTALL) -d $(DESTDIR)$(pkgconfigdir)
-	$(INSTALL) -m 0644 libthreadar.pc $(DESTDIR)$(pkgconfigdir)/libthreadar$(LIBDAR_SUFFIX).pc
+	$(INSTALL) -m 0644 libthreadar.pc $(DESTDIR)$(pkgconfigdir)/libthreadar.pc
 
 uninstall-local:
-	rm -rf $(DESTDIR)$(pkgincludedir) $(DESTDIR)$(pkgconfigdir)/libthreadar$(LIBDAR_SUFFIX).pc
+	rm -rf $(DESTDIR)$(pkgincludedir) $(DESTDIR)$(pkgconfigdir)/libthreadar.pc
 
-all-local : libdar.pc
+all-local : libthreadar.pc
 
 libthreadar.pc : libthreadar.pc.tmpl
-	sed -e "s%#LIBTHREADAR_VERSION#%$(LIBTHREADAR_VERSION_OUT)%g" libdar.pc.tmpl > libdar.pc
+	sed -e "s%#LIBTHREADAR_VERSION#%$(LIBTHREADAR_VERSION_OUT)%g" libthreadar.pc.tmpl > libthreadar.pc
 
 ALL_SOURCES = exceptions.cpp libthreadar.cpp mutex.cpp semaphore.cpp thread.cpp
 
-libthreadar_la_LDFLAGS = -version-info $(LIBDAR_VERSION_IN)
+libthreadar_la_LDFLAGS = -version-info $(LIBTHREADAR_VERSION_IN)
 libthreadar_la_SOURCES = $(ALL_SOURCES)
 

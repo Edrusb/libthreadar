@@ -6,9 +6,9 @@ AC_LANG([C++])
 AC_CONFIG_SRCDIR([src/tampon.hpp])
 
 AM_INIT_AUTOMAKE
-AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION
-AM_ICONV
+# AM_GNU_GETTEXT([external])
+# AM_GNU_GETTEXT_VERSION
+# AM_ICONV
 
 # Checks for programs.
 AC_PROG_CXX
@@ -58,6 +58,26 @@ else
    fi
 fi
 
+AC_MSG_CHECKING([for c++11 support])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+                                   [ thread_local static int test = 0; ])
+                  ],
+                  [ AC_MSG_RESULT(yes) ],
+                  [
+                     AC_MSG_RESULT([no])
+                     AC_MSG_CHECKING([for c++ support with -std=c++11 option set])
+                     CXXSTDFLAGS="-std=c++11"
+                     CXXFLAGS="$CXXFLAGS $CXXSTDFLAGS"
+                     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+                                                        [ thread_local static int test = 0; ])
+                                        ],
+                                        [ AC_MSG_RESULT(yes) ],
+                                        [
+                                           AC_MSG_RESULT(no)
+                                           AC_MSG_ERROR([C++ compiler lack support for c++11 standard])
+                                        ]
+                     )
+                   ])
 
 AM_CONDITIONAL([BSD_SED], [test "$local_sed" = "bsd"])
 
@@ -73,5 +93,4 @@ AC_CONFIG_COMMANDS([hack-libtool], [
 
 
 AC_CONFIG_FILES([Makefile src/Makefile src/libthreadar.pc.tmpl])
-
 AC_OUTPUT

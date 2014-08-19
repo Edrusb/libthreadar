@@ -30,7 +30,6 @@ extern "C"
 }
     // C++ standard headers
 
-
     // libthreadar headers
 
     // this module's header
@@ -61,6 +60,7 @@ namespace libthreadar
 	reset_first_message(buffer);
 	push_message(context);
     }
+
 
 } // end of namespace
 

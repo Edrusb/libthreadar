@@ -21,14 +21,17 @@ cp build/configure.ac .
 cp build/Makefile.am .
 
 libtoolize --automake
-gettextize --force
-po/generate_POTFILES.in
-aclocal -I m4
+# gettextize --force
+# po/generate_POTFILES.in
+
+# aclocal -I m4
+aclocal
+
 autoconf
 autoheader
+cp build/ChangeLog .
 automake --add-missing --gnu
 
-cp build/ChangeLog .
 chmod a-w configure.ac Makefile.am ChangeLog
 if [ ! -e mkinstalldirs ]; then
 cp build/mkinstalldirs .

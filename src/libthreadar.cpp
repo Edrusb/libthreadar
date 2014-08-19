@@ -44,7 +44,7 @@ const unsigned int LIBTHREADAR_MINOR = 0;
 namespace libthreadar
 {
 
-    void get_version(U_I & major, U_I & medium, U_I & minor)
+    void get_version(unsigned int & major, unsigned int & medium, unsigned int & minor)
     {
 	major = LIBTHREADAR_MAJOR;
 	medium = LIBTHREADAR_MEDIUM;
