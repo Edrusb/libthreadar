@@ -48,4 +48,12 @@ namespace libthreadar
 
 } // end of namespace
 
+extern "C"
+{
+	// use AC_CHECK_LIB(threadar, [for_autoconf], [], [])
+	// to have autoconf based configure script properly detecting
+	// the present and usability of libthreadar
+    unsigned int for_autoconf(unsigned int x);
+}
+
 #endif
