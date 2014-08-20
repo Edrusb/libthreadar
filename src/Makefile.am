@@ -25,7 +25,7 @@ dist_noinst_DATA = exceptions.hpp libthreadar.hpp mutex.hpp semaphore.hpp tampon
 
 install-data-local:
 	mkdir -p $(DESTDIR)$(pkgincludedir)
-	cp config.h $(DESTDIR)$(pkgincludedir)/libthreadar_config.h
+	cp ../config.h $(DESTDIR)$(pkgincludedir)/libthreadar_config.h
 	for file in $(dist_noinst_DATA) ; do sed -e 's%#include \"config.h\"%MY_CONFIG_FILE_H%g' -e "s%#include \"%#include \"$(pkgincludedir)/%g" -e "s%MY_CONFIG_FILE_H%#include \"$(pkgincludedir)/libthreadar_config.h\"%g" "$$file" > $(DESTDIR)$(pkgincludedir)/"$$file"  ; done
 	for file in $(DESTDIR)$(pkgincludedir)/* ; do sed -e 's%HAVE_%LIBTHREADAR_HAS_%g' -e 's%VERSION%LIBTHREADAR_VERSION%g' -e 's%_AVAILABLE%_AVAILABLE_FOR_LIBTHREDAR%g' -e 's%STDC_HEADERS%LIBTHREADAR_STDC_HEADERS%g' -e 's%ENABLE_NLS%LIBTHREADAR_ENABLE_NLS%g' "$$file" > "$$file.tmp" && mv "$$file.tmp" "$$file" ; done
 	egrep 'LIBTHREADAR' $(DESTDIR)$(pkgincludedir)/libthreadar_config.h | grep -v "#undef" >  $(DESTDIR)$(pkgincludedir)/config.h.tmp
@@ -41,6 +41,9 @@ all-local : libthreadar.pc
 
 libthreadar.pc : libthreadar.pc.tmpl
 	sed -e "s%#LIBTHREADAR_VERSION#%$(LIBTHREADAR_VERSION_OUT)%g" libthreadar.pc.tmpl > libthreadar.pc
+
+clean-local:
+	rm -rf libthreadar.pc
 
 ALL_SOURCES = exceptions.cpp libthreadar.cpp mutex.cpp semaphore.cpp thread.cpp
 

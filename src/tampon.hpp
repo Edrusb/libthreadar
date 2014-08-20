@@ -24,7 +24,7 @@
 #ifndef LIBTHREADAR_TAMPON_H
 #define LIBTHREADAR_TAMPON_H
 
-    /// \file tampoh.hpp
+    /// \file tampon.hpp
     /// \brief holds a datastructure that provides asynchronous pipe-like (unidirectional) communication between two threads
 
 #include "config.h"
@@ -83,8 +83,8 @@ namespace libthreadar
     public:
 	    /// constructor
 	    ///
-	    /// \param[in] max_block, maximum number of buffers that can be written to without being read
-	    /// \param[in] maximum size of each buffer
+	    /// \param[in] max_block is the maximum number of buffers that can be written to without being read
+	    /// \param[in] block_size is the maximum size of each buffer
 	tampon(unsigned int max_block, unsigned int block_size);
 
 	    /// copy constructor is disabled and generates an exception if called

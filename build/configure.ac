@@ -58,6 +58,33 @@ else
    fi
 fi
 
+AC_ARG_ENABLE( [build-html],
+               AC_HELP_STRING(--disable-build-html, [don't build programming documentation]),
+               [ doxygen="no"
+                 groff="no"
+               ],
+               [ AC_CHECK_PROG(doxygen, doxygen, [yes], [no], [$PATH])
+                   AC_MSG_CHECKING([for doxygen version])
+                   if test "$doxygen" = "yes" ; then
+                       n1=`doxygen --version | cut -d '.' -f 1`
+                       n2=`doxygen --version | cut -d '.' -f 2`
+                       if test $n1 -gt 1 -o $n2 -ge 3 ; then
+                           AC_MSG_RESULT([ >= 1.3])
+                       else
+                           AC_MSG_RESULT([ too old (< 1.3) ignoring doxygen])
+                           doxygen="no"
+                       fi
+                   fi
+                 AC_CHECK_PROG(tmp, man, [yes], [no], [$PATH])
+                 if test "$tmp" = "yes" ; then
+                    AC_CHECK_PROG(groff, groff, [yes], [no], [$PATH])
+                 else
+                    groff = "no";
+                 fi
+               ]
+             )
+
+
 AC_MSG_CHECKING([for c++11 support])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
                                    [ thread_local static int test = 0; ])
@@ -80,6 +107,10 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
                    ])
 
 AM_CONDITIONAL([BSD_SED], [test "$local_sed" = "bsd"])
+AM_CONDITIONAL([USE_DOXYGEN], [test "$doxygen" = "yes"])
+AC_SUBST(DOXYGEN_PROG, [doxygen])
+
+
 
 # defaults
 AC_PREFIX_DEFAULT(/usr/local)
@@ -92,5 +123,5 @@ AC_CONFIG_COMMANDS([hack-libtool], [
 ])
 
 
-AC_CONFIG_FILES([Makefile src/Makefile src/libthreadar.pc.tmpl])
+AC_CONFIG_FILES([Makefile src/Makefile src/libthreadar.pc.tmpl doc/Makefile])
 AC_OUTPUT
