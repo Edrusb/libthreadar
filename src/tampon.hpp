@@ -110,6 +110,9 @@ namespace libthreadar
 	    /// returned by get_block_to_feed;
 	void feed(T* ptr, unsigned int written);
 
+	    /// put back the block obtained by get_block_to_feed() because it was not used so it will be the next to be again next time
+	void feed_cancel_get_block(T *ptr);
+
 	    /// fetch call step 1
 	    ///
 	    /// return the address of the data to be read
@@ -240,6 +243,15 @@ namespace libthreadar
 	shift_by_one(next_feed);
 	if(waiting_fetcher.waiting_thread())
 	    waiting_fetcher.unlock();
+    }
+
+    template <class T> void tampon<T>::feed_cancel_get_block(T *ptr)
+    {
+	if(!feed_outside)
+	    throw exception_range("fetch not outside!");
+	if(ptr != table[next_feed].mem)
+	    throw exception_range("returned ptr is not the one given earlier for feeding");
+	feed_outside = false;
     }
 
     template <class T> void tampon<T>::fetch(T* & ptr, unsigned int & num)
