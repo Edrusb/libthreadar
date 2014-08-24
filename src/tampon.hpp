@@ -88,7 +88,7 @@ namespace libthreadar
 	tampon(unsigned int max_block, unsigned int block_size);
 
 	    /// copy constructor is disabled and generates an exception if called
-	tampon(const tampon & ref): waiting_feeder(1,0), waiting_fetcher(1,0) { throw THREADAR_BUG; };
+	tampon(const tampon & ref): waiting_feeder(1), waiting_fetcher(1) { throw THREADAR_BUG; };
 
 	    /// assignment operator is disabled and generates an exception if called
 	const tampon & operator = (const tampon & ref) { throw THREADAR_BUG; };
