@@ -110,20 +110,31 @@ namespace libthreadar
 	    /// returned by get_block_to_feed;
 	void feed(T* ptr, unsigned int written);
 
-	    /// put back the block obtained by get_block_to_feed() because it was not used so it will be the next to be again next time
+	    /// put back the block obtained by get_block_to_feed() because it was not used so it will be the next returned by get_block_to_feed
 	void feed_cancel_get_block(T *ptr);
 
 	    /// fetch call step 1
 	    ///
-	    /// return the address of the data to be read
-	    /// num is the number of element available for reading
-	    /// note that the caller shall never release the address pointed to by ptr
+	    /// \param[out] ptr is the address of the data to be read
+	    /// \param[out] num is the number of element available for reading
+	    /// \note that the caller shall never release the address pointed to by ptr
 	void fetch(T* & ptr, unsigned int & num);
 
 	    /// fetcher call step 2
 	    ///
 	    /// once data has been read, recycle the block into the tampon object
 	void fetch_recycle(T* ptr);
+
+	    /// put back the fetched block if all some data remain unfetched for now in this block,
+	    ///
+	    /// \note this is the duty of the caller to modify the block for the part of the data
+	    /// that has been fetch be suppressed and the unfetched data becomes at the beginning of
+	    /// the block. The size is thus modified and provided as new amount of available data in that block
+	void fetch_push_back(T *ptr, unsigned int new_num);
+
+	    /// for fetcher to know whether the next feed will be blocking
+	bool is_empty() const { return next_feed == next_fetch; };
+	bool is_not_empty() const { return !is_empty(); };
 
     private:
 	struct atom
@@ -144,9 +155,7 @@ namespace libthreadar
 	semaphore waiting_feeder; //< feeder thread may be stuck waiting on that semaphore if table is full
 	semaphore waiting_fetcher;//< fetcher thread may be stuck waiting on that semaphore if table is empty
 
-	bool is_empty() const { return next_feed == next_fetch; };
 	bool is_full() const;
-	bool is_not_empty() const { return !is_empty(); };
 	bool is_not_full() const { return !is_full(); };
 	void shift_by_one(unsigned int & x); // cyclicly shift an index (next_feed or next_fetch) by one position
     };
@@ -277,6 +286,16 @@ namespace libthreadar
 	shift_by_one(next_fetch);
 	if(waiting_feeder.waiting_thread())
 	    waiting_feeder.unlock();
+    }
+
+    template <class T> void tampon<T>::fetch_push_back(T* ptr, unsigned int new_num)
+    {
+	if(!fetch_outside)
+	    throw exception_range("no block outside for fetching");
+	if(ptr != table[next_fetch].mem)
+	    throw exception_range("returned ptr is not the one given earlier for fetching");
+	fetch_outside = false;
+	table[next_fetch].data_size = new_num;
     }
 
     template <class T> bool tampon<T>::is_full() const
