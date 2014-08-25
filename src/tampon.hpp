@@ -133,7 +133,7 @@ namespace libthreadar
 	void fetch_push_back(T *ptr, unsigned int new_num);
 
 	    /// for fetcher to know whether the next feed will be blocking
-	bool is_empty() const { return next_feed == next_fetch; };
+	bool is_empty() const { return next_feed == next_fetch && !full; };
 	bool is_not_empty() const { return !is_empty(); };
 
     private:
@@ -154,8 +154,9 @@ namespace libthreadar
 	bool feed_outside;        //< if set to true, table's index pointed to by next_feed is used by the feeder
 	semaphore waiting_feeder; //< feeder thread may be stuck waiting on that semaphore if table is full
 	semaphore waiting_fetcher;//< fetcher thread may be stuck waiting on that semaphore if table is empty
+	bool full;                //< set when tampon is full
 
-	bool is_full() const;
+	bool is_full() const { return full; };
 	bool is_not_full() const { return !is_full(); };
 	void shift_by_one(unsigned int & x); // cyclicly shift an index (next_feed or next_fetch) by one position
     };
@@ -182,6 +183,7 @@ namespace libthreadar
 		next_fetch = 0;
 		fetch_outside = false;
 		feed_outside = false;
+		full = false;
 		waiting_feeder.lock();
 		try
 		{
@@ -250,6 +252,8 @@ namespace libthreadar
 	feed_outside = false;
 	table[next_feed].data_size = num;
 	shift_by_one(next_feed);
+	if(next_feed == next_fetch)
+	    full = true;
 	if(waiting_fetcher.waiting_thread())
 	    waiting_fetcher.unlock();
     }
@@ -284,6 +288,7 @@ namespace libthreadar
 	    throw exception_range("returned ptr is no the one given earlier for fetching");
 	fetch_outside = false;
 	shift_by_one(next_fetch);
+	full = false;
 	if(waiting_feeder.waiting_thread())
 	    waiting_feeder.unlock();
     }
@@ -296,17 +301,6 @@ namespace libthreadar
 	    throw exception_range("returned ptr is not the one given earlier for fetching");
 	fetch_outside = false;
 	table[next_fetch].data_size = new_num;
-    }
-
-    template <class T> bool tampon<T>::is_full() const
-    {
-	if(next_feed + 1 < table_size)
-	    if(next_fetch <= next_feed)
-		return false;
-	    else
-		return next_fetch - next_feed > 1;
-	else
-	    return next_fetch > 0;
     }
 
     template <class T> void tampon<T>::shift_by_one(unsigned int & x)
