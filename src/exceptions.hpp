@@ -66,11 +66,38 @@ namespace libthreadar
 
 
     /// pure virtual class parent of all webdar exceptions
+    ///
+    /// \note Some exception like exception_system or exception_bug can carry message information
+    /// about the cause of the message. Along the path the exception take down the stack
+    /// each interrupted call can add a contextual message forming a stack of message.
+    /// For example, at the bottom of the stack of message is found the root cause, like
+    /// "permission denied", then over it we could find "Error while opening file <filename>",
+    /// then upper again we could find "thread creation failed", and so on.
+    /// to know the size of the message stack use the size() method of the exception
+    /// to access each message in the stack use the operator [] of the exception.
+    /// Exemple of use is thus:
+    ///
+    /// catch(libthreadar::exception_base & e)
+    /// {
+    ///    std::string msg;
+    ///
+    ///    for(unsigned int i = 0; i < e.size(); ++i)
+    ///         msg = e[i] + ": " + msg;
+    ///    cerr << msg << endl;
+    /// }
+    ///
+    /// you are allowed to add new messages to the stack using push_message()
+    /// and then rethrow the exception for propagation.
+    ///
+    /// why not concatenating string at each catch clause and propagating the exception?
+    /// because depending on languagues some may prefer to present this nested informations
+    /// another way than separating them with ':' from the less specific to the root cause
     class exception_base
     {
     public:
+	    /// constructor, used inside libthreadar
 	exception_base(const std::string & x_msg) { msg_table.push_back(x_msg); };
-
+	    /// destructor
 	virtual ~exception_base() {};
 
 	    /// to be used in a catch clause to add context information before rethrowing the exception
