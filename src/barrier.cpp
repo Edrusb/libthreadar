@@ -21,40 +21,74 @@
 //  to contact the author: dar.linux@free.fr
 /*********************************************************************/
 
-#ifndef LIBTHREADAR_HPP
-#define LIBTHREADAR_HPP
-
-    /// \file libthreadar.hpp
-    /// \brief only that file should be included from libthreadar
-    ///
-    /// libthreadar provide access to different C++ classes:
-    //. class mutex
-    //. class semaphore
-    //. class tampon (i.e.: buffer)
-    //. class thread
-
 #include "config.h"
 
-#include "mutex.hpp"
-#include "semaphore.hpp"
-#include "tampon.hpp"
-#include "thread.hpp"
+    // C system headers
+extern "C"
+{
+}
+    // C++ standard headers
+
+
+    // libthreadar headers
+#include "exceptions.hpp"
+
+    // this module's header
 #include "barrier.hpp"
+
+using namespace std;
 
 namespace libthreadar
 {
 
-	/// provides the version of libthreadar
-    extern void get_version(unsigned int & major, unsigned int & medium, unsigned int & minor);
+    barrier::barrier(unsigned int num)
+    {
+	switch(pthread_barrier_init(&bar, NULL, num))
+	{
+	case 0:
+	    break;
+	case EAGAIN:
+	    throw exception_range("Lack of resource");
+	case EINVAL:
+	    throw exception_range("zero given as argumet to barrier");
+	case ENOMEM:
+	    throw exception_memory();
+	case EBUSY:
+	    throw THREADAR_BUG;
+	default:
+	    throw THREADAR_BUG;
+	}
+    }
+
+    barrier::~barrier()
+    {
+	switch(pthread_barrier_destroy(&bar))
+	{
+	case 0:
+	    break;
+	case EBUSY:
+	    throw exception_range("destroying a barrier while still in use");
+	case EINVAL:
+	    throw THREADAR_BUG;
+	default:
+	    throw THREADAR_BUG;
+	}
+    }
+
+    void barrier::wait()
+    {
+	switch(pthread_barrier_wait(&bar))
+	{
+	case PTHREAD_BARRIER_SERIAL_THREAD:
+	    break;
+	case 0:
+	    break;
+	case EINVAL:
+	    throw THREADAR_BUG;
+	default:
+	    throw THREADAR_BUG;
+	}
+    }
 
 } // end of namespace
 
-extern "C"
-{
-	// use AC_CHECK_LIB(threadar, [for_autoconf], [], [])
-	// to have autoconf based configure script properly detecting
-	// the present and usability of libthreadar
-    unsigned int for_autoconf(unsigned int x);
-}
-
-#endif
