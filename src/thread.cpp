@@ -145,7 +145,7 @@ namespace libthreadar
 	pthread_t dyn_tid;
 	thread *me = const_cast<thread *>(this);
 
-	if(is_running() || joignable)
+	if(joignable || is_running())
 	{
 	    void *returned_exception;
 	    int ret = pthread_join(tid, &returned_exception);
@@ -188,7 +188,6 @@ namespace libthreadar
 	    if(me == NULL)
 		throw THREADAR_BUG;
 	    me->running = false;
-	    me->joignable = false;
 	}
     }
 
