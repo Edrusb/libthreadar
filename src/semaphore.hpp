@@ -53,6 +53,10 @@ namespace libthreadar
 	    /// semaphore constuctor
 	    ///
 	    /// \param[in] max_value is the maximum number of thread that can concurrently request wait() without being suspended
+	    /// \note the initial value is set to the max value, calling lock() can decrease this initial value at will, but
+	    /// calling unlock which increases the semaphore value must not lead the value to exceed maximum value
+	    /// \note a process/thread calling lock() when the value is less than or equal to zero suspends the thread/process
+	    /// up to the time another thread calls enough unlock() which awakes a single thread an incrases the semaphore value
 	semaphore(unsigned int max_value);
 
 	semaphore(const semaphore & ref):max_value(0) { throw std::string("BUG"); };
