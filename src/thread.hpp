@@ -89,12 +89,7 @@ namespace libthreadar
 	    /// launch the current object routing in a separated thread
 	void run();
 
-	    /// checks whether the object is running in a separated thread
-	    ///
-	    /// \param[out] id returns the thread_id upon success
-	    /// \return true if the object is running under a separated thread
-	    /// if false is returned, the argument is not set
-	bool is_running(pthread_t & id) const;
+	    /// checks whether a separated thread is running the inherited_run() method of this object
 	bool is_running() const { return running; };
 
 	    /// the caller will be suspended until the current object's thread ends
@@ -120,6 +115,14 @@ namespace libthreadar
 	bool joignable;                //< whether exist status of thread has to be retrieved
 	unsigned int cancellable;      //< this field is not protected by mutex as it ougth to be modified only by the spawn thread. It allows suspend/resume cancellation requests to be re-entrant (0 = cancellation accepted)
 	sigset_t sigmask;              //< signal mask to use for the thread
+
+	    /// checks whether the object is running in a separated thread
+	    ///
+	    /// \param[out] id returns the thread_id upon success
+	    /// \return true if the object is running under a separated thread
+	    /// if false is returned, the argument is not set
+	bool is_running(pthread_t & id) const;
+
 
 	    // static members
 
