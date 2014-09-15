@@ -139,7 +139,7 @@ namespace libthreadar
     class exception_bug : public exception_base
     {
     public:
-	exception_bug(const std::string & file, int line) : exception_base("WEBDAR: BUG MET IN File " + file + " line " + std::to_string(line)) {};
+	exception_bug(const std::string & file, int line) : exception_base("LIBTHREADAR BUG MET IN File " + file + " line " + std::to_string(line)) {};
 
     protected:
 	virtual exception_base *clone() const { return cloner<exception_bug>((void *)this); };
