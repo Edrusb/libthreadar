@@ -40,6 +40,20 @@ using namespace std;
 namespace libthreadar
 {
 
+
+    string exception_base::get_message(const string & sep) const
+    {
+	string ret = "";
+
+	if(msg_table.size() > 0)
+	    ret = msg_table[0];
+
+        for(unsigned int i = 1; i < size(); ++i)
+	    ret += sep + msg_table[i];
+
+	return ret;
+    }
+
     exception_system::exception_system(const std::string & context, int error_code) : exception_base("")
     {
 	const unsigned int MSGSIZE = 300;

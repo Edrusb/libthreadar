@@ -108,6 +108,9 @@ namespace libthreadar
 	    /// get the content of the message table
 	const std::string & operator [](unsigned int i) const { return msg_table[i]; };
 
+	    /// concaterate messages and use the given separator between messages
+	std::string get_message(const std::string & sep) const;
+
 	virtual exception_base *clone() const = 0;
 
     protected:
