@@ -10,6 +10,18 @@ AM_INIT_AUTOMAKE
 # AM_GNU_GETTEXT_VERSION
 # AM_ICONV
 
+# have a specific variable for pkgconfig, setting the default value:
+AC_SUBST(pkgconfigdir, [${libdir}/pkgconfig])
+AC_ARG_WITH([pkgconfigdir],
+            AC_HELP_STRING(--with-pkgconfigdir=DIR, [defines an alternative directory to install pkconfig files, default is '${libdir}/pkgconfig']),
+            [
+               if [ ! -z "$withval" ] ; then
+                 AC_SUBST(pkgconfigdir, $withval)
+               fi
+            ],
+            []
+           )
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
