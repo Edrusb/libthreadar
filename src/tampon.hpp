@@ -145,6 +145,7 @@ namespace libthreadar
 	    atom() { mem = NULL; data_size = 0; };
 	};
 
+	mutex modif;              //< to make critical section when non atomic action can garanty a status has not changed between a test and following action
 	atom *table;              //< datastructure holding data in transit between two threads
 	unsigned int table_size;  //< size of table, i.e. number of struct atom it holds
 	unsigned int alloc_size;  //< size of allocated memory for each atom in table
@@ -155,10 +156,15 @@ namespace libthreadar
 	semaphore waiting_feeder; //< feeder thread may be stuck waiting on that semaphore if table is full
 	semaphore waiting_fetcher;//< fetcher thread may be stuck waiting on that semaphore if table is empty
 	bool full;                //< set when tampon is full
+	bool feeder_go_lock;      //< true to inform fetcher than feeder is about to or has already acquire lock on waiting_feeder
+	bool feeder_lock_track;   //< only used by feeder to lock on waiting_feeder once outside of critical section
+	bool fetcher_go_lock;     //< true to inform feeder than fetcher is about to or has already acquire lock on waiting_fetcher
+	bool fetcher_lock_track;  //< only used by fetcher to lock on waiting_fetcher once outside of critical section
 
 	bool is_full() const { return full; };
 	bool is_not_full() const { return !is_full(); };
 	void shift_by_one(unsigned int & x); // cyclicly shift an index (next_feed or next_fetch) by one position
+
     };
 
     template <class T> tampon<T>::tampon(unsigned int max_block, unsigned int block_size): waiting_feeder(1), waiting_fetcher(1)
@@ -184,6 +190,10 @@ namespace libthreadar
 		fetch_outside = false;
 		feed_outside = false;
 		full = false;
+		feeder_go_lock = false;
+		feeder_lock_track = false;
+		fetcher_go_lock = false;
+		fetcher_lock_track = false;
 		waiting_feeder.lock();
 		try
 		{
@@ -191,7 +201,8 @@ namespace libthreadar
 		}
 		catch(...)
 		{
-		    waiting_feeder.unlock();
+		    waiting_feeder.reset();
+		    waiting_fetcher.reset();
 		    throw;
 		}
 	    }
@@ -226,56 +237,94 @@ namespace libthreadar
 	    }
 	    delete [] table;
 	}
-	waiting_feeder.unlock();
-	waiting_fetcher.unlock();
+	waiting_feeder.reset();
+	waiting_fetcher.reset();
     }
 
     template <class T> void tampon<T>::get_block_to_feed(T * & ptr, unsigned int & num)
     {
 	if(feed_outside)
 	    throw exception_range("feed already out!");
+	feed_outside = true;
+
+	modif.lock();  	// --- critical section START
 	if(is_full())
-	    waiting_feeder.lock();
+	{
+	    feeder_go_lock = true;   // inform fetcher that we will suspend in waiting_feeder
+	    feeder_lock_track = true;// to suspend on waiting_feeder once we will be out of the critical section
+	}
+	modif.unlock(); // --- critical section END
+
+	if(feeder_lock_track)
+	{
+	    feeder_lock_track = false;
+	    waiting_feeder.lock(); // cannot lock inside a critical section ...
+	}
+
 	if(is_full())
 	    throw THREADAR_BUG; // still full!
-	feed_outside = true;
 	ptr = table[next_feed].mem;
 	num = alloc_size;
     }
 
     template <class T> void tampon<T>::feed(T *ptr, unsigned int num)
     {
+	unsigned int tmp;
+
 	if(!feed_outside)
 	    throw exception_range("fetch not outside!");
+	feed_outside = false;
+
 	if(ptr != table[next_feed].mem)
 	    throw exception_range("returned ptr is not the one given earlier for feeding");
-	feed_outside = false;
 	table[next_feed].data_size = num;
-	shift_by_one(next_feed);
-	if(next_feed == next_fetch)
+
+	tmp = next_feed;
+	shift_by_one(tmp);
+
+	modif.lock();   // --- critical section START
+	if(tmp == next_fetch)
 	    full = true;
-	if(waiting_fetcher.waiting_thread())
+	next_feed = tmp;  // doing in that order avoid empty() reporting true while the object is full
+	if(fetcher_go_lock)
+	{
+	    fetcher_go_lock = false;
 	    waiting_fetcher.unlock();
+	}
+	modif.unlock(); // --- critical section END
     }
 
     template <class T> void tampon<T>::feed_cancel_get_block(T *ptr)
     {
 	if(!feed_outside)
-	    throw exception_range("fetch not outside!");
+	    throw exception_range("feed not outside!");
+	feed_outside = false;
 	if(ptr != table[next_feed].mem)
 	    throw exception_range("returned ptr is not the one given earlier for feeding");
-	feed_outside = false;
     }
 
     template <class T> void tampon<T>::fetch(T* & ptr, unsigned int & num)
     {
 	if(fetch_outside)
 	    throw exception_range("already fetched block outside");
+	fetch_outside = true;
+
+	modif.lock();   // --- critical section START
 	if(is_empty())
-	    waiting_fetcher.lock();
+	{
+	    fetcher_go_lock = true;    // to inform feeder that we will suspend on waiting_fetcher
+	    fetcher_lock_track = true; // to suspend on waiting_fetcher once we will be out of the critical section
+	}
+	modif.unlock(); // --- critical section END
+
+	if(fetcher_lock_track)
+	{
+	    fetcher_lock_track = false;
+	    waiting_fetcher.lock();   // cannot lock inside a critical section ...
+	}
+
 	if(is_empty())
 	    throw THREADAR_BUG;
-	fetch_outside = true;
 	ptr = table[next_fetch].mem;
 	num = table[next_fetch].data_size;
     }
@@ -284,22 +333,29 @@ namespace libthreadar
     {
 	if(!fetch_outside)
 	    throw exception_range("no block outside for fetching");
+	fetch_outside = false;
 	if(ptr != table[next_fetch].mem)
 	    throw exception_range("returned ptr is no the one given earlier for fetching");
-	fetch_outside = false;
+
+	modif.lock();   // --- critical section START
 	shift_by_one(next_fetch);
 	full = false;
-	if(waiting_feeder.waiting_thread())
+	if(feeder_go_lock)
+	{
+	    feeder_go_lock = false;
 	    waiting_feeder.unlock();
+	}
+	modif.unlock(); // --- critical section END
     }
 
     template <class T> void tampon<T>::fetch_push_back(T* ptr, unsigned int new_num)
     {
 	if(!fetch_outside)
 	    throw exception_range("no block outside for fetching");
+	fetch_outside = false;
+
 	if(ptr != table[next_fetch].mem)
 	    throw exception_range("returned ptr is not the one given earlier for fetching");
-	fetch_outside = false;
 	table[next_fetch].data_size = new_num;
     }
 
