@@ -4,8 +4,8 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: libthreadar
-Description: C++ classes to work with thread
+Description: C++ classes to work with threads
 Requires:
 Version: #LIBTHREADAR_VERSION#
 Libs: -L${libdir} -lthreadar @LIBS@
-Cflags: -I${includedir}
+Cflags: -I${includedir} @cxxstdflags@

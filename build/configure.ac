@@ -10,6 +10,8 @@ AM_INIT_AUTOMAKE
 # AM_GNU_GETTEXT_VERSION
 # AM_ICONV
 
+
+
 # have a specific variable for pkgconfig, setting the default value:
 AC_SUBST(pkgconfigdir, [${libdir}/pkgconfig])
 AC_ARG_WITH([pkgconfigdir],
@@ -35,7 +37,36 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
                   [AC_MSG_RESULT(ok)],
                   [AC_MSG_ERROR([No C++ compiler found])])
 
+AC_MSG_CHECKING([for c++11 support])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+                                   [ thread_local static int test = 0; ])
+                  ],
+                  [
+		      AC_SUBST(cxxstdflags, [])
+		      AC_MSG_RESULT(yes)
+		  ],
+                  [
+                     AC_MSG_RESULT([no])
+                     AC_MSG_CHECKING([for c++ support with -std=c++11 option set])
+                     CXXSTDFLAGS="-std=c++11"
+                     CXXFLAGS="$CXXFLAGS $CXXSTDFLAGS"
+                     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
+                                                        [ thread_local static int test = 0; ])
+                                        ],
+                                        [
+					   AC_SUBST(cxxstdflags, $CXXSTDFLAGS)
+					   AC_MSG_RESULT(yes)
+					],
+                                        [
+                                           AC_MSG_RESULT(no)
+                                           AC_MSG_ERROR([C++ compiler lack support for c++11 standard])
+                                        ]
+                     )
+                   ])
+
+
 # Checks for libraries.
+AC_CHECK_LIB(pthread, [pthread_mutex_init], [], [])
 
 
 # Checks for header files.
@@ -95,28 +126,6 @@ AC_ARG_ENABLE( [build-html],
                  fi
                ]
              )
-
-
-AC_MSG_CHECKING([for c++11 support])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
-                                   [ thread_local static int test = 0; ])
-                  ],
-                  [ AC_MSG_RESULT(yes) ],
-                  [
-                     AC_MSG_RESULT([no])
-                     AC_MSG_CHECKING([for c++ support with -std=c++11 option set])
-                     CXXSTDFLAGS="-std=c++11"
-                     CXXFLAGS="$CXXFLAGS $CXXSTDFLAGS"
-                     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
-                                                        [ thread_local static int test = 0; ])
-                                        ],
-                                        [ AC_MSG_RESULT(yes) ],
-                                        [
-                                           AC_MSG_RESULT(no)
-                                           AC_MSG_ERROR([C++ compiler lack support for c++11 standard])
-                                        ]
-                     )
-                   ])
 
 AM_CONDITIONAL([BSD_SED], [test "$local_sed" = "bsd"])
 AM_CONDITIONAL([USE_DOXYGEN], [test "$doxygen" = "yes"])
