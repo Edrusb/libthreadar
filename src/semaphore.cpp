@@ -67,21 +67,30 @@ namespace libthreadar
 
     void semaphore::lock()
     {
+	bool locking = false;
+
 	val_mutex.lock();
 	--value;
-	val_mutex.unlock();
 	if(value < 0)
+	    locking = true;
+	val_mutex.unlock();
+
+	if(locking)
 	    semaph.lock();
     }
 
     void semaphore::unlock()
     {
+	bool unlocking = false;
+
 	val_mutex.lock();
 	try
 	{
 	    if(value == max_value)
 		throw exception_range("too much call to unlock() given the number of lock() so far");
 	    ++value;
+	    if(value <= 0)
+		unlocking = true;
 	}
 	catch(...)
 	{
@@ -89,7 +98,8 @@ namespace libthreadar
 	    throw;
 	}
 	val_mutex.unlock();
-	if(value <= 0) // value was negative at the beginning of this call, meaning at least one thread was waiting
+
+	if(unlocking) // value was negative at the beginning of this call, meaning at least one thread was waiting
 	    semaph.unlock();
     }
 
