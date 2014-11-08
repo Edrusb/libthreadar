@@ -52,6 +52,8 @@ namespace libthreadar
 
     mutex::~mutex()
     {
+	try_lock();
+	unlock();
 	(void)pthread_mutex_destroy(&mut);
     }
 
