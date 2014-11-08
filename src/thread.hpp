@@ -84,6 +84,8 @@ namespace libthreadar
 	virtual ~thread();
 
 	    /// set signal mask for this object's when the thread will be run
+	    ///
+	    /// \note see sigsetops(3) for details on manipulating signal sets
 	void set_signal_mask(const sigset_t & mask) { sigmask = mask; };
 
 	    /// launch the current object routing in a separated thread
@@ -91,6 +93,13 @@ namespace libthreadar
 
 	    /// checks whether a separated thread is running the inherited_run() method of this object
 	bool is_running() const { return running; };
+
+	    /// checks whether the object is running in a separated thread
+	    ///
+	    /// \param[out] id returns the thread_id upon success
+	    /// \return true if the object is running under a separated thread
+	    /// if false is returned, the argument is not set
+	bool is_running(pthread_t & id) const;
 
 	    /// the caller will be suspended until the current object's thread ends
 	void join() const;
@@ -101,6 +110,11 @@ namespace libthreadar
     protected:
 
 	    /// action to be performed in the sperated thread
+	    ///
+	    /// \note, there is no argument to provide, because this is the responsibility of the inherited class
+	    /// to defined private/protected fields, methods and constructors to set their value
+	    /// and whether fields are only accessed by the spawn or the calling thread
+	    /// or both and in that case which way to avoid concurrent access to such fields.
 	virtual void inherited_run() = 0;
 
 	    /// available for inherited class to avoid thread cancellation to occur in a critical section
@@ -115,13 +129,6 @@ namespace libthreadar
 	bool joignable;                //< whether exist status of thread has to be retrieved
 	unsigned int cancellable;      //< this field is not protected by mutex as it ougth to be modified only by the spawn thread. It allows suspend/resume cancellation requests to be re-entrant (0 = cancellation accepted)
 	sigset_t sigmask;              //< signal mask to use for the thread
-
-	    /// checks whether the object is running in a separated thread
-	    ///
-	    /// \param[out] id returns the thread_id upon success
-	    /// \return true if the object is running under a separated thread
-	    /// if false is returned, the argument is not set
-	bool is_running(pthread_t & id) const;
 
 
 	    // static members
