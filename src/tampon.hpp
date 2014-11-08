@@ -38,7 +38,7 @@ extern "C"
 
 
     // libthreadar headers
-#include "semaphore.hpp"
+#include "mutex.hpp"
 #include "exceptions.hpp"
 
 namespace libthreadar
@@ -88,7 +88,7 @@ namespace libthreadar
 	tampon(unsigned int max_block, unsigned int block_size);
 
 	    /// copy constructor is disabled and generates an exception if called
-	tampon(const tampon & ref): waiting_feeder(1), waiting_fetcher(1) { throw THREADAR_BUG; };
+	tampon(const tampon & ref) { throw THREADAR_BUG; };
 
 	    /// assignment operator is disabled and generates an exception if called
 	const tampon & operator = (const tampon & ref) { throw THREADAR_BUG; };
@@ -140,6 +140,9 @@ namespace libthreadar
 	bool is_full() const { return full; }; // no need to acquire mutex "modif"
 	bool is_not_full() const { return !is_full(); };
 
+	    /// reset the object fields and mutex as if the object was just created
+	void reset();
+
     private:
 	struct atom
 	{
@@ -157,8 +160,8 @@ namespace libthreadar
 	unsigned int next_fetch;  //< index in table of the next atom to use for fetch table
 	bool fetch_outside;       //< if set to true, table's index pointed to by next_fetch is used by the fetcher
 	bool feed_outside;        //< if set to true, table's index pointed to by next_feed is used by the feeder
-	semaphore waiting_feeder; //< feeder thread may be stuck waiting on that semaphore if table is full
-	semaphore waiting_fetcher;//< fetcher thread may be stuck waiting on that semaphore if table is empty
+	mutex waiting_feeder;     //< feeder thread may be stuck waiting on that semaphore if table is full
+	mutex waiting_fetcher;    //< fetcher thread may be stuck waiting on that semaphore if table is empty
 	bool full;                //< set when tampon is full
 	bool feeder_go_lock;      //< true to inform fetcher than feeder is about to or has already acquire lock on waiting_feeder
 	bool feeder_lock_track;   //< only used by feeder to lock on waiting_feeder once outside of critical section
@@ -170,7 +173,7 @@ namespace libthreadar
 
     };
 
-    template <class T> tampon<T>::tampon(unsigned int max_block, unsigned int block_size): waiting_feeder(1), waiting_fetcher(1)
+    template <class T> tampon<T>::tampon(unsigned int max_block, unsigned int block_size)
     {
 	table_size = max_block;
 	table = new atom[table_size];
@@ -188,26 +191,7 @@ namespace libthreadar
 			throw exception_memory();
 		    table[i].data_size = 0;
 		}
-		next_feed = 0;
-		next_fetch = 0;
-		fetch_outside = false;
-		feed_outside = false;
-		full = false;
-		feeder_go_lock = false;
-		feeder_lock_track = false;
-		fetcher_go_lock = false;
-		fetcher_lock_track = false;
-		waiting_feeder.lock();
-		try
-		{
-		    waiting_fetcher.lock();
-		}
-		catch(...)
-		{
-		    waiting_feeder.reset();
-		    waiting_fetcher.reset();
-		    throw;
-		}
+		reset();
 	    }
 	    catch(...)
 	    {
@@ -240,8 +224,6 @@ namespace libthreadar
 	    }
 	    delete [] table;
 	}
-	waiting_feeder.reset();
-	waiting_fetcher.reset();
     }
 
     template <class T> void tampon<T>::get_block_to_feed(T * & ptr, unsigned int & num)
@@ -371,6 +353,21 @@ namespace libthreadar
 	me->modif.unlock();
 
 	return ret;
+    }
+
+    template <class T> void tampon<T>::reset()
+    {
+	next_feed = 0;
+	next_fetch = 0;
+	fetch_outside = false;
+	feed_outside = false;
+	full = false;
+	feeder_go_lock = false;
+	feeder_lock_track = false;
+	fetcher_go_lock = false;
+	fetcher_lock_track = false;
+	(void)waiting_feeder.try_lock();
+	(void)waiting_fetcher.try_lock();
     }
 
     template <class T> void tampon<T>::shift_by_one(unsigned int & x)
