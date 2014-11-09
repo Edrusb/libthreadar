@@ -141,8 +141,15 @@ namespace libthreadar
 	bool is_full() const { return full; }; // no need to acquire mutex "modif"
 	bool is_not_full() const { return !is_full(); };
 
-	    /// number of block currently used in the tampon
-	unsigned int size() const { return next_fetch <= next_feed ? next_feed - next_fetch : table_size - (next_fetch - next_feed); };
+
+	    /// returns the size of the tampon in maximum number of block it can contain
+	unsigned int size() const { return table_size; };
+
+	    /// returns the allocation size of each block
+	unsigned int block_size() const { return alloc_size; };
+
+	    /// returns the current number of blocks currently used in the tampon (fed but not fetched)
+	unsigned int load() const { return next_fetch <= next_feed ? next_feed - next_fetch : table_size - (next_fetch - next_feed); };
 
 	    /// reset the object fields and mutex as if the object was just created
 	void reset();
