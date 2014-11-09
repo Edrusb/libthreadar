@@ -122,14 +122,15 @@ namespace libthreadar
 
 	    /// fetcher call step 2
 	    ///
-	    /// once data has been read, recycle the block into the tampon object
+	    /// once data has been read, recycle the block into the tampon object as free block
 	void fetch_recycle(T* ptr);
 
-	    /// put back the fetched block if all some data remain unfetched for now in this block,
+	    /// put back the fetched block if some data remain unfetched for now in this block,
 	    ///
 	    /// \note this is the duty of the caller to modify the block for the part of the data
 	    /// that has been fetch be suppressed and the unfetched data becomes at the beginning of
 	    /// the block. The size is thus modified and provided as new amount of available data in that block
+	    /// which will be returned again by the next fetch() call.
 	void fetch_push_back(T *ptr, unsigned int new_num);
 
 	    /// for fetcher to know whether the next fetch will be blocking
@@ -139,6 +140,9 @@ namespace libthreadar
 	    // for feeder to know whether the next get_block_to_feed will be blocking
 	bool is_full() const { return full; }; // no need to acquire mutex "modif"
 	bool is_not_full() const { return !is_full(); };
+
+	    /// number of block currently used in the tampon
+	unsigned int size() const { return next_fetch <= next_feed ? next_feed - next_fetch : table_size - (next_fetch - next_feed); };
 
 	    /// reset the object fields and mutex as if the object was just created
 	void reset();
@@ -152,7 +156,7 @@ namespace libthreadar
 	    atom() { mem = NULL; data_size = 0; };
 	};
 
-	mutex modif;              //< to make critical section when non atomic action can garanty a status has not changed between a test and following action
+	mutex modif;              //< to make critical section when non atomic action requires a status has not changed between a test and following action
 	atom *table;              //< datastructure holding data in transit between two threads
 	unsigned int table_size;  //< size of table, i.e. number of struct atom it holds
 	unsigned int alloc_size;  //< size of allocated memory for each atom in table
