@@ -113,7 +113,7 @@ namespace libthreadar
 	    /// put back the block obtained by get_block_to_feed() because it was not used so it will be the next returned by get_block_to_feed
 	void feed_cancel_get_block(T *ptr);
 
-	    /// fetch call step 1
+	    /// fetch call step 1, blocking call if no block is available
 	    ///
 	    /// \param[out] ptr is the address of the data to be read
 	    /// \param[out] num is the number of element available for reading
@@ -140,6 +140,9 @@ namespace libthreadar
 	    // for feeder to know whether the next get_block_to_feed will be blocking
 	bool is_full() const { return full; }; // no need to acquire mutex "modif"
 	bool is_not_full() const { return !is_full(); };
+
+	    /// return true if only one slot is available before filling the tampon
+	bool is_quiet_full() const { unsigned int tmp = next_feed; shift_by_one(tmp); return tmp == next_fetch; };
 
 
 	    /// returns the size of the tampon in maximum number of block it can contain
