@@ -133,7 +133,18 @@ namespace libthreadar
 	    /// which will be returned again by the next fetch() call.
 	void fetch_push_back(T *ptr, unsigned int new_num);
 
-	    /// for fetcher to know whether the next fetch will be blocking
+	    /// put back the fetched block and skip to next block for the next fetch()
+	    /// \param[in] ptr address of the fetched block to push back
+	    /// \param[in] new_num possibily modified size of the fetched block to push back
+	void fetch_push_back_and_skip(T *ptr, unsigned int new_num);
+
+	    /// reactivate all skipped blocks, next fetch() will be the oldest available block
+	void fetch_skip_back();
+
+	    /// to known whether next fetch will be blocking (not skipped blocks)
+	bool has_readable_block_next() const;
+
+	    /// to know whether the tampon has objects (readable or skipped)
 	bool is_empty() const;
 	bool is_not_empty() const { return !is_empty(); };
 
@@ -142,7 +153,7 @@ namespace libthreadar
 	bool is_not_full() const { return !is_full(); };
 
 	    /// return true if only one slot is available before filling the tampon
-	bool is_quiet_full() const { unsigned int tmp = next_feed; shift_by_one(tmp); return tmp == next_fetch; };
+	bool is_quiet_full() const { unsigned int tmp = next_feed; shift_by_one(tmp); return tmp == fetch_head; };
 
 
 	    /// returns the size of the tampon in maximum number of block it can contain
@@ -152,7 +163,7 @@ namespace libthreadar
 	unsigned int block_size() const { return alloc_size; };
 
 	    /// returns the current number of blocks currently used in the tampon (fed but not fetched)
-	unsigned int load() const { return next_fetch <= next_feed ? next_feed - next_fetch : table_size - (next_fetch - next_feed); };
+	unsigned int load() const { return fetch_head <= next_feed ? next_feed - fetch_head : table_size - (fetch_head - next_feed); };
 
 	    /// reset the object fields and mutex as if the object was just created
 	void reset();
@@ -172,6 +183,7 @@ namespace libthreadar
 	unsigned int alloc_size;  //< size of allocated memory for each atom in table
 	unsigned int next_feed;   //< index in table of the next atom to use for feeding table
 	unsigned int next_fetch;  //< index in table of the next atom to use for fetch table
+	unsigned int fetch_head;  //< the oldest object to be fetched
 	bool fetch_outside;       //< if set to true, table's index pointed to by next_fetch is used by the fetcher
 	bool feed_outside;        //< if set to true, table's index pointed to by next_feed is used by the feeder
 	mutex waiting_feeder;     //< feeder thread may be stuck waiting on that semaphore if table is full
@@ -182,8 +194,22 @@ namespace libthreadar
 	bool fetcher_go_lock;     //< true to inform feeder than fetcher is about to or has already acquire lock on waiting_fetcher
 	bool fetcher_lock_track;  //< only used by fetcher to lock on waiting_fetcher once outside of critical section
 
-	bool is_empty_no_lock() const { return next_feed == next_fetch && !full; };
-	void shift_by_one(unsigned int & x); // cyclicly shift an index (next_feed or next_fetch) by one position
+	bool is_empty_no_lock() const { return next_feed == fetch_head && !full; };
+
+	    /// for fetcher to know whether the next fetch will be blocking
+	bool has_readable_block_next_no_lock() const { return next_feed != next_fetch || full; }
+
+	    /// cyclicly shift an index (next_feed or next_fetch) by one position
+	void shift_by_one(unsigned int & x) const;
+
+	    /// cyclicly shift an index by one in the other direction (backbward) than shift_by_one() does
+	void shift_back_by_one(unsigned int & x) const;
+
+	    /// shift table data by one in the given range [begin, end) and return the new index for "end" (first item out of range)
+	    ///
+	    /// \param[in] begin is the index of the first slot that will be copied to the previous slot (cyclicly)
+	    /// \param[in] end is the first slot that will *not* be copied to the previous slot (cyclicly)
+	void shift_by_one_data_in_range(unsigned int begin, unsigned int end);
 
     };
 
@@ -279,7 +305,7 @@ namespace libthreadar
 
 	modif.lock();   // --- critical section START
 	shift_by_one(next_feed);
-	if(next_feed == next_fetch)
+	if(next_feed == fetch_head)
 	    full = true;
 	if(fetcher_go_lock)
 	{
@@ -304,7 +330,7 @@ namespace libthreadar
 	    throw exception_range("already fetched block outside");
 
 	modif.lock();   // --- critical section START
-	if(is_empty_no_lock())
+	if(!has_readable_block_next_no_lock())
 	{
 	    fetcher_go_lock = true;    // to inform feeder that we will suspend on waiting_fetcher
 	    fetcher_lock_track = true; // to suspend on waiting_fetcher once we will be out of the critical section
@@ -334,8 +360,25 @@ namespace libthreadar
 	    throw exception_range("returned ptr is no the one given earlier for fetching");
 
 	modif.lock();   // --- critical section START
-	shift_by_one(next_fetch);
-	full = false;
+	if(next_fetch == fetch_head)
+	{
+
+		// no block were skipped
+
+	    shift_by_one(fetch_head);
+	    next_fetch = fetch_head;
+	    full = false;
+	}
+	else
+	{
+	    unsigned int tmp = next_fetch;
+
+	    shift_by_one(tmp);
+	    shift_by_one_data_in_range(tmp, next_feed);
+	    shift_back_by_one(next_feed);
+	    full = false;
+	}
+
 	if(feeder_go_lock)
 	{
 	    feeder_go_lock = false;
@@ -355,6 +398,40 @@ namespace libthreadar
 	table[next_fetch].data_size = new_num;
     }
 
+    template <class T> void tampon<T>::fetch_push_back_and_skip(T *ptr,
+								unsigned int new_num)
+    {
+	fetch_push_back(ptr, new_num);
+      	modif.lock();   // --- critical section START
+	if(full && next_fetch == next_feed) // reach last block feed, cannot skip it
+	    throw exception_range("cannot skip the last fed block when the tampon is full");
+	shift_by_one(next_fetch);
+	modif.unlock(); // --- critical section END
+    }
+
+    template <class T> void tampon<T>::fetch_skip_back()
+    {
+	if(fetch_outside)
+	    throw exception_range("cannot skip back fetching while a block is being fetched");
+	next_fetch = fetch_head;
+    }
+
+
+    template <class T> bool tampon<T>::has_readable_block_next() const
+    {
+	bool ret;
+
+	tampon<T> *me = const_cast<tampon<T> *>(this);
+	if(me == NULL)
+	    throw THREADAR_BUG;
+	me->modif.lock();
+	ret = has_readable_block_next_no_lock();
+	me->modif.unlock();
+
+	return ret;
+    }
+
+
     template <class T> bool tampon<T>::is_empty() const
     {
 	bool ret;
@@ -373,6 +450,7 @@ namespace libthreadar
     {
 	next_feed = 0;
 	next_fetch = 0;
+	fetch_head = 0;
 	fetch_outside = false;
 	feed_outside = false;
 	full = false;
@@ -384,12 +462,42 @@ namespace libthreadar
 	(void)waiting_fetcher.try_lock();
     }
 
-    template <class T> void tampon<T>::shift_by_one(unsigned int & x)
+    template <class T> void tampon<T>::shift_by_one(unsigned int & x) const
     {
 	++x;
 	if(x >= table_size)
 	    x = 0;
     }
+
+    template <class T> void tampon<T>::shift_back_by_one(unsigned int & x) const
+    {
+	if(x == 0)
+	    x = table_size - 1;
+	else
+	    --x;
+    }
+
+    template <class T> void tampon<T>::shift_by_one_data_in_range(unsigned int begin, unsigned int end)
+    {
+
+	if(begin != end)
+	{
+	    unsigned int prev = begin;
+	    shift_back_by_one(prev);
+	    T* not_squeezed = table[prev].mem; // we will erase the address pointed to by mem so we keep it in memory here
+
+	    while(begin != end)
+	    {
+		table[prev] = table[begin]; // this copies both mem (the value of the pointer, not the pointed to) and data_size,
+		prev = begin;
+		shift_by_one(begin);
+	    }
+
+	    table[prev].mem = not_squeezed;
+	    table[prev].data_size = 0; // by precaution
+	}
+    }
+
 
 } // end of namespace
 
