@@ -372,10 +372,24 @@ namespace libthreadar
 	else
 	{
 	    unsigned int tmp = next_fetch;
+	    atom tmp_tom;
 
 	    shift_by_one(tmp);
 	    shift_by_one_data_in_range(tmp, next_feed);
+
+		// we also take into account the situation
+		// where a block has been given for feeding
+		// so the next call to feed() will match the
+		// expected address of the returned block
+	    tmp = next_feed; // recording old position of next_feed
 	    shift_back_by_one(next_feed);
+		// swapping contents between old next_feed position
+		// and new one:
+	    tmp_tom = table[next_feed];
+	    table[next_feed] = table[tmp];
+	    table[tmp] = tmp_tom;
+		// done!
+
 	    full = false;
 	}
 
