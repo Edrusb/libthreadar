@@ -120,9 +120,7 @@ namespace libthreadar
 	std::vector<std::string> msg_table;
     };
 
-    class exception_memory;
-
-    template<class T> exception_base *cloner(void * const ptr) { exception_base *ret = new (std::nothrow) T(*(reinterpret_cast<T const *>(ptr))); if(ret == NULL) throw exception_memory(); return ret; };
+    template<class T> exception_base *cloner(void * const ptr);
 
 	///  exception used to report memory allocation failures
 
@@ -134,6 +132,8 @@ namespace libthreadar
     protected:
 	virtual exception_base *clone() const { return cloner<exception_memory>((void *)this); };
     };
+
+    template<class T> exception_base *cloner(void * const ptr) { exception_base *ret = new (std::nothrow) T(*(reinterpret_cast<T const *>(ptr))); if(ret == NULL) throw exception_memory(); return ret; };
 
 	/// exception used to report webdar internal bugs
 
