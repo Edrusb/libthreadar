@@ -25,7 +25,7 @@
 #define LIBTHREADAR_BARRIER_HPP
 
     /// \file barrier.hpp
-    /// \brief defines a barrier C++ class, to synchronize N threads
+    /// \brief defines the barrier C++ class, to synchronize several threads
 
 #include "config.h"
 
@@ -45,29 +45,42 @@ extern "C"
 
 namespace libthreadar
 {
-	/// the class barrier allow num threads to synchronize
-	///
+	/// the class barrier allows several threads to synchronize between them
+
 	/// the number of thread to synchronize is given in the constructor
-	/// argument. All thread calling the wait() method get locked
-	/// until 'num' thread have called this wait() method at which
-	/// time they are all unlocked. The barrier is then ready for a
-	/// new cycle
-	/// \note, the barrier shall not be destroyed if at least one thread
+	/// argument 'num'. All thread calling the wait() method get locked
+	/// until 'num' thread(s) have called this wait() method at which
+	/// time they are all unlocked. The barrier object is then ready for a
+	/// new cycle.
+	/// \note The barrier shall not be destroyed if at least one thread
 	/// is waiting (locked) on it
     class barrier
     {
     public:
+	    /// The constructor
+
+	    /// \param[in] num is the number of thread to synchronize
 	barrier(unsigned int num);
+
 	    // no copy constructor (made private)
+
 	    // no assignment operator (made private)
+
+	    /// The destructor
+
+	    /// \note A barrier object must not be destroyed if some thread are suspended calling wait() on it
 	~barrier();
 
-	    /// suspend the calling thread up to the time a total of 'num' (given to constructor) threads have also called wait(). Then all suspended thread are resumed
+	    /// suspend the calling thread waiting for other up to 'num' other thread to call wait too
+
+	    /// \note A thread is suspended up to the time a total amount of 'num' threads (as given to the barrier constructor)
+	    /// have also called wait(). Then all suspended thread are resumed.
 	void wait();
 
     private:
 	barrier(const barrier & ref) { throw THREADAR_BUG; };
 	const barrier & operator = (const barrier & ref) { throw THREADAR_BUG; };
+
 	pthread_barrier_t bar;
     };
 

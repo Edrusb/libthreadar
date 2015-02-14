@@ -1,18 +1,75 @@
 
-	libthreadar is provides C++ classes for
-	manipulating threads easily and propagating
+What is libthreadar:
+	libthreadar provides C++ classes for
+	manipulating threads and propagating
 	back exception from thread to parent thread
+	when the parent calls the join() method
+	[ same paradygm as what wait() system calls does
+	[ for a forked process to its parent ]
 
-	libthreadar relies on posix thread which and
-	does not require C++11 support from the compiler
+what it is relying on:
+	libthreadar relies on posix thread for historical
+	reason, this might change in the future to rely on
+	C++11 thread without any impact on the API.
 
+which compiler to use to build libthreadar:
+	To propagate exception of any type libthreadar
+	use C++11 specific construction, so it requires
+	such compiler to be built.
+
+which compiler to use to link with libthreadar:
+        However the header file you will need to include in
+	your program to	use libthreadar do not use C++11 specific
+	construction, so older compiler should work too.
+
+Why that strange name:
 	libthreadar has been setup from code initially
-	part of webdar and also to be used by dar and
-	libdar, where from its name.
+	part of webdar and also now used by dar and
+	libdar, where from its "dar" ending name. However
+	this library is not part of webdar, libdar or dar,
+	is released separately and can be used independently
+	of them.
 
-	It is a simple implementation for simple things
-	but as it may be of interest to any other C++ project
-	it has been released under the Lesser GPL.
+What the advantages of libthreadar over c++11 or boost thread?
+        C++11 and boost define threads as function base operation
+	while libthreadar defines it as a class base operation:
 
-	For details about this license see the
+
+	Libthreadar defines a pure virtual class "thread" you
+        have to inherit your own class from and define just one
+        method that will be run from a separated thread. So far
+	the difference is tight, right.
+
+	But once a thread object is created the correspponding
+	thread is not run until you call the run() method.
+	It means also that once it has finished you can run it
+	again without the overhead of passing again arguments
+	and defining data structure available to that thread.
+
+	Doing that way, it is much easier to pass a lot of
+	arguments after construction time by calling several
+	more simple and readable adhoc customized methods
+	defined at your will by your inherited class, than
+	having many arguments to pass to a single call that does
+	also start the thread execution as boost or C++11 do.
+
+	Doing that way also let you define private fields that
+	only the thread will have access to and thus access in total
+	security and performance (no mutex required, and so on).
+	You also may provide methods for your class to interact
+	with the running thread and have mutex as private field
+	that let the class manage the inter-thread communications
+	in total transparency to the user of that class.
+
+	libthreadar also provides mutex semaphore and other
+	C++ class adapted to what you can find from Posix thread
+	library.
+
+
+lbthreadar Licensing:
+	Libthreadar is released under the
+
+		GNU LESSER GENERAL PUBLIC LICENSE.
+
+	For details about this library license see the
 	COPYING and COPYING.LESSER files.

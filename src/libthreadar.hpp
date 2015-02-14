@@ -25,13 +25,21 @@
 #define LIBTHREADAR_HPP
 
     /// \file libthreadar.hpp
-    /// \brief only that file should be included from libthreadar
+    /// \brief main header file of the library, only that file should be #included in your programs
+
+    /// \mainpage
+    /// Libthreadar is a C++ library that provides several classes to manipulate threads:
+    /// - class barrier
+    /// - class mutex
+    /// - class semaphore
+    /// - class tampon (i.e.: buffer)
+    /// - class thread
     ///
-    /// libthreadar provide access to different C++ classes:
-    //. class mutex
-    //. class semaphore
-    //. class tampon (i.e.: buffer)
-    //. class thread
+    /// In addition, libthreadar uses the class exception_base and inherted ones to manage errors.
+    /// All libthreadar symbols are defined under the libthreadar namespace.
+    ///
+    /// Refer to each class documentation for details.
+    ///
 
 #include "config.h"
 
@@ -41,20 +49,33 @@
 #include "thread.hpp"
 #include "barrier.hpp"
 
+   /// This is the only namespace used in libthreadar and all symbols provided by libthreadar are member of this namespace.
+
 namespace libthreadar
 {
 
 	/// provides the version of libthreadar
+
+	/// \param[out] major is incremented when the API changes in a way it becomes incompatible
+	/// with previous API so user program have to be adapted to
+	/// be used with it else they might even not compile.
+	/// \param[out] medium is incremented when new features are added to the library in a way
+	/// it stays compatible with previous version of the API (user program should not need to be
+	/// modified nor recompiled)
+	/// \param[out] minor is incremented when bug fix is brought to the library without any new
+	/// feature or feature enhancment nor API modification.
     extern void get_version(unsigned int & major, unsigned int & medium, unsigned int & minor);
 
 } // end of namespace
 
 extern "C"
 {
-	// use AC_CHECK_LIB(threadar, [for_autoconf], [], [])
-	// to have autoconf based configure script properly detecting
-	// the presence and usability of libthreadar
-    unsigned int for_autoconf(unsigned int x);
+	/// in case you use autoconf AC_CHECK_LIB in your program to detect the availability of libthreadar
+
+	/// use AC_CHECK_LIB(threadar, [for_autoconf], [], [])
+	/// to have autoconf based configure script properly detecting
+	/// the presence and usability of libthreadar
+    extern unsigned int for_autoconf(unsigned int x);
 }
 
 #endif

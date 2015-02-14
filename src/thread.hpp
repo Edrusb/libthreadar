@@ -53,27 +53,38 @@ extern "C"
 namespace libthreadar
 {
 
-	/// class thread is a pure virtual class, that implements thread creation and actions
+	/// Class thread is a pure virtual class, that implements thread creation and operations
+
+	/// At the difference of the C++11 thread directive, the creation of an inherited class
+	/// object does not immediately launch a thread. The inherited class can first provide any
+	/// fields necessary to the thread execution by mean of inherited class constructor or better
+	/// by using several customized method of the inherited class, which brings better readability
+	/// and ease code maintenance than having a call with a lot of argument as C++11 requests it
+	/// to be done.
 	///
-	/// at the difference if the C++11 thread directive, the creation of an inherited class
-	/// object does not immediately create a thread. The inherited class can provide any
-	/// constructor it will as well as any other methods and fields that will be accessed
-	/// by the thread method. This is far more easy to pass arguments to a thread that way.
+	/// Inherited classes must only define the inherited_run() method, method that will be
+	/// run in its specific thread once the run() method will be called. The private field of
+	/// inherited classes can be used to host variables only accessible by the running thread.
+	/// Inherited class
+	/// may also implement method to communicate with the running thread, here too the private
+	/// (or protected) fields of the class can be used to host mutex if one is necessary to provide
+	/// consistent information from one thread to the other.
 	///
-	/// inherited classes only must define the inherited_run() method, method that will be
-	/// run in its specific thread.
-	//
-	/// Once dat has been setup, the thread can be run calling the run() method
+	/// The join() method can be used by the run() caller to wait for thread termination.
+	/// If the corresponding thread has already ended, the join() method ends immediately.
+	/// If the thread aborted due to an exception, this exception will be rethrown from the
+	/// the thread calling join(). Last, calling join() on an object which thread has not yet
+	/// started or which has ended and for which join() has already been run, does nothing:
+	/// the join() method returns immediately.
 	///
-	/// the join() method can be used by the run() caller to wait for thread terminasion
-	/// join() may throw any exception that could have been generated in from inherited_run()
-	/// method. Object destruction kills the thread and may also generate an exception
+	/// \Note Class thread object destruction kills the thread and may also generate an exception
 	/// if one has been thrown from inherited_run(). For that reason it is advised to always
 	/// call join() before destructor get called to avoid having to manage exception at
 	/// destuction time.
 	///
-	/// once the thread is no more running a new call to run() is allowed to run again the
-	/// thread for that object.
+	/// Once the thread is no more running a new call to run() is allowed if a join() call has been issued
+	/// since the thread was last run. This allows to run again a thread without having
+	/// to pass again all the possibly many arguments and datastructures requested by this thread.
     class thread
     {
     public:
@@ -84,7 +95,7 @@ namespace libthreadar
 	virtual ~thread();
 
 	    /// set signal mask for this object's when the thread will be run
-	    ///
+
 	    /// \note see sigsetops(3) for details on manipulating signal sets
 	void set_signal_mask(const sigset_t & mask) { sigmask = mask; };
 
@@ -95,7 +106,7 @@ namespace libthreadar
 	bool is_running() const { return running; };
 
 	    /// checks whether the object is running in a separated thread
-	    ///
+
 	    /// \param[out] id returns the thread_id upon success
 	    /// \return true if the object is running under a separated thread
 	    /// if false is returned, the argument is not set
@@ -109,16 +120,17 @@ namespace libthreadar
 
     protected:
 
-	    /// action to be performed in the sperated thread
-	    ///
-	    /// \note, there is no argument to provide, because this is the responsibility of the inherited class
+	    /// action to be performed in the separated thread
+
+	    /// \note There is no argument to provide, because this is the responsibility of the inherited class
 	    /// to defined private/protected fields, methods and constructors to set their value
-	    /// and whether fields are only accessed by the spawn or the calling thread
+	    /// and define whether fields are only accessed by the spawn or the calling thread
 	    /// or both and in that case which way to avoid concurrent access to such fields.
 	virtual void inherited_run() = 0;
 
 	    /// available for inherited class to avoid thread cancellation to occur in a critical section
 	void suspend_cancellation_requests() const;
+
 	    /// available for inherited class to avoid thread cancellation to occur in a critical section
 	void resume_cancellation_requests() const;
 

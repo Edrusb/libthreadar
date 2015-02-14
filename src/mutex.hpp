@@ -25,7 +25,7 @@
 #define LIBTHREADAR_MUTEX_HPP
 
     /// \file mutex.hpp
-    /// \brief defines a mutex C++ class, using pthread_mutex_t C object
+    /// \brief defines the mutex C++ class
 
 #include "config.h"
 
@@ -46,40 +46,48 @@ extern "C"
 
 namespace libthreadar
 {
-	/// the class mutex allow control to data by a single thread
-	///
-	/// to protect a data against concurrent access by different threads
+	/// Wrapper around the Posix pthread_mutex_t C objects
+
+	/// To protect a data against concurrent access by different threads
 	/// each thread has to call the lock() method before and unlock() method
 	/// after accessing that data.
-	/// if another thread is already accessing that data the caller to lock()
-	/// is suspended up to the time the thread accessing the data calls unlock()
+	/// If another thread is already accessing that data calling lock() will
+	/// suspended the calling thread up to the time the thread accessing the data calls unlock()
     class mutex
     {
     public:
+	    /// constructor
 	mutex();
-	mutex(const mutex & ref) { throw std::string("BUG"); };
-	const mutex & operator = (const mutex & ref) { throw std::string("BUG"); };
+
+	    // no copy constructor (made private)
+
+	    // no assignment operator (made private)
+
+	    /// destructor
 	~mutex();
 
 	    /// lock the mutex
-	    ///
-	    /// \note if another thread called lock() and not yet called unlock(),
-	    /// this call puts the caller is suspended up to the time the mutex is
+
+	    /// \note if another thread has called lock() and not yet called unlock(),
+	    /// the calling thread is suspended up to the time the mutex is
 	    /// released by a call to unlock().
 	void lock();
 
 	    /// unlock the mutex
-	    ///
+
 	    /// \note if one or more threads are suspended on that mutex, a single
 	    /// thread suspended is then awaken and returns from its call to lock().
 	void unlock();
 
 	    /// Tells whether calling lock() would currently suspend the caller or not
-	    ///
-	    /// \return true if lock is acquired false if mutex is already locked
+
+	    /// \return true if lock is acquired false if mutex was already locked
 	bool try_lock();
 
     private:
+	mutex(const mutex & ref) { throw std::string("BUG"); };
+	const mutex & operator = (const mutex & ref) { throw std::string("BUG"); };
+
 	pthread_mutex_t mut; //< the mutex
     };
 

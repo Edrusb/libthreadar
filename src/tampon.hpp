@@ -25,7 +25,7 @@
 #define LIBTHREADAR_TAMPON_H
 
     /// \file tampon.hpp
-    /// \brief holds a datastructure that provides asynchronous pipe-like (unidirectional) communication between two threads
+    /// \brief defines the tampon class that provides asynchronous pipe-like (unidirectional) communication between two threads
 
 #include "config.h"
 
@@ -44,96 +44,126 @@ extern "C"
 namespace libthreadar
 {
 
-	///  class tampon provides asynchronous communication between two threads
-	///
-	/// a first thread is defined as a feeder and feeds the object with data
-	/// that the other thread known as the fetcher will read at a later time.
+	///  Class tampon provides asynchronous communication between two threads
+
+	/// A first thread is defined as a *feeder* and feeds the tampon object with data
+	/// that the other thread known as the *fetcher* will read at a later time.
 	/// If the tampon is empty the fetch thread is suspended, if it is full
-	/// this is the feeder thread instead that is suspended. Feeding an empty
+	/// the feeder thread is suspended. Feeding an empty
 	/// tampon automatically awakes the fetcher thread if it was suspended for reading,
-	/// reading a full tempon automatically awakes a feeder that was suspended
-	/// on that object.
+	/// reading a full tampon automatically awakes a feeder that was suspended
+	/// for writing.
 	///
 	/// The feeder has to proceed in two steps:
-	//. first call get_block_to_feed() and assign data to that block not exceeding
-	//  the number "num" of entry of type T
-	//. once the block of data is written to, call feed() with that block.
+	/// - first call get_block_to_feed() and write data to the obtained block
+	/// - once the data has been written to the block, it must call feed() with that block.
 	/// The feeder must not feed() the tampon with any other block than the one
 	/// obtained by get_block_to_feed(). The obtained blocks remains the property
 	/// of the tampon object and will be released by it.
 	/// Only one block can be obtained at a time, thus get_block_to_feed() and feed()
-	/// should be called alternatively.
+	/// should be called alternatively. The feeder can call feed_cancel_get_block()
+	/// instead of feed() to return the obtained block as if get_block_to_feed() was not called.
 	///
-	/// The fetcher interface is almost symmetric, and also has two steps too:
-	//. first fetch() a new block of data, read the data from the obtained block of
-	/// data of given size 'num'.
-	//. then give back the block to the tampon object calling fetch_recycle().
-	/// the Fetcher has not to delete the fetched block not it must fetch_recycle()
+	/// The fetcher interface is almost symmetric, and also has two steps:
+	/// - first fetch() a new block of data, read the data from the obtained block of
+	/// data,
+	/// - then give back the block to the tampon object calling fetch_recycle().
+	/// the Fetcher has not to delete the fetched block nor it must fetch_recycle()
 	/// another block than the one that has been fetched.
-	/// only one block can be fetched at a time, thus fetch() and fetch_recycle() should
-	/// be called alternatively.
+	/// Only one block can be fetched at a time, thus fetch() and fetch_recycle() should
+	/// be called alternatively. The fetcher can call fetch_push_back() instead of fetch_recycle()
+	/// to return the fetched block as if fetch() was not called before. The next time, fetch()
+	/// will then return the same block that has been fetch_push[ed]_back().
 	///
 	/// Only on thread can be a feeder, only one (other) thread can be a fetcher.
 	///
-	/// tampon objects cannot be copied, once created they can only be passed as reference or
-	/// using a pointer to them.
-
+	/// tampon objects cannot be copied, once created they can only be passed as reference
+	/// or using a pointer to them.
+	///
+	/// \note Class tampon is a template with a single type 'T' as argument. This type is the
+	/// base type of the memory block. If you want to exchanges blocks of char between two
+	/// threads by use of char * pointers, use tampon<char>
+	///
+	/// The *fetcher* has an the possiblity to read data after the next block to be fetched:
+	/// - same as before, the fetcher has first to fetch() a block
+	/// - then calling fetch_push_back_and_skip() the block is put back into the pipe but the next call
+	/// to fetch() will provide the block after this one if there is one available. If no other block
+	/// is available the calling thread will be suspended up to the feeder provides a new block of data.
+	/// - once the next block is obtained by fetch() it can be remove from the pipe calling fetch_recycle(),
+	/// put back in place and available for next fetch() calling fetch_push_back() or put back and having
+	/// the cursor skipped one step further calling fetch_push_back_and_skip().
+	///
+	/// In that situation the block(s) at the head of the pipe (which is/are the one(s) for which fetch_push_back_and_skip()
+	/// has been used) is/are still there but not readable. The fetcher has to call fetch_skip_back() to return
+	/// the cursor at the beginning of the pipe in order to have access to them and possibly remove them from the pipe.
     template <class T> class tampon
     {
     public:
 	    /// constructor
-	    ///
+
 	    /// \param[in] max_block is the maximum number of buffers that can be written to without being read
 	    /// \param[in] block_size is the maximum size of each buffer
+	    /// \note that the object will allocate max_block * block_size * sizeof(T) bytes in consequence
 	tampon(unsigned int max_block, unsigned int block_size);
 
-	    /// copy constructor is disabled and generates an exception if called
-	tampon(const tampon & ref) { throw THREADAR_BUG; };
+	    // no copy constructor (made private)
 
-	    /// assignment operator is disabled and generates an exception if called
-	const tampon & operator = (const tampon & ref) { throw THREADAR_BUG; };
+	    // no assignment operator (made private)
 
-	    /// the destructor releases all inernally allocated blocks even if they have been fetched
+	    /// the destructor releases all internally allocated blocks even if they have been fetched
 	    /// or obtained for feeding.
 	~tampon();
 
-	    /// feeder call step 1
-	    ///
-	    /// provides an area where to write down data to
-	    /// note that the caller shall never release the address pointed to by ptr
+	    /// feeder call - step 1
+
+	    /// provides a single block where the caller will be able to write data to in order to be transmitted to the fetcher thread
+	    /// \param[out] ptr the address where the caller can write data to
+	    /// \param[out] num is the size of the block in number of objects of type T
+	    /// \note note that the caller shall never release the address pointed to by ptr
 	void get_block_to_feed(T * & ptr, unsigned int & num);
 
-	    /// feeder call step 2
-	    ///
-	    /// once the data has been set in the previously obtained buffern, it is given back to the tampon
-	    /// written is the number of element written, written shall be less than or equal to the argument "num"
-	    /// returned by get_block_to_feed;
+	    /// feeder call - step 2
+
+	    /// Once data has been copied into the block obtained by a call to get_block_to_feed(), use this call to given back this block to the tampon object
+	    /// \param[in] ptr address of the block to return to the tampon object
+	    /// \param[in] written is the number of element of the block that contain meaninful information, written shall be less than or equal to the argument "num" given by get_block_to_feed().
 	void feed(T* ptr, unsigned int written);
 
-	    /// put back the block obtained by get_block_to_feed() because it was not used so it will be the next returned by get_block_to_feed
+	    /// feeder call - step 2 alternative
+
+	    /// put back the block obtained by get_block_to_feed() for example because it was not used.
+	    /// This block will be the next one returned by get_block_to_feed
+	    /// \param[in] ptr is the address of the block to put back in place for next feed
 	void feed_cancel_get_block(T *ptr);
 
-	    /// fetch call step 1, blocking call if no block is available
-	    ///
+	    /// fetcher call - step 1
+
+	    /// obtain the next block to read
 	    /// \param[out] ptr is the address of the data to be read
 	    /// \param[out] num is the number of element available for reading
 	    /// \note that the caller shall never release the address pointed to by ptr
 	void fetch(T* & ptr, unsigned int & num);
 
-	    /// fetcher call step 2
-	    ///
-	    /// once data has been read, recycle the block into the tampon object as free block
+	    /// fetcher call - step 2
+
+	    /// Once data has been read, the fetcher must recycle the block into the tampon object
+	    /// \param[in] ptr the address of the block to recycle
 	void fetch_recycle(T* ptr);
 
+	    /// fetcher call - step 2 alternative
+
 	    /// put back the fetched block if some data remain unfetched for now in this block,
-	    ///
+	    /// \param[in] ptr the address of the block to push back into the tampon object
+	    /// \param[in] new_num is the new amount of data that is left for reading assuming some data but
+	    /// not all could be read from that buffer.
 	    /// \note this is the duty of the caller to modify the block for the part of the data
-	    /// that has been fetch be suppressed and the unfetched data becomes at the beginning of
+	    /// that has been fetch be suppressed and the unfetched data be moved at the beginning of
 	    /// the block. The size is thus modified and provided as new amount of available data in that block
-	    /// which will be returned again by the next fetch() call.
+	    /// which will be returned again by the next call to fetch().
 	void fetch_push_back(T *ptr, unsigned int new_num);
 
 	    /// put back the fetched block and skip to next block for the next fetch()
+
 	    /// \param[in] ptr address of the fetched block to push back
 	    /// \param[in] new_num possibily modified size of the fetched block to push back
 	void fetch_push_back_and_skip(T *ptr, unsigned int new_num);
@@ -146,20 +176,27 @@ namespace libthreadar
 
 	    /// to know whether the tampon has objects (readable or skipped)
 	bool is_empty() const;
+
+	    /// to know whether the tampon is *not* empty
 	bool is_not_empty() const { return !is_empty(); };
 
-	    // for feeder to know whether the next get_block_to_feed will be blocking
+	    /// for feeder to know whether the next call to get_block_to_feed() will be blocking
 	bool is_full() const { return full; }; // no need to acquire mutex "modif"
+
+	    /// to know whether the tampon is *not* full
 	bool is_not_full() const { return !is_full(); };
 
-	    /// return true if only one slot is available before filling the tampon
+	    /// returns true if only one slot is available before filling the tampon
 	bool is_quiet_full() const { unsigned int tmp = next_feed; shift_by_one(tmp); return tmp == fetch_head; };
 
-
 	    /// returns the size of the tampon in maximum number of block it can contain
+
+	    /// \note this is the max_block argument given at construction time
 	unsigned int size() const { return table_size; };
 
 	    /// returns the allocation size of each block
+
+	    /// \note this is the block_size argument given at construction time
 	unsigned int block_size() const { return alloc_size; };
 
 	    /// returns the current number of blocks currently used in the tampon (fed but not fetched)
@@ -169,6 +206,12 @@ namespace libthreadar
 	void reset();
 
     private:
+	    /// copy constructor is disabled and generates an exception if called
+	tampon(const tampon & ref) { throw THREADAR_BUG; };
+
+	    /// assignment operator is disabled and generates an exception if called
+	const tampon & operator = (const tampon & ref) { throw THREADAR_BUG; };
+
 	struct atom
 	{
 	    T* mem;

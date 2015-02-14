@@ -25,7 +25,7 @@
 #define LIBTHREADAR_SEMAPHORE_HPP
 
     /// \file semaphore.hpp
-    /// \brief defines a semaphore class
+    /// \brief defines the semaphore class
     ///
 
 #include "config.h"
@@ -45,59 +45,71 @@ extern "C"
 namespace libthreadar
 {
 
-	/// class semaphore is used as replacement of sem_t type in order to detect whether other
+	/// Class semaphore is an enhanced version of Posix semaphore
+
+	/// In addition to Posix Semaphore, this class let the calling thread to detect whether other
 	/// thread than the one currently having the lock are waiting for the semaphore to be released
     class semaphore
     {
     public:
 	    /// semaphore constuctor
-	    ///
+
 	    /// \param[in] max_value is the maximum number of thread that can concurrently request wait() without being suspended
 	    /// \note the initial value is set to the max value, calling lock() can decrease this initial value at will, but
-	    /// calling unlock which increases the semaphore value must not lead the value to exceed maximum value
-	    /// \note a process/thread calling lock() when the value is less than or equal to zero suspends the thread/process
-	    /// up to the time another thread calls enough unlock() which awakes a single thread an incrases the semaphore value
+	    /// calling unlock() which increases the semaphore value that must not lead it to exceed maximum value. In other
+	    /// words there must not be more unlock() calls than lock() calls invoked so far.
+	    /// \note A thread calling lock() when the value is less than or equal to zero is suspended
+	    /// up to the time another thread calls unlock(). If more than one was pending on that semaphore, unlock() awakes a single thread.
 	semaphore(unsigned int max_value);
 
-	semaphore(const semaphore & ref):max_value(0) { throw std::string("BUG"); };
-	const semaphore & operator = (const semaphore & ref) { throw std::string("BUG"); };
+	    // no copy constructor (made private)
+
+	    // no assignment operator (made private)
+
+	    /// Destructor
 	~semaphore();
 
-	    /// return whether the semaphore has at least a pending thread waiting for another thread to unlock it
+	    /// Return whether the semaphore has at least a pending thread waiting for another thread to unlock it
 	bool waiting_thread() const;
 
 
 	    /// return whether the semaphore has at least one thread that acquired the lock, possibily without other thread pending
 	bool working_thread() const;
 
-	    /// request a "resource"
-	    ///
+	    /// Request a "resource"
+
 	    /// \note at most max_value (given at construction time) "resources" can be requested at a time.
-	    /// if no more "resource" is available the caller is suspended waiting for another thread releasing
+	    /// if no more "resource" is available the caller is suspended waiting for another thread to release
 	    /// a resource calling unlock(). The notion of "resource" is an abstraction, that's up to the developer
 	    /// relying on that class to define what a "resource" is. The semaphore only assures that at most max_value
 	    /// resource will be used at the same time.
 	void lock();
 
-	    /// release a "resource"
-	    ///
-	    /// \note that if one or more thread are suspended waiting during a call to lock() a single thread is awaken
+	    /// Release a "resource"
+
+	    /// \note Note that if one or more thread are suspended due to a call to lock() a single thread is awaken
 	    /// and returns from the lock() call it was suspended into.
 	void unlock();
 
-	    /// reset to initial state releasing any thread that could wait on us
+	    /// Reset to initial state releasing any thread that could wait on the semaphore
 	void reset();
 
-	    /// return the value of the semaphore, that's to say the number of available "resources".
-	    ///
-	    /// \note a negative value gives the total number of threads that are suspended by calling lock() (the opposit of the value
-	    /// more precisely).
+	    /// Return the value of the semaphore, that's to say the number of available "resources".
+
+	    /// \note a negative value gives the total number of threads that are suspended by calling lock() (well the opposit value of
+	    /// the number of threads more precisely).
 	int get_value() const { return value; };
 
     private:
+	    /// copy constructor is forbidden, generates an exception
+	semaphore(const semaphore & ref):max_value(0) { throw std::string("BUG"); };
+
+	    /// assignement operation is forbidden, generates an exception
+	const semaphore & operator = (const semaphore & ref) { throw std::string("BUG"); };
+
 	int value;            //< this is the semaphore value
 	mutex val_mutex;      //< this controls modification to value
-	mutex semaph;         //< this is mutex is used to suspend thread when more than one is requesting the lock
+	mutex semaph;         //< this mutex is used to suspend thread semaphore value get negative
 	const int max_value;  //< maximum value the semaphore cannot exceed
     };
 
