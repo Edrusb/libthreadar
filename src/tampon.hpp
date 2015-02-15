@@ -48,7 +48,7 @@ namespace libthreadar
 
 	/// A first thread is defined as a *feeder* and feeds the tampon object with data
 	/// that the other thread known as the *fetcher* will read at a later time.
-	/// If the tampon is empty the fetch thread is suspended, if it is full
+	/// If the tampon is empty the fetcher thread is suspended, if it is full
 	/// the feeder thread is suspended. Feeding an empty
 	/// tampon automatically awakes the fetcher thread if it was suspended for reading,
 	/// reading a full tampon automatically awakes a feeder that was suspended
@@ -62,11 +62,10 @@ namespace libthreadar
 	/// of the tampon object and will be released by it.
 	/// Only one block can be obtained at a time, thus get_block_to_feed() and feed()
 	/// should be called alternatively. The feeder can call feed_cancel_get_block()
-	/// instead of feed() to return the obtained block as if get_block_to_feed() was not called.
+	/// instead of feed() to return the obtained block as if get_block_to_feed() had not been called.
 	///
 	/// The fetcher interface is almost symmetric, and also has two steps:
-	/// - first fetch() a new block of data, read the data from the obtained block of
-	/// data,
+	/// - first fetch() a new block of data, read the data from it
 	/// - then give back the block to the tampon object calling fetch_recycle().
 	/// the Fetcher has not to delete the fetched block nor it must fetch_recycle()
 	/// another block than the one that has been fetched.
@@ -84,11 +83,12 @@ namespace libthreadar
 	/// base type of the memory block. If you want to exchanges blocks of char between two
 	/// threads by use of char * pointers, use tampon<char>
 	///
-	/// The *fetcher* has an the possiblity to read data after the next block to be fetched:
+	/// The *fetcher* has the possiblity to read data after the next block to be fetched:
 	/// - same as before, the fetcher has first to fetch() a block
 	/// - then calling fetch_push_back_and_skip() the block is put back into the pipe but the next call
 	/// to fetch() will provide the block after this one if there is one available. If no other block
-	/// is available the calling thread will be suspended up to the feeder provides a new block of data.
+	/// is available the calling thread will be suspended up to the feeder provides a new block of data. The block
+	/// that has been put back this way to the tampon object is preserved.
 	/// - once the next block is obtained by fetch() it can be remove from the pipe calling fetch_recycle(),
 	/// put back in place and available for next fetch() calling fetch_push_back() or put back and having
 	/// the cursor skipped one step further calling fetch_push_back_and_skip().

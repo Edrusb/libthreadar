@@ -28,19 +28,22 @@
     /// \brief main header file of the library, only that file should be # included in your programs
 
     /// \mainpage
-    /// Libthreadar is a C++ library that provides several classes to manipulate threads:
+    /// This is the documentation pages of Libthreadar, a C++ library that provides several classes to manipulate threads:
     /// - class barrier
     /// - class mutex
     /// - class semaphore
-    /// - class tampon (i.e.: buffer)
+    /// - class tampon (asynchronous communication)
     /// - class thread
     ///
-    /// In addition, libthreadar uses the class exception_base and inherted ones to manage errors.
+    /// In addition, libthreadar uses the class exception_base and some inherted other ones to manage errors.
     /// All libthreadar symbols are defined under the libthreadar namespace.
     ///
-    /// Refer to each class documentation for details.
+    /// Refer to each class documentation for details (see Classes tab above).
     ///
-
+    /// An example of use "hello word" is available in the example subdirectory of source package
+    ///
+    /// source code, support, discussion, and so on is available from sourceforge page at https://sourceforge.net/projects/libthreadar/
+    ///
 #include "config.h"
 
 #include "mutex.hpp"
