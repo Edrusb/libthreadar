@@ -10,14 +10,10 @@ what it is relying on:
 	change in the future to rely on C++11 thread without any impact on
 	the API.
 
-which compiler to use to compile libthreadar:
+which compiler to use with libthreadar:
 	To propagate exception of any type libthreadar use C++11 specific
-	construction, so it requires such compiler to be compiled.
-
-which compiler to use to link with libthreadar:
-        However the header file you will need to include in your program in
-	order to use libthreadar do not use C++11 specific construction, so
-	older compiler should work too.
+	construction, so it requires such compiler to be compiled and linked
+	with.
 
 Why that strange name:
 	libthreadar has been extracted from code initially part of webdar and
