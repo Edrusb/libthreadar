@@ -1,5 +1,17 @@
 
- installation instruction for libthreadar
+ installation instructions for libthreadar
 
- <to be done>
+ 1 -  run './configure [options]'
+      where [options] can be --prefix=/usr (by default installation goes to /usr/local)
+      run './configure --help' for more available options
+
+ 2 -  compile running 'make'
+
+ 3 -  once compilation succeeded, as root install by runing 'make install'
+
+ 3 -  You can also make use of DESTDIR variable to setup a package for your distro
+      make DESTDIR=/tmp install
+
+
+
 
