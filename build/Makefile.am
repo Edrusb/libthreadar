@@ -1,4 +1,4 @@
-SUBDIRS = src doc
+SUBDIRS = src doc examples
 dist_noinst_DATA = INSTALL README THANKS AUTHORS COPYING COPYING.LESSER
 
 

@@ -144,5 +144,5 @@ AC_CONFIG_COMMANDS([hack-libtool], [
 ])
 
 
-AC_CONFIG_FILES([Makefile src/Makefile src/libthreadar.pc.tmpl doc/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile src/libthreadar.pc.tmpl doc/Makefile examples/Makefile])
 AC_OUTPUT

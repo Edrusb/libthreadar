@@ -77,7 +77,7 @@ namespace libthreadar
 	/// started or which has ended and for which join() has already been run, does nothing:
 	/// the join() method returns immediately.
 	///
-	/// \Note Class thread object destruction kills the thread and may also generate an exception
+	/// \note Class thread object destruction kills the thread and may also generate an exception
 	/// if one has been thrown from inherited_run(). For that reason it is advised to always
 	/// call join() before destructor get called to avoid having to manage exception at
 	/// destuction time.
@@ -116,6 +116,9 @@ namespace libthreadar
 	void join() const;
 
 	    /// the caller send a cancellation request to this object's running thread if any
+
+	    /// \note if the thread is suspended by the system reading or writing to a filedescriptor for
+	    /// example, the thread survives up to the time it exits from that suspended state
 	void kill() const;
 
     protected:

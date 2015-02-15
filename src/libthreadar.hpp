@@ -25,7 +25,7 @@
 #define LIBTHREADAR_HPP
 
     /// \file libthreadar.hpp
-    /// \brief main header file of the library, only that file should be #included in your programs
+    /// \brief main header file of the library, only that file should be # included in your programs
 
     /// \mainpage
     /// Libthreadar is a C++ library that provides several classes to manipulate threads:
