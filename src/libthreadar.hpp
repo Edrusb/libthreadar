@@ -49,6 +49,7 @@
 #include "mutex.hpp"
 #include "semaphore.hpp"
 #include "tampon.hpp"
+#include "fast_tampon.hpp"
 #include "thread.hpp"
 #include "barrier.hpp"
 

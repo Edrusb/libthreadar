@@ -37,9 +37,9 @@ extern "C"
     // this module's header
 #include "libthreadar.hpp"
 
-const unsigned int LIBTHREADAR_MAJOR = 0;
-const unsigned int LIBTHREADAR_MEDIUM = 0;
-const unsigned int LIBTHREADAR_MINOR = 1;
+const unsigned int LIBTHREADAR_MAJOR = 1;
+const unsigned int LIBTHREADAR_MEDIUM = 1;
+const unsigned int LIBTHREADAR_MINOR = 0;
 
 namespace libthreadar
 {
