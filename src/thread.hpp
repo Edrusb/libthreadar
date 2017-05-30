@@ -85,6 +85,8 @@ namespace libthreadar
 	/// Once the thread is no more running a new call to run() is allowed if a join() call has been issued
 	/// since the thread was last run. This allows to run again a thread without having
 	/// to pass again all the possibly many arguments and datastructures requested by this thread.
+	///
+
     class thread
     {
     public:
@@ -132,6 +134,9 @@ namespace libthreadar
 	virtual void inherited_run() = 0;
 
 	    /// available for inherited class to avoid thread cancellation to occur in a critical section
+
+	    /// any cancellation request received after a call to suspend_cancellation_requests() is delayed
+	    /// until a call to resume_cancellation_requests() is issued
 	void suspend_cancellation_requests() const;
 
 	    /// available for inherited class to avoid thread cancellation to occur in a critical section
@@ -152,6 +157,10 @@ namespace libthreadar
 	static void primitive_suspend_cancellation_requests();
 	static void primitive_resume_cancellation_requests();
     };
+
+    	/// \example ../doc/examples/thread_example.cpp
+	/// this is an example of use of class libthreadar::thread
+	///
 
 } // end of namespace
 

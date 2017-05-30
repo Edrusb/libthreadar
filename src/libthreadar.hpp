@@ -32,10 +32,10 @@
     /// - class barrier
     /// - class mutex
     /// - class semaphore
-    /// - class tampon (asynchronous communication)
+    /// - class fast_tampon
     /// - class thread
+    /// These classes are independent from each others
     ///
-    /// In addition, libthreadar uses the class exception_base and some inherted other ones to manage errors.
     /// All libthreadar symbols are defined under the libthreadar namespace.
     ///
     /// Refer to each class documentation for details (see Classes tab above).

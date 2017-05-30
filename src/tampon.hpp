@@ -44,8 +44,10 @@ extern "C"
 namespace libthreadar
 {
 
-	///  Class tampon provides asynchronous communication between two threads
+	///  DEPRECATED see fast_tampon instead!
 
+	/// Class tampon provides asynchronous communication between two threads
+	///
 	/// A first thread is defined as a *feeder* and feeds the tampon object with data
 	/// that the other thread known as the *fetcher* will read at a later time.
 	/// If the tampon is empty the fetcher thread is suspended, if it is full

@@ -45,8 +45,44 @@ namespace libthreadar
 {
 
 	///  Class fast_tampon provides asynchronous communication between two threads
+
+    	/// A first thread is defined as a *feeder* and feeds the fast_tampon object with data
+	/// that the other thread known as the *fetcher* will read at a later time.
+	/// If the fast_tampon is empty the fetcher thread is suspended, if it is full
+	/// the feeder thread is suspended. Feeding an empty
+	/// fast_tampon automatically awakes the fetcher thread if it was suspended for reading,
+	/// reading a full fast_tampon automatically awakes a feeder that was suspended
+	/// for writing.
 	///
-	/// usage is similar to class tampon.
+	/// The feeder has to proceed in two steps:
+	/// - first call get_block_to_feed() and write data to the obtained block
+	/// - once the data has been written to the block, it must call feed() with that block.
+	/// The feeder must not feed() the fast_tampon with any other block than the one
+	/// obtained by get_block_to_feed(). The obtained blocks remains the property
+	/// of the fast_tampon object and will be released by it.
+	/// Only one block can be obtained at a time, thus get_block_to_feed() and feed()
+	/// should be called alternatively. The feeder can call feed_cancel_get_block()
+	/// instead of feed() to return the obtained block as if get_block_to_feed() had not been called.
+	///
+	/// The fetcher interface is almost symmetric, and also has two steps:
+	/// - first fetch() a new block of data, read the data from it
+	/// - then give back the block to the fast_tampon object calling fetch_recycle().
+	/// the Fetcher has not to delete the fetched block nor it must fetch_recycle()
+	/// another block than the one that has been fetched.
+	/// Only one block can be fetched at a time, thus fetch() and fetch_recycle() should
+	/// be called alternatively. The fetcher can call fetch_push_back() instead of fetch_recycle()
+	/// to return the fetched block as if fetch() was not called before. The next time, fetch()
+	/// will then return the same block that has been fetch_push[ed]_back().
+	///
+	/// Only on thread can be a feeder, only one (other) thread can be a fetcher.
+	///
+	/// fast_tampon objects cannot be copied, once created they can only be passed as reference
+	/// or using a pointer to them.
+	///
+	/// \note Class fast_tampon is a template with a single type 'T' as argument. This type is the
+	/// base type of the memory block. If you want to exchanges blocks of char between two
+	/// threads by use of char * pointers, use tampon<char>
+
 
     template <class T> class fast_tampon
     {
@@ -363,7 +399,9 @@ namespace libthreadar
 	    x = 0;
     }
 
-
+    	/// \example ../doc/examples/fast_tampon_example.cpp
+	/// this is an example of use of class libthreadar::fast_tampon and
+	/// libthreadar::exception_base and derivated classes
 
 } // end of namespace
 
