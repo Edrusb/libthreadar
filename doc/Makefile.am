@@ -1,3 +1,5 @@
+SUBDIRS = examples
+
 dist_noinst_DATA = Doxyfile portable_cp
 dist_pkgdata_DATA = README
 

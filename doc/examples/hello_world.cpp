@@ -2,7 +2,7 @@
 // is part of libthreader distribution) we include the libthreadar
 // with explicit path. In your program you should rather use the following
 // directive: #include <libthreadar/libthreadar.hpp>
-#include "../src/libthreadar.hpp"
+#include "../../src/libthreadar.hpp"
 
 extern "C"
 {
@@ -79,7 +79,7 @@ protected:
 private:
     string my_name;
     unsigned int counter;
-    libthreadar::tampon<char> channel; // fetcher is the inner thread, feeder is the calling thread
+    libthreadar::fast_tampon<char> channel; // fetcher is the inner thread, feeder is the calling thread
 };
 
 int main()
