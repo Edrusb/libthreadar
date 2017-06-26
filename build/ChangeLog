@@ -1,3 +1,6 @@
+From release 1.1.0 to 1.1.1
+- fixed missing freezer.hpp include in libthreadar.hpp
+
 From release 1.0.x to 1.1.x
 - added freezer class
 
