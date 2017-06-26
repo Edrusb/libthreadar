@@ -28,6 +28,7 @@
     /// \brief defines the mutex C++ class
 
 #include "config.h"
+#include "exceptions.hpp"
 
     // C system headers
 extern "C"
