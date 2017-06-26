@@ -21,7 +21,7 @@
 //  to contact the author: dar.linux@free.fr
 /*********************************************************************/
 
-#ifndef LIBTHREADAR_SEMAPHORE_HPP
+#ifndef LIBTHREADAR_FREEZER_HPP
 #define LIBTHREADAR_FREEZER_HPP
 
     /// \file freezer.hpp
