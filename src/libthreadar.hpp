@@ -52,6 +52,7 @@
 #include "fast_tampon.hpp"
 #include "thread.hpp"
 #include "barrier.hpp"
+#include "freezer.hpp"
 
    /// This is the only namespace used in libthreadar and all symbols provided by libthreadar are member of this namespace.
 
