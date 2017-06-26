@@ -92,6 +92,10 @@ namespace libthreadar
 	    /// \note used inside libthreadar only
 	exception_base(const std::string & x_msg) { msg_table.push_back(x_msg); };
 
+	    /// default copy constructor is fine
+	    /// a move constructor would not do better than copy constructor
+	    /// default assignment operator is fine
+
 	    /// destructor
 	virtual ~exception_base() {};
 

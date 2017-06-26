@@ -85,8 +85,8 @@ namespace libthreadar
 	bool try_lock();
 
     private:
-	mutex(const mutex & ref) { throw std::string("BUG"); };
-	const mutex & operator = (const mutex & ref) { throw std::string("BUG"); };
+	mutex(const mutex & ref) { throw THREADAR_BUG; };
+	const mutex & operator = (const mutex & ref) { throw THREADAR_BUG; };
 
 	pthread_mutex_t mut; //< the mutex
     };

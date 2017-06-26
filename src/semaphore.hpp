@@ -102,10 +102,10 @@ namespace libthreadar
 
     private:
 	    /// copy constructor is forbidden, generates an exception
-	semaphore(const semaphore & ref):max_value(0) { throw std::string("BUG"); };
+	semaphore(const semaphore & ref):max_value(0) { throw THREADAR_BUG; };
 
 	    /// assignement operation is forbidden, generates an exception
-	const semaphore & operator = (const semaphore & ref) { throw std::string("BUG"); };
+	const semaphore & operator = (const semaphore & ref) { throw  THREADAR_BUG; };
 
 	int value;            //< this is the semaphore value
 	mutex val_mutex;      //< this controls modification to value

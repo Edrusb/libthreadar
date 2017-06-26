@@ -93,6 +93,8 @@ namespace libthreadar
 	    /// constructor
 	thread();
 
+	    /// copy constructor and assignment operator made private
+
 	    /// destructor
 	virtual ~thread();
 
@@ -149,6 +151,9 @@ namespace libthreadar
 	bool joignable;                //< whether exist status of thread has to be retrieved
 	unsigned int cancellable;      //< this field is not protected by mutex as it ougth to be modified only by the spawn thread. It allows suspend/resume cancellation requests to be re-entrant (0 = cancellation accepted)
 	sigset_t sigmask;              //< signal mask to use for the thread
+
+	thread(const thread & ref) { throw THREADAR_BUG; };
+	const thread & operator = (const thread & ref) { throw THREADAR_BUG; };
 
 
 	    // static members
