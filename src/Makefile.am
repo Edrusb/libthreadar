@@ -21,7 +21,7 @@ LIBTHREADAR_LIBTOOL_AGE=$(LIBTHREADAR_MEDIUM)
 LIBTHREADAR_VERSION_IN=$(LIBTHREADAR_LIBTOOL_CURRENT):$(LIBTHREADAR_LIBTOOL_REVISION):$(LIBTHREADAR_LIBTOOL_AGE)
 LIBTHREADAR_VERSION_OUT=$(LIBTHREADAR_MAJOR).$(LIBTHREADAR_MEDIUM).$(LIBTHREADAR_MINOR)
 
-dist_noinst_DATA = exceptions.hpp libthreadar.hpp mutex.hpp semaphore.hpp tampon.hpp thread.hpp barrier.hpp fast_tampon.hpp freezer.hpp
+dist_noinst_DATA = exceptions.hpp libthreadar.hpp mutex.hpp semaphore.hpp tampon.hpp thread.hpp barrier.hpp fast_tampon.hpp freezer.hpp condition.hpp
 
 install-data-local:
 	mkdir -p $(DESTDIR)$(pkgincludedir)
