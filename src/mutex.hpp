@@ -44,7 +44,6 @@ extern "C"
     // libthreadar headers
 
 
-
 namespace libthreadar
 {
 	/// Wrapper around the Posix pthread_mutex_t C objects
@@ -65,7 +64,7 @@ namespace libthreadar
 	    // no assignment operator (made private)
 
 	    /// destructor
-	~mutex();
+	virtual ~mutex();
 
 	    /// lock the mutex
 
@@ -89,6 +88,7 @@ namespace libthreadar
 	mutex(const mutex & ref) { throw THREADAR_BUG; };
 	const mutex & operator = (const mutex & ref) { throw THREADAR_BUG; };
 
+    protected:
 	pthread_mutex_t mut; //< the mutex
     };
 

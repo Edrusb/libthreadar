@@ -45,7 +45,7 @@ libthreadar.pc : libthreadar.pc.tmpl
 clean-local:
 	rm -rf libthreadar.pc
 
-ALL_SOURCES = exceptions.cpp libthreadar.cpp mutex.cpp semaphore.cpp thread.cpp barrier.cpp freezer.cpp
+ALL_SOURCES = exceptions.cpp libthreadar.cpp mutex.cpp semaphore.cpp thread.cpp barrier.cpp freezer.cpp condition.cpp
 
 libthreadar_la_LDFLAGS = -version-info $(LIBTHREADAR_VERSION_IN)
 libthreadar_la_SOURCES = $(ALL_SOURCES)
