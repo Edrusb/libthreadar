@@ -46,74 +46,80 @@ namespace libthreadar
     freezer::freezer()
     {
 	value = 0;
-	semaph.lock(); // now semaph will suspend thread for which lock() is called
     }
 
     freezer::~freezer()
     {
 	reset();
-	semaph.unlock();
     }
 
     bool freezer::waiting_thread() const
     {
-	return value < 0; // reading of integer is atomic CPU single operation, no need to lock val_mutex
+	return value < 0; // reading of integer is atomic CPU operation, no need to lock val_mutex
     }
 
     void freezer::lock()
     {
-	bool locking = false;
-
-	val_mutex.lock();
-	--value;
-	if(value < 0)
-	    locking = true;
-	val_mutex.unlock();
-
-	if(locking)
-	    semaph.lock();
+	cond.lock();
+	try
+	{
+	    --value;
+	    if(value < 0)
+		cond.wait();
+	}
+	catch(...)
+	{
+	    cond.unlock();
+	    throw;
+	}
+	cond.unlock();
     }
 
     void freezer::unlock()
     {
-	bool unlocking = false;
-
-	val_mutex.lock();
+	cond.lock();
 	try
 	{
 	    ++value;
 	    if(value <= 0)
-		unlocking = true;
+		cond.signal();
 	}
 	catch(...)
 	{
-	    val_mutex.unlock();
+	    cond.unlock();
 	    throw;
 	}
-	val_mutex.unlock();
-
-	if(unlocking) // value was negative at the beginning of this call, meaning at least one thread was waiting
-	    semaph.unlock();
+	cond.unlock();
     }
 
     void freezer::reset()
     {
-	val_mutex.lock();
-	try
+	bool loop = true;
+
+	do
 	{
-	    while(value < 0)
+	    cond.lock();
+	    try
 	    {
-		semaph.unlock();
-		++value;
+		if(value < 0)
+		{
+		    ++value;
+		    cond.signal();
+		}
+		else
+		{
+		    value = 0;
+		    loop = false;
+		}
 	    }
-	    value = 0;
+	    catch(...)
+	    {
+		cond.unlock();
+		throw;
+	    }
+	    cond.unlock();
 	}
-	catch(...)
-	{
-	    val_mutex.unlock();
-	    throw;
-	}
-	val_mutex.unlock();
+	while(loop);
     }
 
 

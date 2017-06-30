@@ -40,7 +40,7 @@ extern "C"
 
 
     // libthreadar headers
-#include "mutex.hpp"
+#include "condition.hpp"
 
 namespace libthreadar
 {
@@ -98,8 +98,7 @@ namespace libthreadar
 	const freezer & operator = (const freezer & ref) { throw  THREADAR_BUG; };
 
 	int value;            //< this is the freezer value
-	mutex val_mutex;      //< this controls modification to value
-	mutex semaph;         //< this mutex is used to suspend thread when freezer value get negative
+	condition cond;       //< to protect access to value
     };
 
 } // end of namespace
