@@ -94,9 +94,17 @@ namespace libthreadar
 	    /// \note that the object will allocate max_block * block_size * sizeof(T) bytes in consequence
 	fast_tampon(unsigned int max_block, unsigned int block_size);
 
-	    // no copy constructor (made private)
+	    /// no copy constructor
+	fast_tampon(const fast_tampon & ref) = delete;
 
-	    // no assignment operator (made private)
+	    /// no move constructor
+	fast_tampon(fast_tampon && ref) noexcept = delete;
+
+	    /// no assignment operator
+	fast_tampon & operator = (const fast_tampon & ref) = delete;
+
+	    /// no move operator
+	fast_tampon & operator = (fast_tampon && ref) noexcept = delete;
 
 	    /// the destructor releases all internally allocated blocks even if they have been fetched
 	    /// or obtained for feeding.
@@ -176,11 +184,6 @@ namespace libthreadar
 	void reset();
 
     private:
-	    /// copy constructor is disabled and generates an exception if called
-	fast_tampon(const fast_tampon & ref) { throw THREADAR_BUG; };
-
-	    /// assignment operator is disabled and generates an exception if called
-	const fast_tampon & operator = (const fast_tampon & ref) { throw THREADAR_BUG; };
 
 	struct atom
 	{
