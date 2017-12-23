@@ -149,10 +149,10 @@ namespace libthreadar
 	    me->joignable = false;
 	    if(ret != ESRCH && ret != 0)
 		throw exception_system("Failed joining thread: ", errno);
-	    if(returned_exception != NULL && returned_exception != PTHREAD_CANCELED)
+	    if(returned_exception != nullptr && returned_exception != PTHREAD_CANCELED)
 	    {
 		exception_ptr *ebase = reinterpret_cast<exception_ptr *>(returned_exception);
-		if(ebase == NULL)
+		if(ebase == nullptr)
 		    throw THREADAR_BUG;
 		try
 		{
@@ -181,7 +181,7 @@ namespace libthreadar
 	    if(ret != ESRCH && ret != 0)
 		throw exception_system("Failed killing thread: ", errno);
 
-	    if(me == NULL)
+	    if(me == nullptr)
 		throw THREADAR_BUG;
 	    me->running = false;
 	}
@@ -206,12 +206,12 @@ namespace libthreadar
 
     void *thread::run_obj(void *obj)
     {
-	exception_ptr *ret = NULL;
+	exception_ptr *ret = nullptr;
 
 	try
 	{
 	    thread *tobj = reinterpret_cast<thread *>(obj);
-	    if(tobj == NULL)
+	    if(tobj == nullptr)
 		throw THREADAR_BUG;
 
 		// locking and unlocking object's mutex is a simple form of barrier

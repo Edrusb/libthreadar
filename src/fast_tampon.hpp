@@ -187,7 +187,7 @@ namespace libthreadar
 	    T* mem;
 	    unsigned int data_size;
 
-	    atom() { mem = NULL; data_size = 0; };
+	    atom() { mem = nullptr; data_size = 0; };
 	};
 
 	mutex modif;
@@ -212,7 +212,7 @@ namespace libthreadar
     {
 	table_size = max_block;
 	table = new atom[table_size];
-	if(table == NULL)
+	if(table == nullptr)
 	    throw exception_memory();
 	try
 	{
@@ -222,7 +222,7 @@ namespace libthreadar
 		for(unsigned int i = 0 ; i < table_size ; ++i)
 		{
 		    table[i].mem = new T[alloc_size];
-		    if(table[i].mem == NULL)
+		    if(table[i].mem == nullptr)
 			throw exception_memory();
 		    table[i].data_size = 0;
 		}
@@ -232,7 +232,7 @@ namespace libthreadar
 	    {
 		for(unsigned int i = 0; i < table_size ; ++i)
 		{
-		    if(table[i].mem != NULL)
+		    if(table[i].mem != nullptr)
 			delete [] table[i].mem;
 		}
 
@@ -241,7 +241,7 @@ namespace libthreadar
 	}
 	catch(...)
 	{
-	    if(table != NULL)
+	    if(table != nullptr)
 		delete [] table;
 	    throw;
 	}
@@ -250,11 +250,11 @@ namespace libthreadar
 
     template <class T> fast_tampon<T>::~fast_tampon()
     {
-	if(table != NULL)
+	if(table != nullptr)
 	{
 	    for(unsigned int i = 0 ; i < table_size ; ++i)
 	    {
-		if(table[i].mem != NULL)
+		if(table[i].mem != nullptr)
 		    delete [] table[i].mem;
 	    }
 	    delete [] table;

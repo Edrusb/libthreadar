@@ -157,7 +157,7 @@ namespace libthreadar
 	virtual exception_base *clone() const { return cloner<exception_memory>((void *)this); };
     };
 
-    template<class T> exception_base *cloner(void * const ptr) { exception_base *ret = new (std::nothrow) T(*(reinterpret_cast<T const *>(ptr))); if(ret == NULL) throw exception_memory(); return ret; }
+    template<class T> exception_base *cloner(void * const ptr) { exception_base *ret = new (std::nothrow) T(*(reinterpret_cast<T const *>(ptr))); if(ret == nullptr) throw exception_memory(); return ret; }
 
 	/// Macro used to throw an exception_bug when execution reach that statement
 

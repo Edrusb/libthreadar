@@ -222,7 +222,7 @@ namespace libthreadar
 	    T* mem;
 	    unsigned int data_size;
 
-	    atom() { mem = NULL; data_size = 0; };
+	    atom() { mem = nullptr; data_size = 0; };
 	};
 
 	mutex modif;              //< to make critical section when non atomic action requires a status has not changed between a test and following action
@@ -265,7 +265,7 @@ namespace libthreadar
     {
 	table_size = max_block;
 	table = new atom[table_size];
-	if(table == NULL)
+	if(table == nullptr)
 	    throw exception_memory();
 	try
 	{
@@ -275,7 +275,7 @@ namespace libthreadar
 		for(unsigned int i = 0 ; i < table_size ; ++i)
 		{
 		    table[i].mem = new T[alloc_size];
-		    if(table[i].mem == NULL)
+		    if(table[i].mem == nullptr)
 			throw exception_memory();
 		    table[i].data_size = 0;
 		}
@@ -285,7 +285,7 @@ namespace libthreadar
 	    {
 		for(unsigned int i = 0; i < table_size ; ++i)
 		{
-		    if(table[i].mem != NULL)
+		    if(table[i].mem != nullptr)
 			delete [] table[i].mem;
 		}
 
@@ -294,7 +294,7 @@ namespace libthreadar
 	}
 	catch(...)
 	{
-	    if(table != NULL)
+	    if(table != nullptr)
 		delete [] table;
 	    throw;
 	}
@@ -303,11 +303,11 @@ namespace libthreadar
 
     template <class T> tampon<T>::~tampon()
     {
-	if(table != NULL)
+	if(table != nullptr)
 	{
 	    for(unsigned int i = 0 ; i < table_size ; ++i)
 	    {
-		if(table[i].mem != NULL)
+		if(table[i].mem != nullptr)
 		    delete [] table[i].mem;
 	    }
 	    delete [] table;
@@ -484,7 +484,7 @@ namespace libthreadar
 	bool ret;
 
 	tampon<T> *me = const_cast<tampon<T> *>(this);
-	if(me == NULL)
+	if(me == nullptr)
 	    throw THREADAR_BUG;
 	me->modif.lock();
 	ret = has_readable_block_next_no_lock();
@@ -499,7 +499,7 @@ namespace libthreadar
 	bool ret;
 
 	tampon<T> * me = const_cast<tampon<T> *>(this);
-	if(me == NULL)
+	if(me == nullptr)
 	    throw THREADAR_BUG;
 	me->modif.lock();
 	ret = is_empty_no_lock();
