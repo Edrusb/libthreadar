@@ -52,7 +52,7 @@ namespace libthreadar
 	condition & operator = (const condition & ref) = delete;
 
 	    /// no move operator
-	condition & operator = (condition && ref) noexcept = default;
+	condition & operator = (condition && ref) noexcept = delete;
 
 	    /// destructor
 	~condition();
