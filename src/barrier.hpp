@@ -62,9 +62,17 @@ namespace libthreadar
 	    /// \param[in] num is the number of thread to synchronize
 	barrier(unsigned int num);
 
-	    // no copy constructor (made private)
+	    /// no copy constructor
+	barrier(const barrier & ref) = delete;
 
-	    // no assignment operator (made private)
+	    /// no move constructor
+	barrier(barrier && ref) noexcept = delete;
+
+	    /// no assignment operator
+	barrier & operator = (const barrier & ref) = delete;
+
+	    /// no move operator
+	barrier & operator = (barrier && ref) noexcept = delete;
 
 	    /// The destructor
 
@@ -78,9 +86,6 @@ namespace libthreadar
 	void wait();
 
     private:
-	barrier(const barrier & ref) { throw THREADAR_BUG; };
-	const barrier & operator = (const barrier & ref) { throw THREADAR_BUG; };
-
 	pthread_barrier_t bar;
     };
 

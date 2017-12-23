@@ -62,9 +62,17 @@ namespace libthreadar
 	    /// up to the time another thread calls unlock(). If more than one was pending on that semaphore, unlock() awakes a single thread.
 	semaphore(unsigned int max_value);
 
-	    // no copy constructor (made private)
+	    /// no copy constructor
+	semaphore(const semaphore & ref) = delete;
 
-	    // no assignment operator (made private)
+	    /// no move constructor
+	semaphore(semaphore && ref) noexcept = delete;
+
+	    /// no assignment operator
+	semaphore & operator = (const semaphore & ref) = delete;
+
+	    /// no move operator
+	semaphore & operator = (semaphore && ref) noexcept = delete;
 
 	    /// Destructor
 	~semaphore();
@@ -101,12 +109,6 @@ namespace libthreadar
 	int get_value() const { return value; };
 
     private:
-	    /// copy constructor is forbidden, generates an exception
-	semaphore(const semaphore & ref):max_value(0) { throw THREADAR_BUG; };
-
-	    /// assignement operation is forbidden, generates an exception
-	const semaphore & operator = (const semaphore & ref) { throw  THREADAR_BUG; };
-
 	int value;            //< this is the semaphore value
 	mutex val_mutex;      //< this controls modification to value
 	mutex semaph;         //< this mutex is used to suspend thread semaphore value get negative

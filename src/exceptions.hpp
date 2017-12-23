@@ -93,11 +93,19 @@ namespace libthreadar
 	exception_base(const std::string & x_msg) { msg_table.push_back(x_msg); };
 
 	    /// default copy constructor is fine
-	    /// a move constructor would not do better than copy constructor
+	exception_base(const exception_base & ref) = default;
+
+	    /// default move constructor is fine
+	exception_base(exception_base && ref) noexcept = default;
+
 	    /// default assignment operator is fine
+	exception_base & operator = (const exception_base & ref) = default;
+
+	    /// default move operator is fine
+	exception_base & operator = (exception_base && ref) noexcept = default;
 
 	    /// destructor
-	virtual ~exception_base() {};
+	virtual ~exception_base() = default;
 
 	    /// to be used in a catch clause to add context information before rethrowing the exception
 	void push_message(const std::string & x_msg) { msg_table.push_back(x_msg); };

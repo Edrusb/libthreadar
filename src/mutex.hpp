@@ -59,9 +59,17 @@ namespace libthreadar
 	    /// constructor
 	mutex();
 
-	    // no copy constructor (made private)
+	    /// no copy constructor
+	mutex(const mutex & ref) = delete;
 
-	    // no assignment operator (made private)
+	    /// no move constructor
+	mutex(mutex && ref) noexcept = delete;
+
+	    /// no assignment operator
+	mutex & operator = (const mutex & ref) = delete;
+
+	    /// no move operator
+	mutex & operator = (mutex && ref) noexcept = delete;
 
 	    /// destructor
 	virtual ~mutex();
@@ -83,10 +91,6 @@ namespace libthreadar
 
 	    /// \return true if lock is acquired false if mutex was already locked
 	bool try_lock();
-
-    private:
-	mutex(const mutex & ref) { throw THREADAR_BUG; };
-	const mutex & operator = (const mutex & ref) { throw THREADAR_BUG; };
 
     protected:
 	pthread_mutex_t mut; //< the mutex

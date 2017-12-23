@@ -55,12 +55,19 @@ namespace libthreadar
     {
     public:
 	    /// freezer constuctor
-
 	freezer();
 
-	    // no copy constructor (made private)
+	    /// no copy constructor
+	freezer(const freezer & ref) = delete;
 
-	    // no assignment operator (made private)
+	    /// no move constructor
+	freezer(freezer && ref) noexcept = delete;
+
+	    /// no assignment operator (made private)
+	freezer & operator = (const freezer & ref) = delete;
+
+	    /// no move operator
+	freezer & operator = (freezer && ref) noexcept = delete;
 
 	    /// Destructor
 	~freezer();
@@ -91,12 +98,6 @@ namespace libthreadar
 	int get_value() const { return value; };
 
     private:
-	    /// copy constructor is forbidden, generates an exception
-	freezer(const freezer & ref) { throw THREADAR_BUG; };
-
-	    /// assignement operation is forbidden, generates an exception
-	const freezer & operator = (const freezer & ref) { throw  THREADAR_BUG; };
-
 	int value;            //< this is the freezer value
 	condition cond;       //< to protect access to value
     };

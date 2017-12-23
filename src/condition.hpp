@@ -42,9 +42,17 @@ namespace libthreadar
 	    /// constructor
 	condition();
 
-	    // no copy constructor (made private)
+	    /// no copy constructor
+	condition(const condition & ref) = delete;
 
-	    // not assignment operator (made private)
+	    /// no move constructor
+	condition(condition && ref) noexcept = delete;
+
+	    /// no assignment operator
+	condition & operator = (const condition & ref) = delete;
+
+	    /// no move operator
+	condition & operator = (condition && ref) noexcept = default;
 
 	    /// destructor
 	~condition();
@@ -66,12 +74,6 @@ namespace libthreadar
 
     private:
 	pthread_cond_t cond;
-
-	    /// copy constructor made private
-	condition(const condition & ref) { throw THREADAR_BUG; };
-
-	    /// assignment operator made private
-	const condition & operator = (const condition & ref) { throw THREADAR_BUG; };
 
     };
 
