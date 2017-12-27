@@ -41,7 +41,7 @@ using namespace std;
 namespace libthreadar
 {
 
-    barrier::barrier(unsigned int num)
+    barrier::barrier(unsigned int num): val(num)
     {
 	switch(pthread_barrier_init(&bar, NULL, num))
 	{

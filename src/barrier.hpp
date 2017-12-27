@@ -85,8 +85,11 @@ namespace libthreadar
 	    /// have also called wait(). Then all suspended thread are resumed.
 	void wait();
 
+	unsigned int get_count() const { return val; };
+
     private:
 	pthread_barrier_t bar;
+	unsigned int val;
     };
 
 } // end of namespace
