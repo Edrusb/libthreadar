@@ -1,3 +1,10 @@
+Frome release 1.1.x to 1.2.0
+- adding class condition
+- reimplemented constructor following C++11 standard
+- added move operator whenever posssible
+- replaced private constructors par "= delete" ones
+- reimplemented semaphore using condition class
+
 From release 1.1.0 to 1.1.1
 - fixed missing freezer.hpp include in libthreadar.hpp
 
