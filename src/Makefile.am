@@ -1,9 +1,3 @@
-if BSD_SED
-  SED_REGEX = -E
-else
-  SED_REGEX = -r
-endif
-
 localedir = @localedir@
 pkgconfigdir = @pkgconfigdir@
 
@@ -11,9 +5,6 @@ AM_LDFLAGS = @LTLIBINTL@
 LDADD =
 lib_LTLIBRARIES = libthreadar.la
 
-LIBTHREADAR_MAJOR=`sed -$(SED_REGEX) -n -e 's/^.*LIBTHREADAR_MAJOR\s*=\s+([^\s;]+).*/\1/p' libthreadar.cpp`
-LIBTHREADAR_MEDIUM=`sed -$(SED_REGEX) -n -e 's/^.*LIBTHREADAR_MEDIUM\s*=\s+([^\s;]+).*/\1/p' libthreadar.cpp`
-LIBTHREADAR_MINOR=`sed -$(SED_REGEX) -n -e 's/^.*LIBTHREADAR_MINOR\s*=\s+([^\s;]+).*/\1/p' libthreadar.cpp`
 LIBTHREADAR_MEDIUM_000=`echo $(LIBTHREADAR_MEDIUM) | sed $(SED_REGEX) -e 's% %%g' -e 's%([^0-9]|^)([0-9]{1})([^0-9]|$$)%0\2%' -e 's%([^0-9]|^)([0-9]{2})([^0-9]|$$)%0\2%'`
 LIBTHREADAR_LIBTOOL_CURRENT=$(LIBTHREADAR_MAJOR)$(LIBTHREADAR_MEDIUM_000)
 LIBTHREADAR_LIBTOOL_REVISION=$(LIBTHREADAR_MINOR)

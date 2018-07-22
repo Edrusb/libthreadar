@@ -10,8 +10,6 @@ AM_INIT_AUTOMAKE
 # AM_GNU_GETTEXT_VERSION
 # AM_ICONV
 
-
-
 # have a specific variable for pkgconfig, setting the default value:
 AC_SUBST(pkgconfigdir, [${libdir}/pkgconfig])
 AC_ARG_WITH([pkgconfigdir],
@@ -89,17 +87,18 @@ AC_TYPE_SIGNAL
 
 AC_MSG_CHECKING([for sed -r/-E option])
 if sed -r -e 's/(c|o)+/\1/g' > /dev/null < /dev/null ; then
-    local_sed="gnu"
+    local_sed="-r"
     AC_MSG_RESULT([GNU sed, using -r option for regex])
 else
    if sed -E -e 's/(c|o)+/\1/g' > /dev/null < /dev/null ; then
-     local_sed="bsd"
+     local_sed="-E"
      AC_MSG_RESULT([BSD sed, using -E option for regex])
    else
-     local_sed=unknown
+     local_sed=""
      AC_MSG_ERROR([unknown switch to use with sed to support regex])
    fi
 fi
+AC_SUBST(SED_REGEX, [${local_sed}])
 
 AC_ARG_ENABLE( [build-html],
                AC_HELP_STRING(--disable-build-html, [don't build programming documentation]),
@@ -127,11 +126,23 @@ AC_ARG_ENABLE( [build-html],
                ]
              )
 
-AM_CONDITIONAL([BSD_SED], [test "$local_sed" = "bsd"])
+threadar_major=`echo AC_PACKAGE_VERSION | [ sed ${local_sed} -n -e 's/^([0-9]+)\..*/\1/p']`
+threadar_medium=`echo AC_PACKAGE_VERSION | [ sed ${local_sed} -n -e 's/^[0-9]+\.([0-9]+)\..*/\1/p']`
+threadar_minor=`echo AC_PACKAGE_VERSION | [ sed ${local_sed} -n -e 's/^[0-9]+\.[0-9]+\.([0-9]+).*/\1/p' ]`
+
+# for makefiles.in
+AC_SUBST(LIBTHREADAR_MAJOR, ${threadar_major})
+AC_SUBST(LIBTHREADAR_MEDIUM, ${threadar_medium})
+AC_SUBST(LIBTHREADAR_MINOR, ${threadar_minor})
+
+# for macro in source code
+AC_DEFINE_UNQUOTED(LIBTHREADAR_MAJOR, ${threadar_major}, [major version of libthreadar])
+AC_DEFINE_UNQUOTED(LIBTHREADAR_MEDIUM, ${threadar_medium}, [medium version of libthreadar])
+AC_DEFINE_UNQUOTED(LIBTHREADAR_MINOR, ${threadar_minor}, [minor version of libthreadar])
+
 AM_CONDITIONAL([USE_DOXYGEN], [test "$doxygen" = "yes"])
 AC_SUBST(DOXYGEN_PROG, [doxygen])
-
-
+AC_SUBST(THREADAR_VERSION, AC_PACKAGE_VERSION)
 
 # defaults
 AC_PREFIX_DEFAULT(/usr/local)
