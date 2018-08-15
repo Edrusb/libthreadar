@@ -45,48 +45,48 @@ extern "C"
 
 namespace libthreadar
 {
-	/// the class barrier allows several threads to synchronize between them
+        /// the class barrier allows several threads to synchronize between them
 
-	/// the number of thread to synchronize is given in the constructor
-	/// argument 'num'. All thread calling the wait() method get locked
-	/// until 'num' thread(s) have called this wait() method at which
-	/// time they are all unlocked. The barrier object is then ready for a
-	/// new cycle.
-	/// \note The barrier shall not be destroyed if at least one thread
-	/// is waiting (locked) on it
+        /// the number of thread to synchronize is given in the constructor
+        /// argument 'num'. All thread calling the wait() method get locked
+        /// until 'num' thread(s) have called this wait() method at which
+        /// time they are all unlocked. The barrier object is then ready for a
+        /// new cycle.
+        /// \note The barrier shall not be destroyed if at least one thread
+        /// is waiting (locked) on it
     class barrier
     {
     public:
-	    /// The constructor
+            /// The constructor
 
-	    /// \param[in] num is the number of thread to synchronize
-	barrier(unsigned int num);
+            /// \param[in] num is the number of thread to synchronize
+        barrier(unsigned int num);
 
-	    /// no copy constructor
-	barrier(const barrier & ref) = delete;
+            /// no copy constructor
+        barrier(const barrier & ref) = delete;
 
-	    /// no move constructor
-	barrier(barrier && ref) noexcept = delete;
+            /// no move constructor
+        barrier(barrier && ref) noexcept = delete;
 
-	    /// no assignment operator
-	barrier & operator = (const barrier & ref) = delete;
+            /// no assignment operator
+        barrier & operator = (const barrier & ref) = delete;
 
-	    /// no move operator
-	barrier & operator = (barrier && ref) noexcept = delete;
+            /// no move operator
+        barrier & operator = (barrier && ref) noexcept = delete;
 
-	    /// The destructor
+            /// The destructor
 
-	    /// \note A barrier object must not be destroyed if some thread are suspended calling wait() on it
+            /// \note A barrier object must not be destroyed if some thread are suspended calling wait() on it
         ~barrier() noexcept(false);
 
-	    /// suspend the calling thread waiting for other up to 'num' other thread to call wait too
+            /// suspend the calling thread waiting for other up to 'num' other thread to call wait too
 
-	    /// \note A thread is suspended up to the time a total amount of 'num' threads (as given to the barrier constructor)
-	    /// have also called wait(). Then all suspended thread are resumed.
-	void wait();
+            /// \note A thread is suspended up to the time a total amount of 'num' threads (as given to the barrier constructor)
+            /// have also called wait(). Then all suspended thread are resumed.
+        void wait();
 
     private:
-	pthread_barrier_t bar;
+        pthread_barrier_t bar;
     };
 
 } // end of namespace
