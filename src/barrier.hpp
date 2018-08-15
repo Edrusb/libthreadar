@@ -77,7 +77,7 @@ namespace libthreadar
 	    /// The destructor
 
 	    /// \note A barrier object must not be destroyed if some thread are suspended calling wait() on it
-	~barrier();
+        ~barrier() noexcept(false);
 
 	    /// suspend the calling thread waiting for other up to 'num' other thread to call wait too
 

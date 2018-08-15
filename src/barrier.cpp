@@ -60,7 +60,7 @@ namespace libthreadar
 	}
     }
 
-    barrier::~barrier()
+    barrier::~barrier() noexcept(false)
     {
 	switch(pthread_barrier_destroy(&bar))
 	{
