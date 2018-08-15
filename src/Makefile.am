@@ -1,8 +1,25 @@
-if BSD_SED
-  SED_REGEX = -E
-else
-  SED_REGEX = -r
-endif
+#######################################################################
+## libthreadar - is a library providing several C++ classes to work with threads
+## Copyright (C) 2014-2018 Denis Corbin
+##
+## This file is part of libthreadar
+##
+##  libthreadar is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU Lesser General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  libhtreadar is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU Lesser General Public License for more details.
+##
+##  You should have received a copy of the GNU Lesser General Public License
+##  along with libthreadar.  If not, see <http:##www.gnu.org/licenses/>
+##
+######
+##  to contact the author: dar.linux@free.fr
+#######################################################################
 
 localedir = @localedir@
 pkgconfigdir = @pkgconfigdir@
@@ -11,10 +28,7 @@ AM_LDFLAGS = @LTLIBINTL@
 LDADD =
 lib_LTLIBRARIES = libthreadar.la
 
-LIBTHREADAR_MAJOR=`sed -$(SED_REGEX) -n -e 's/^.*LIBTHREADAR_MAJOR\s*=\s+([^\s;]+).*/\1/p' libthreadar.cpp`
-LIBTHREADAR_MEDIUM=`sed -$(SED_REGEX) -n -e 's/^.*LIBTHREADAR_MEDIUM\s*=\s+([^\s;]+).*/\1/p' libthreadar.cpp`
-LIBTHREADAR_MEDIUM_000=`echo $(LIBDTHREADAR_MEDIUM) | sed $(SED_REGEX) -e 's% %%g' -e 's%([^0-9]|^)([0-9]{1})([^0-9]|$$)%0\2%' -e 's%([^0-9]|^)([0-9]{2})([^0-9]|$$)%0\2%'`
-LIBTHREADAR_MINOR=`sed -$(SED_REGEX) -n -e 's/^.*LIBTHREADAR_MINOR\s*=\s+([^\s;]+).*/\1/p' libthreadar.cpp`
+LIBTHREADAR_MEDIUM_000=`echo $(LIBTHREADAR_MEDIUM) | sed $(SED_REGEX) -e 's% %%g' -e 's%([^0-9]|^)([0-9]{1})([^0-9]|$$)%0\2%' -e 's%([^0-9]|^)([0-9]{2})([^0-9]|$$)%0\2%'`
 LIBTHREADAR_LIBTOOL_CURRENT=$(LIBTHREADAR_MAJOR)$(LIBTHREADAR_MEDIUM_000)
 LIBTHREADAR_LIBTOOL_REVISION=$(LIBTHREADAR_MINOR)
 LIBTHREADAR_LIBTOOL_AGE=$(LIBTHREADAR_MEDIUM)

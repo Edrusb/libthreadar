@@ -1,6 +1,6 @@
 /*********************************************************************/
 // libthreadar - is a library providing several C++ classes to work with threads
-// Copyright (C) 2014-2015 Denis Corbin
+// Copyright (C) 2014-2018 Denis Corbin
 //
 // This file is part of libthreadar
 //
@@ -34,15 +34,13 @@
     /// - class semaphore
     /// - class fast_tampon
     /// - class thread
-    /// These classes are independent from each others
+    /// - class freezer
+    /// - class condition
+    /// .
+    /// These classes are to be used independently from each others and are defined within the libthreadar namespace.
+    /// An example of use "hello word" is available in the example subdirectory of source package.
     ///
-    /// All libthreadar symbols are defined under the libthreadar namespace.
-    ///
-    /// Refer to each class documentation for details (see Classes tab above).
-    ///
-    /// An example of use "hello word" is available in the example subdirectory of source package
-    ///
-    /// source code, support, discussion, and so on is available from sourceforge page at https://sourceforge.net/projects/libthreadar/
+    /// source code download, support, discussion, and so on is available from sourceforge page at https://sourceforge.net/projects/libthreadar/
     ///
 #include "config.h"
 

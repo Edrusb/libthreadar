@@ -1,6 +1,6 @@
 /*********************************************************************/
 // libthreadar - is a library providing several C++ classes to work with threads
-// Copyright (C) 2014-2015 Denis Corbin
+// Copyright (C) 2014-2018 Denis Corbin
 //
 // This file is part of libthreadar
 //
@@ -36,10 +36,6 @@ extern "C"
 
     // this module's header
 #include "libthreadar.hpp"
-
-const unsigned int LIBTHREADAR_MAJOR = 1;
-const unsigned int LIBTHREADAR_MEDIUM = 1;
-const unsigned int LIBTHREADAR_MINOR = 0;
 
 namespace libthreadar
 {

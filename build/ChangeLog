@@ -1,4 +1,8 @@
-Frome release 1.1.x to 1.2.0
+From release 1.2.0 to 1.2.1
+- fixed compilation problem met with gcc-6.4.0 (destuctor throwing exceptions)
+- simplified handling of package version information
+
+From release 1.1.x to 1.2.0
 - adding class condition
 - reimplemented constructor following C++11 standard
 - added move operator whenever posssible

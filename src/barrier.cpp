@@ -1,6 +1,6 @@
 /*********************************************************************/
 // libthreadar - is a library providing several C++ classes to work with threads
-// Copyright (C) 2014-2015 Denis Corbin
+// Copyright (C) 2014-2018 Denis Corbin
 //
 // This file is part of libthreadar
 //
@@ -43,52 +43,51 @@ namespace libthreadar
 
     barrier::barrier(unsigned int num): val(num)
     {
-	switch(pthread_barrier_init(&bar, NULL, num))
-	{
-	case 0:
-	    break;
-	case EAGAIN:
-	    throw exception_range("Lack of resource");
-	case EINVAL:
-	    throw exception_range("zero given as argumet to barrier");
-	case ENOMEM:
-	    throw exception_memory();
-	case EBUSY:
-	    throw THREADAR_BUG;
-	default:
-	    throw THREADAR_BUG;
-	}
+        switch(pthread_barrier_init(&bar, NULL, num))
+        {
+        case 0:
+            break;
+        case EAGAIN:
+            throw exception_range("Lack of resource");
+        case EINVAL:
+            throw exception_range("zero given as argumet to barrier");
+        case ENOMEM:
+            throw exception_memory();
+        case EBUSY:
+            throw THREADAR_BUG;
+        default:
+            throw THREADAR_BUG;
+        }
     }
 
-    barrier::~barrier()
+    barrier::~barrier() noexcept(false)
     {
-	switch(pthread_barrier_destroy(&bar))
-	{
-	case 0:
-	    break;
-	case EBUSY:
-	    throw exception_range("destroying a barrier while still in use");
-	case EINVAL:
-	    throw THREADAR_BUG;
-	default:
-	    throw THREADAR_BUG;
-	}
+        switch(pthread_barrier_destroy(&bar))
+        {
+        case 0:
+            break;
+        case EBUSY:
+            throw exception_range("destroying a barrier while still in use");
+        case EINVAL:
+            throw THREADAR_BUG;
+        default:
+            throw THREADAR_BUG;
+        }
     }
 
     void barrier::wait()
     {
-	switch(pthread_barrier_wait(&bar))
-	{
-	case PTHREAD_BARRIER_SERIAL_THREAD:
-	    break;
-	case 0:
-	    break;
-	case EINVAL:
-	    throw THREADAR_BUG;
-	default:
-	    throw THREADAR_BUG;
-	}
+        switch(pthread_barrier_wait(&bar))
+        {
+        case PTHREAD_BARRIER_SERIAL_THREAD:
+            break;
+        case 0:
+            break;
+        case EINVAL:
+            throw THREADAR_BUG;
+        default:
+            throw THREADAR_BUG;
+        }
     }
 
 } // end of namespace
-

@@ -1,6 +1,6 @@
 /*********************************************************************/
 // libthreadar - is a library providing several C++ classes to work with threads
-// Copyright (C) 2014-2015 Denis Corbin
+// Copyright (C) 2014-2018 Denis Corbin
 //
 // This file is part of libthreadar
 //
@@ -83,6 +83,10 @@ namespace libthreadar
 	/// \note Class fast_tampon is a template with a single type 'T' as argument. This type is the
 	/// base type of the memory block. If you want to exchanges blocks of char between two
 	/// threads by use of char * pointers, use tampon<char>
+        /// \note .../doc/examples/fast_tampon_example.cpp
+	/// this is an example of use of class libthreadar::fast_tampon with
+	/// libthreadar::exception_base and derivated classes
+
 
 
     template <class T> class fast_tampon
@@ -400,10 +404,6 @@ namespace libthreadar
 	if(x >= table_size)
 	    x = 0;
     }
-
-    	/// \example ../doc/examples/fast_tampon_example.cpp
-	/// this is an example of use of class libthreadar::fast_tampon and
-	/// libthreadar::exception_base and derivated classes
 
 } // end of namespace
 
