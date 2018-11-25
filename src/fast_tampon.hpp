@@ -38,7 +38,6 @@ extern "C"
 
 
     // libthreadar headers
-#include "mutex.hpp"
 #include "condition.hpp"
 #include "exceptions.hpp"
 
@@ -190,34 +189,34 @@ namespace libthreadar
 
     private:
 
-        struct atom
-        {
-            T* mem;
-            unsigned int data_size;
+	struct atom
+	{
+	    T* mem;
+	    unsigned int data_size;
 
-            atom() { mem = nullptr; data_size = 0; };
-        };
+	    atom() { mem = nullptr; data_size = 0; };
+	};
 
-        mutex modif;              //< protect the access to table
-        atom *table;              //< datastructure holding data in transit between two threads
-        unsigned int table_size;  //< size of table, i.e. number of struct atom it holds
-        unsigned int alloc_size;  //< size of allocated memory for each atom in table
-        unsigned int next_feed;   //< index in table of the next atom to use for feeding table
-        unsigned int next_fetch;  //< index in table of the next atom to use for fetch table
-        bool fetch_outside;       //< if set to true, table's index pointed to by next_fetch is used by the fetcher
-        bool feed_outside;        //< if set to true, table's index pointed to by next_feed is used by the feeder
-        condition waiting_feeder; //< feeder thread may be stuck waiting on that semaphore if table is full
-        condition waiting_fetcher;//< fetcher thread may be stuck waiting on that semaphore if table is empty
-        bool feeder_go_lock;      //< true to inform fetcher than feeder is about to or has already acquire lock on waiting_feeder
-        bool fetcher_go_lock;     //< true to inform feeder than fetcher is about to or has already acquire lock on waiting_fetcher
+	condition modif;
+	atom *table;              //< datastructure holding data in transit between two threads
+	unsigned int table_size;  //< size of table, i.e. number of struct atom it holds
+	unsigned int alloc_size;  //< size of allocated memory for each atom in table
+	unsigned int next_feed;   //< index in table of the next atom to use for feeding the table
+	unsigned int next_fetch;  //< index in table of the next atom to fetch from table
+	bool fetch_outside;       //< if set to true, table's index pointed to by next_fetch is used by the fetcher
+	bool feed_outside;        //< if set to true, table's index pointed to by next_feed is used by the feeder
+	bool feeder_go_lock;      //< true to inform fetcher than feeder is suspended on modif
+	bool fetcher_go_lock;     //< true to inform feeder than fetcher is suspended on modif
 
-            /// cyclicly shift an index (next_feed or next_fetch) by one position
-        void shift_by_one(unsigned int & x) const;
+	    /// cyclicly shift an index (next_feed or next_fetch) by one position
+	void shift_by_one(unsigned int & x) const;
 
     };
 
     template <class T> fast_tampon<T>::fast_tampon(unsigned int max_block, unsigned int block_size)
     {
+	if(max_block < 2)
+	    throw exception_range("max_block for fast_tampon should be strictly greater than 1");
 	table_size = max_block;
 	table = new atom[table_size];
 	if(table == nullptr)
@@ -234,6 +233,8 @@ namespace libthreadar
 			throw exception_memory();
 		    table[i].data_size = 0;
 		}
+		feeder_go_lock = false;
+		fetcher_go_lock = false;
 		reset();
 	    }
 	    catch(...)
@@ -271,49 +272,49 @@ namespace libthreadar
 
     template <class T> void fast_tampon<T>::get_block_to_feed(T * & ptr, unsigned int & num)
     {
-        if(feed_outside)
-            throw exception_range("feed already out!");
+	if(feed_outside)
+	    throw exception_range("feed already out!");
 
-        if(is_full()) // if not full it will not become full, no need to enter a critical section
-        {
-            waiting_feeder.lock();  // --- critical section START
-            if(is_full()) // still full thus we must wait
-            {
-                feeder_go_lock = true; // inform fetcher that we will suspend in waiting_feeder
-                waiting_feeder.wait(); // this will suspend the thread when calling unlock()
-            }
-            waiting_feeder.unlock(); // --- critical section END
-        }
+	if(is_full())
+	{
+	    modif.lock();  	// --- critical section START
+	    if(is_full())
+	    {
+		feeder_go_lock = true;   // inform fetcher that we will suspend
+		modif.wait();
+		feeder_go_lock = false;  // remove the flag now we got released
 
-        if(is_full())
-            throw THREADAR_BUG; // still full!?!
+		if(is_full())
+		    throw THREADAR_BUG; // still full!
+	    }
+		// *else*
+		// full condition was transitional
+		// only the feeder (this is us) can make it happen again
+		// so the full condition should not occur before we return
+		// the block we are about to fetch
+	    modif.unlock(); // --- critical section END
+	}
 
-        feed_outside = true;
-        ptr = table[next_feed].mem;
-        num = alloc_size;
+	feed_outside = true;
+	ptr = table[next_feed].mem;
+	num = alloc_size;
     }
 
     template <class T> void fast_tampon<T>::feed(T *ptr, unsigned int num)
     {
-        if(!feed_outside)
-            throw exception_range("fetch not outside!");
-        feed_outside = false;
+	if(!feed_outside)
+	    throw exception_range("fetch not outside!");
+	feed_outside = false;
 
-        if(ptr != table[next_feed].mem)
-            throw exception_range("returned ptr is not the one given earlier for feeding");
-        table[next_feed].data_size = num;
+	if(ptr != table[next_feed].mem)
+	    throw exception_range("returned ptr is not the one given earlier for feeding");
+	table[next_feed].data_size = num;
 
-        modif.lock();   // --- critical section START
-        shift_by_one(next_feed);
-        modif.unlock(); // --- critical section END
-
-        if(fetcher_go_lock)
-        {
-            waiting_fetcher.lock();
-            fetcher_go_lock = false;
-            waiting_fetcher.signal();
-            waiting_fetcher.unlock();
-        }
+	modif.lock();   // --- critical section START
+	shift_by_one(next_feed);
+	if(fetcher_go_lock)
+	    modif.signal();  // releasing the fetcher when unlock() will complete
+	modif.unlock(); // --- critical section END
     }
 
     template <class T> void fast_tampon<T>::feed_cancel_get_block(T *ptr)
@@ -327,47 +328,48 @@ namespace libthreadar
 
     template <class T> void fast_tampon<T>::fetch(T* & ptr, unsigned int & num)
     {
-        if(fetch_outside)
-            throw exception_range("already fetched block outside");
+	if(fetch_outside)
+	    throw exception_range("already fetched block outside");
 
-        if(is_empty()) // if not empty it will not become empty, no need to enter critical section
-        {
-            waiting_fetcher.lock();   // --- critical section START
-            if(is_empty())
-            {
-                fetcher_go_lock = true;    // to inform feeder that we will suspend on waiting_fetcher
-                waiting_fetcher.wait(); // this will suspend the thread when calling unlock()
-            }
-            waiting_fetcher.unlock(); // --- critical section END
-        }
+	if(is_empty())
+	{
+	    modif.lock();   // --- critical section START
+	    if(is_empty())
+	    {
+		fetcher_go_lock = true;    // to inform feeder that we will suspend
+		modif.wait();
+		fetcher_go_lock = false;   // removing the flag now we got released
 
-        if(is_empty())
-            throw THREADAR_BUG; // still empty!?!
+		if(is_empty())
+		    throw THREADAR_BUG;
+	    }
+		// *else*
+		// the emptiness condition was transitional
+		// only the fetcher (this is us) can make it happen again
+		// so the empty condition should not occur before we return
+		// the block we are about to fetch
 
-        fetch_outside = true;
-        ptr = table[next_fetch].mem;
-        num = table[next_fetch].data_size;
+	    modif.unlock(); // --- critical section END
+	}
+
+	fetch_outside = true;
+	ptr = table[next_fetch].mem;
+	num = table[next_fetch].data_size;
     }
 
     template <class T> void fast_tampon<T>::fetch_recycle(T* ptr)
     {
-        if(!fetch_outside)
-            throw exception_range("no block outside for fetching");
-        fetch_outside = false;
-        if(ptr != table[next_fetch].mem)
-            throw exception_range("returned ptr is no the one given earlier for fetching");
+	if(!fetch_outside)
+	    throw exception_range("no block outside for fetching");
+	fetch_outside = false;
+	if(ptr != table[next_fetch].mem)
+	    throw exception_range("returned ptr is no the one given earlier for fetching");
 
-        modif.lock();   // --- critical section START
-        shift_by_one(next_fetch);
-        modif.unlock(); // --- critical section END
-
-        if(feeder_go_lock)
-        {
-            waiting_feeder.lock();
-            feeder_go_lock = false;
-            waiting_feeder.signal();
-            waiting_feeder.unlock();
-        }
+	modif.lock();   // --- critical section START
+	shift_by_one(next_fetch);
+	if(feeder_go_lock)
+	    modif.signal();  // releasing the fetcher when unlock() will complete
+	modif.unlock(); // --- critical section END
     }
 
     template <class T> void fast_tampon<T>::fetch_push_back(T* ptr, unsigned int new_num)
@@ -384,18 +386,23 @@ namespace libthreadar
 
     template <class T> void fast_tampon<T>::reset()
     {
-        next_feed = 0;
-        next_fetch = 0;
-        fetch_outside = false;
-        feed_outside = false;
-        feeder_go_lock = false;
-        fetcher_go_lock = false;
-        (void)waiting_feeder.try_lock();
-        waiting_feeder.signal();
-        waiting_feeder.unlock();
-        (void)waiting_fetcher.try_lock();
-        waiting_fetcher.signal();
-        waiting_fetcher.unlock();
+	modif.lock(); // --- critical section START
+	if(feeder_go_lock && fetcher_go_lock)
+	    throw THREADAR_BUG; // both were locked ??? tampon was full *and* empty at the same time ???
+	if(feeder_go_lock || fetcher_go_lock)
+	    modif.signal();
+	modif.unlock(); // --- critical section END
+
+	    // pending thread is now released
+
+	modif.lock(); // --- critical section START
+	next_feed = 0;
+	next_fetch = 0;
+	fetch_outside = false;
+	feed_outside = false;
+	feeder_go_lock = false;
+	fetcher_go_lock = false;
+	modif.unlock(); // --- critical section END
     }
 
     template <class T> void fast_tampon<T>::shift_by_one(unsigned int & x) const
