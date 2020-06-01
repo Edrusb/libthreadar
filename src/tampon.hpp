@@ -112,13 +112,13 @@ namespace libthreadar
 	tampon(const tampon & ref) = delete;
 
 	    /// no move constructor
-	tampon(tampon && ref) noexcept = delete;
+	tampon(tampon && ref) noexcept = default;
 
 	    /// no assignment operator
 	tampon & operator = (const tampon & ref) = delete;
 
 	    /// no move operator
-	tampon & operator = (tampon && ref) noexcept = delete;
+	tampon & operator = (tampon && ref) noexcept = default;
 
 	    /// the destructor releases all internally allocated blocks even if they have been fetched
 	    /// or obtained for feeding.
