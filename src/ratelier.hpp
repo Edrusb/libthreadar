@@ -134,7 +134,7 @@ namespace libthreadar
 	void update_first_index(); ///< scan the table for the smallest index and updates first_index field
     };
 
-    template <class T> ratelier<T>::ratelier(unsigned int size): table(size), corres(size)
+    template <class T> ratelier<T>::ratelier(unsigned int size): table(size)
     {
 	next_index = 0;
 	first_index = 0;
