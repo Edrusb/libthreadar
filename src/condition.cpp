@@ -74,4 +74,20 @@ namespace libthreadar
 	}
     }
 
+    void condition::broadcast()
+    {
+	try
+	{
+	    int ret = pthread_cond_broadcast(&cond);
+	    if(ret != 0)
+		throw string("Error while unlocking and broadcasting");
+	}
+	catch(...)
+	{
+	    unlock();
+	    throw;
+	}
+    }
+
+
 } // end of namespace

@@ -65,12 +65,19 @@ namespace libthreadar
 	    /// awaken after another thread called signal
 	void wait();
 
-	    /// awakes a thread suspended after having called wait()
-
+	    /// awakes a single thread suspended after having called wait()
+	    ///
 	    /// \note signal() must be called between lock() and unlock(). This is only at
 	    /// the time unlock() is called that another thread exits from the suspended
 	    /// state.
 	void signal();
+
+	    /// awakes all threads suspended after having called wait()
+	    ///
+	    /// \note broadcast() must be called between lock() and unlock(). This is only at
+	    /// the time unlock() is called that another thread exits from the suspended
+	    /// state.
+	void broadcast();
 
     private:
 	pthread_cond_t cond;
