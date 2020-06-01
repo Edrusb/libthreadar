@@ -66,13 +66,13 @@ namespace libthreadar
         barrier(const barrier & ref) = delete;
 
             /// no move constructor
-        barrier(barrier && ref) noexcept = delete;
+        barrier(barrier && ref) noexcept = default;
 
             /// no assignment operator
         barrier & operator = (const barrier & ref) = delete;
 
             /// no move operator
-        barrier & operator = (barrier && ref) noexcept = delete;
+        barrier & operator = (barrier && ref) noexcept = default;
 
             /// The destructor
 
