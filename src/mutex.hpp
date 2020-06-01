@@ -63,13 +63,13 @@ namespace libthreadar
 	mutex(const mutex & ref) = delete;
 
 	    /// no move constructor
-	mutex(mutex && ref) noexcept = delete;
+	mutex(mutex && ref) noexcept = default;
 
 	    /// no assignment operator
 	mutex & operator = (const mutex & ref) = delete;
 
 	    /// no move operator
-	mutex & operator = (mutex && ref) noexcept = delete;
+	mutex & operator = (mutex && ref) = default;
 
 	    /// destructor
 	virtual ~mutex();

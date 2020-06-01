@@ -95,9 +95,9 @@ namespace libthreadar
 
 	    /// copy constructor and assignment operator are disabled
 	thread(const thread & ref) = delete;
-	thread(thread && ref) noexcept = delete;
+	thread(thread && ref) noexcept = default;
 	thread & operator = (const thread & ref) = delete;
-	thread & operator = (thread && ref) noexcept = delete;
+	thread & operator = (thread && ref) noexcept = default;
 
 	    /// destructor
 	virtual ~thread();
