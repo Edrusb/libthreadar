@@ -1,3 +1,6 @@
+From release 1.2.3 to 1.2.2
+- nothing real, only copyright dates changed
+
 From release 1.2.1 to 1.2.2
 - relying on condition object to simplify fast_tampon implementation
 
