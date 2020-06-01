@@ -151,10 +151,12 @@ namespace libthreadar
 	try
 	{
 	    if(empty_slot.empty())
+	    {
 		verrou.wait();
+		if(empty_slot.empty())
+		    throw THREADAR_BUG;
+	    }
 
-	    if(empty_slot.empty())
-		throw THREADAR_BUG;
 	    tableindex = empty_slot.back();
 
 		// sanity checks
