@@ -77,9 +77,9 @@ namespace libthreadar
     public:
 	ratelier(unsigned int size);
 	ratelier(const ratelier & ref) = delete;
-	ratelier(ratelier && ref) = delete;
+	ratelier(ratelier && ref) noexcept = default;
 	ratelier & operator = (const ratelier & ref) = delete;
-	ratelier & operator = (ratelier && ref) = delete;
+	ratelier & operator = (ratelier && ref) noexcept = default;
 	virtual ~ratelier() = default;
 
 	    /// mean for the non-worker thread to provide data to the ratelier (mode 1)
