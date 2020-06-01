@@ -84,7 +84,7 @@ namespace libthreadar
 
 	    /// mean for the non-worker thread to provide data to the ratelier (mode 1)
 	    ///
-	    /// \the data is added to new higher indexs of the virtualluy infininte
+	    /// \note the data is added to new higher indexes of the virtually infininte
 	    /// list of object. However the caller may be suspended if the ratelier
 	    /// is full
 	void feed(std::unique_ptr<T> one);
