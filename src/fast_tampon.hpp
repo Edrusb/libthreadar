@@ -102,13 +102,13 @@ namespace libthreadar
 	fast_tampon(const fast_tampon & ref) = delete;
 
 	    /// no move constructor
-	fast_tampon(fast_tampon && ref) noexcept = delete;
+	fast_tampon(fast_tampon && ref) noexcept = default;
 
 	    /// no assignment operator
 	fast_tampon & operator = (const fast_tampon & ref) = delete;
 
 	    /// no move operator
-	fast_tampon & operator = (fast_tampon && ref) noexcept = delete;
+	fast_tampon & operator = (fast_tampon && ref) noexcept = default;
 
 	    /// the destructor releases all internally allocated blocks even if they have been fetched
 	    /// or obtained for feeding.
