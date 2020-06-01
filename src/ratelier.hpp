@@ -75,7 +75,7 @@ namespace libthreadar
     template <class T> class ratelier
     {
     public:
-	ratelier(unsigned int size, T objtype);
+	ratelier(unsigned int size);
 	ratelier(const ratelier & ref) = delete;
 	ratelier(ratelier && ref) = delete;
 	ratelier & operator = (const ratelier & ref) = delete;
@@ -134,7 +134,7 @@ namespace libthreadar
 	void updating_first_index(); ///< scan the table for the smallest index and updates first_index field
     };
 
-    template <class T> ratelier<T>::ratelier(unsigned int size, T objtype): table(size), corres(size)
+    template <class T> ratelier<T>::ratelier(unsigned int size): table(size), corres(size)
     {
 	next_index = 0;
 	first_index = 0;
