@@ -1,6 +1,6 @@
 #######################################################################
 ## libthreadar - is a library providing several C++ classes to work with threads
-## Copyright (C) 2014-2018 Denis Corbin
+## Copyright (C) 2014-2020 Denis Corbin
 ##
 ## This file is part of libthreadar
 ##
@@ -23,7 +23,7 @@
 
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.69)
-AC_INIT([LIBTHREADAR], [1.2.2], [])
+AC_INIT([LIBTHREADAR], [1.2.3], [])
 AC_CONFIG_HEADERS([config.h])
 AC_LANG([C++])
 AC_CONFIG_SRCDIR([src/tampon.hpp])
