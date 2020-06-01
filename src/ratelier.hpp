@@ -131,7 +131,7 @@ namespace libthreadar
 	std::deque<unsigned int> empty_slot; ///< empty slot of table
 	libthreadar::condition verrou;  ///< lock to manipulate private data
 
-	void updating_first_index(); ///< scan the table for the smallest index and updates first_index field
+	void update_first_index(); ///< scan the table for the smallest index and updates first_index field
     };
 
     template <class T> ratelier<T>::ratelier(unsigned int size): table(size), corres(size)
@@ -273,7 +273,7 @@ namespace libthreadar
 	    empty_slot.push_back(it->second);
 	    corres.erase(it); // removing the correspondance
 
-	    updating_first_index();
+	    update_first_index();
 	}
 	catch(...)
 	{
@@ -371,7 +371,7 @@ namespace libthreadar
 		}
 		++index;
 	    }
-	    updating_first_index();
+	    update_first_index();
 	}
 	catch(...)
 	{
@@ -379,6 +379,27 @@ namespace libthreadar
 	    throw;
 	}
 	verrou.unlock();
+    }
+
+    template <class T> void ratelier<T>::update_first_index()
+    {
+	std::map<unsigned int, unsigned int>::iterator it = corres.begin();
+
+	if(first_index > next_index)
+	{
+		// overflood of next_index took place, we have still older slot at higher numbers
+
+	    while(it != corres.end() && it->first < first_index)
+		++it;
+
+	    if(it == corres.end()) // there is no old slot used at highest positions
+		it = corres.begin();
+	}
+
+	if(it == corres.end()) // map is empty
+	    first_index = next_index;
+	else
+	    first_index = it->first; // smallest key of the map
     }
 
 } // end of namespace
