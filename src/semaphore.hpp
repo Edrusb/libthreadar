@@ -66,13 +66,13 @@ namespace libthreadar
 	semaphore(const semaphore & ref) = delete;
 
 	    /// no move constructor
-	semaphore(semaphore && ref) noexcept = delete;
+	semaphore(semaphore && ref) noexcept = default;
 
 	    /// no assignment operator
 	semaphore & operator = (const semaphore & ref) = delete;
 
 	    /// no move operator
-	semaphore & operator = (semaphore && ref) noexcept = delete;
+	semaphore & operator = (semaphore && ref) noexcept = default;
 
 	    /// Destructor
 	~semaphore();
