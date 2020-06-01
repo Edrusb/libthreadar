@@ -74,6 +74,7 @@ namespace libthreadar
 
     template <class T> class ratelier
     {
+    public:
 	ratelier(unsigned int size, T objtype);
 	ratelier(const ratelier & ref) = delete;
 	ratelier(ratelier && ref) = delete;
@@ -86,7 +87,7 @@ namespace libthreadar
 	    /// \the data is added to new higher indexs of the virtualluy infininte
 	    /// list of object. However the caller may be suspended if the ratelier
 	    /// is full
-	void feed(std::unique_ptr<T> & one);
+	void feed(std::unique_ptr<T> one);
 
 	    /// mean for a worker thread to obtain a object in the lowest slot available (mode 1)
 	    ///
@@ -107,7 +108,7 @@ namespace libthreadar
 	    /// \note if the slot is already full an exception is thrown
 	    /// \note if the ratelier is full the caller will be suspended until the
 	    /// non-worker thread calls get() to make some room
-	void worker_fill(unsigned int slot, std::unique_ptr<T> & one);
+	void worker_fill(unsigned int slot, std::unique_ptr<T> one);
 
 	    /// obtain the lowest continuous filled slots of the ratelier and free them (mode 2)
 	void get(std::vector<std::unique_ptr<T> > & ones);
@@ -142,7 +143,7 @@ namespace libthreadar
 	    empty_slot.push_back(i);
     }
 
-    template <class T> void ratelier<T>::feed(std::unique_ptr<T> & one)
+    template <class T> void ratelier<T>::feed(std::unique_ptr<T> one)
     {
 	unsigned int tableindex;
 
@@ -168,7 +169,7 @@ namespace libthreadar
 		// recording the change
 
 	    table[tableindex].empty = false;
-	    table[tableindex].obj = one;
+	    table[tableindex].obj = std::move(one);
 	    table[tableindex].index = next_index;
 
 	    corres[next_index] = tableindex;
@@ -219,7 +220,7 @@ namespace libthreadar
 
 		table[it->second].locked = true;
 		table[it->second].index = first_index;
-		ret = table[it->second].obj;
+		ret = std::move(table[it->second].obj);
 		slot = first_index;
 	    }
 	}
@@ -282,7 +283,7 @@ namespace libthreadar
 	verrou.unlock();
     }
 
-    template <class T> void ratelier<T>::worker_fill(unsigned int slot, std::unique_ptr<T> & one)
+    template <class T> void ratelier<T>::worker_fill(unsigned int slot, std::unique_ptr<T> one)
     {
 	verrou.lock();
 
@@ -311,7 +312,7 @@ namespace libthreadar
 		// recording the change
 
 	    corres[slot] = index;
-	    table[index].obj = one;
+	    table[index].obj = std::move(one);
 	    table[index].empty = false;
 	    table[index].index = slot;
 
@@ -363,7 +364,7 @@ namespace libthreadar
 
 			// recording the change
 
-		    ones.push_back(table[it->second].obj);
+		    ones.push_back(std::move(table[it->second].obj));
 		    table[it->second].empty = true;
 		    empty_slot.push_back(it->second);
 		    corres.erase(it);
