@@ -52,7 +52,8 @@
 #include "barrier.hpp"
 #include "freezer.hpp"
 #include "condition.hpp"
-#include "ratelier.hpp"
+#include "ratelier_gather.hpp"
+#include "ratelier_scatter.hpp"
 
    /// This is the only namespace used in libthreadar and all symbols provided by libthreadar are member of this namespace.
 
