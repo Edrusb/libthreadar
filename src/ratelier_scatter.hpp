@@ -142,7 +142,7 @@ namespace libthreadar
 
 	    empty_slot.pop_back();
 	    if(was_empty)
-		verrou.broadcast();
+		verrou.signal();
 		// awake one worker thread possibily suspended if ratelier_scatter
 		// was empty or had all its slot filled
 		// This signal will be effective exiting this critical section
@@ -199,6 +199,8 @@ namespace libthreadar
 			    // this will be done at verrou.unlock() time
 			if(empty_slot.empty())
 			    verrou.broadcast();
+			    // need to use broadcast() to be sure the non-worker
+			    // thread is awaken if it was waiting
 
 			    // reusing quicker the last block used
 			    // as the back() be used first
