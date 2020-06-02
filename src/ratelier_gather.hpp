@@ -174,11 +174,7 @@ namespace libthreadar
 		while(it != corres.end())
 		{
 		    if(it->first > next_index) // not continuous sequence
-		    {
-			if(ones.empty())
-			    verrou.wait(); // waiting for a worker to add the expected slot
 			break; // exiting the inner while loop
-		    }
 
 		    if(it->first == next_index)
 		    {
@@ -213,6 +209,9 @@ namespace libthreadar
 			    // waiting for a feeder to add some data
 		    }
 		}
+
+		if(ones.empty())
+		    verrou.wait();
 	    }
 	    while(ones.empty());
 

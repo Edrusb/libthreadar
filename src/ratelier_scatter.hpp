@@ -167,14 +167,8 @@ namespace libthreadar
 	    {
 		if(it != corres.end())
 		{
-
 		    if(it->first < lowest_index) // overflooding occured
-		    {
 			++it; // ignoring this slot
-			if(it == corres.end())
-			    verrou.wait();
-			it = corres.begin();
-		    }
 		    else
 		    {
 
@@ -206,6 +200,7 @@ namespace libthreadar
 			    // as the back() be used first
 			empty_slot.push_back(it->second);
 			corres.erase(it); // removing the correspondance
+			it = corres.end();
 		    }
 		}
 		else
