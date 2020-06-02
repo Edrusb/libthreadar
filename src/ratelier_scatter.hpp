@@ -109,7 +109,7 @@ namespace libthreadar
 	    empty_slot.push_back(i);
     }
 
-    template <class T> void ratelier_scatter<T>::feed(std::unique_ptr<T> one)
+    template <class T> void ratelier_scatter<T>::scatter(std::unique_ptr<T> one)
     {
 	unsigned int tableindex;
 
@@ -167,30 +167,46 @@ namespace libthreadar
 	    {
 		if(it != corres.end())
 		{
-		    	// sanity checks
 
-		    if(it->second >= table.size())
-			throw THREADAR_BUG;
-		    if(table[it->second].empty)
-			throw THREADAR_BUG;
-		    if( ! table[it->second].obj)
-			throw THREADAR_BUG;
+		    if(it->first < lowest_index) // overflooding occured
+		    {
+			++it; // ignoring this slot
+			if(it == corres.end())
+			    verrou.wait();
+			it = corres.begin();
+		    }
+		    else
+		    {
 
-			// recording the change
+			    // sanity checks
 
-		    ret = std::move(table[it->second].obj);
-		    slot = table[it->second].index;
-		    table[it->second].empty = true;
+			if(it->second >= table.size())
+			    throw THREADAR_BUG;
+			if(table[it->second].empty)
+			    throw THREADAR_BUG;
+			if( ! table[it->second].obj)
+			    throw THREADAR_BUG;
 
-			// awaking non-worker thread eventually pending for a free slot
-			// this will be done at verrou.unlock() time
-		    if(empty_slot.empty())
-			verrou.broadcast();
+			    // recording the change
 
-			// reusing quicker the last block used
-			// as the back() be used first
-		    empty_slot.push_back(it->second);
-		    corres.erase(it); // removing the correspondance
+			ret = std::move(table[it->second].obj);
+			slot = table[it->second].index;
+			table[it->second].empty = true;
+
+			if(lowest_index != slot)
+			    throw THREADAR_BUG;
+			++lowest_index;
+
+			    // awaking non-worker thread eventually pending for a free slot
+			    // this will be done at verrou.unlock() time
+			if(empty_slot.empty())
+			    verrou.broadcast();
+
+			    // reusing quicker the last block used
+			    // as the back() be used first
+			empty_slot.push_back(it->second);
+			corres.erase(it); // removing the correspondance
+		    }
 		}
 		else
 		{

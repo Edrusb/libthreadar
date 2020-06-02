@@ -187,7 +187,7 @@ namespace libthreadar
 
 			if(it->second >= table.size())
 			    throw THREADAR_BUG;
-			if(table[it->second].index != index)
+			if(table[it->second].index != next_index)
 			    throw THREADAR_BUG;
 			if(table[it->second].empty)
 			    throw THREADAR_BUG;
