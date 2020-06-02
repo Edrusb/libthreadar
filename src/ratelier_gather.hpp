@@ -70,10 +70,10 @@ namespace libthreadar
 	    /// \note if the slot is already full an exception is thrown
 	    /// \note if the ratelier_gather is full the caller will be suspended until the
 	    /// non-worker thread calls get() to make some room
-	void worker_fill(unsigned int slot, std::unique_ptr<T> one);
+	void worker_push_one(unsigned int slot, std::unique_ptr<T> one);
 
 	    /// obtain the lowest continuous filled slots of the ratelier_gather and free them
-	void get(std::vector<std::unique_ptr<T> > & ones);
+	void gather(std::vector<std::unique_ptr<T> > & ones);
 
     private:
 	struct slot
@@ -101,7 +101,7 @@ namespace libthreadar
     }
 
 
-    template <class T> void ratelier_gather<T>::worker_fill(unsigned int slot, std::unique_ptr<T> one)
+    template <class T> void ratelier_gather<T>::worker_push_one(unsigned int slot, std::unique_ptr<T> one)
     {
 	verrou.lock();
 
@@ -156,7 +156,7 @@ namespace libthreadar
 	verrou.unlock();
     }
 
-    template <class T> void ratelier_gather<T>::get(std::vector<std::unique_ptr<T> > & ones)
+    template <class T> void ratelier_gather<T>::gather(std::vector<std::unique_ptr<T> > & ones)
     {
 	ones.clear();
 

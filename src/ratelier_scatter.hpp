@@ -74,7 +74,7 @@ namespace libthreadar
 	    /// \note the data is added to new higher indexes of the virtually infininte
 	    /// list of object. However the caller may be suspended if the ratelier_scatter
 	    /// is full
-	void feed(std::unique_ptr<T> one);
+	void scatter(std::unique_ptr<T> one);
 
 	    /// mean for a worker thread to obtain a object in the lowest slot available
 	    ///
