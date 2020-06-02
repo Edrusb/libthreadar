@@ -40,53 +40,78 @@ using namespace std;
 namespace libthreadar
 {
 
-    condition::condition()
+    condition::condition(unsigned int num): cond(num)
     {
-	int ret = pthread_cond_init(&cond, NULL);
-	if(ret != 0)
-	    throw string("Error while creating condition");
+	for(unsigned int i = 0; i < num; ++i)
+	{
+	    int ret = pthread_cond_init(&(cond[i]), NULL);
+	    if(ret != 0)
+	    {
+		for(unsigned int dec = i - 1; dec >= 0; --dec)
+		    (void)pthread_cond_destroy(&(cond[dec]));
+		throw string("Error while creating condition");
+	    }
+	}
     }
 
     condition::~condition()
     {
-	(void)pthread_cond_destroy(&cond);
+	std::deque<pthread_cond_t>::iterator it = cond.begin();
+
+	while(it != cond.end())
+	    (void)pthread_cond_destroy(&(*it));
     }
 
-    void condition::wait()
+    void condition::wait(unsigned int instance)
     {
-	int ret = pthread_cond_wait(&cond, &mut);
-	if(ret != 0)
-	    throw string("Error while going to wait on condition");
-    }
-
-    void condition::signal()
-    {
-	try
+	if(instance < cond.size())
 	{
-	    int ret = pthread_cond_signal(&cond);
+	    int ret = pthread_cond_wait(&(cond[instance]), &mut);
 	    if(ret != 0)
-		throw string("Error while unlocking and signaling");
+		throw string("Error while going to wait on condition");
 	}
-	catch(...)
-	{
-	    unlock();
-	    throw;
-	}
+	else
+	    throw exception_range("the instance number given to condition::wait() is out of range");
     }
 
-    void condition::broadcast()
+    void condition::signal(unsigned int instance)
     {
-	try
+	if(instance < cond.size())
 	{
-	    int ret = pthread_cond_broadcast(&cond);
-	    if(ret != 0)
-		throw string("Error while unlocking and broadcasting");
+	    try
+	    {
+		int ret = pthread_cond_signal(&(cond[instance]));
+		if(ret != 0)
+		    throw string("Error while unlocking and signaling");
+	    }
+	    catch(...)
+	    {
+		unlock();
+		throw;
+	    }
 	}
-	catch(...)
+	else
+	    throw exception_range("the instance number given to condition::signal() is out of range");
+    }
+
+    void condition::broadcast(unsigned int instance)
+    {
+	if(instance < cond.size())
 	{
-	    unlock();
-	    throw;
+	    try
+	    {
+		int ret = pthread_cond_broadcast(&(cond[instance]));
+		if(ret != 0)
+		    throw string("Error while unlocking and broadcasting");
+	    }
+	    catch(...)
+	    {
+		unlock();
+		throw;
+	    }
 	}
+	else
+	    throw exception_range("the instance number given to condition::broadcast() is out of range");
     }
 
 

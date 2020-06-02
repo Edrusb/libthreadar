@@ -30,17 +30,27 @@
 #include "mutex.hpp"
 #include "exceptions.hpp"
 
+#include <deque>
+
 namespace libthreadar
 {
 
 	/// Wrapper around the Posix pthread_cond_t object and its associated mutex
+
+	/// \note each object share a user defined set of condition on the same mutex
+	/// as defined at constructor time. wait() takes as argument the condition number
+	/// and will be awaken by a signal() or broadcast() having this same number as
+	/// argument
 
     class condition : public mutex
     {
     public:
 
 	    /// constructor
-	condition();
+
+	    /// \param[in] number of instance to create, each instance is a separated condition
+	    /// relying on the same mutex. First instance starts with index 0
+	condition(unsigned int num = 1);
 
 	    /// no copy constructor
 	condition(const condition & ref) = delete;
@@ -60,27 +70,30 @@ namespace libthreadar
 
 	    /// put the calling thread on hold waiting for another thread to call signal()
 
+	    /// \param[in] instance the instance number to have the caller waiting on
 	    /// \note wait() must be called between lock() and unlock(). Once suspendend, the
 	    /// calling thread unlocks the mutex and acquires the mutex lock() again once
 	    /// awaken after another thread called signal
-	void wait();
+	void wait(unsigned int instance = 0);
 
 	    /// awakes a single thread suspended after having called wait()
-	    ///
+
+	    /// \param[in] instance signal thread that have been waiting on that instance
 	    /// \note signal() must be called between lock() and unlock(). This is only at
 	    /// the time unlock() is called that another thread exits from the suspended
 	    /// state.
-	void signal();
+	void signal(unsigned int instance = 0);
 
 	    /// awakes all threads suspended after having called wait()
-	    ///
+
+	    /// \param[in] instance broadcast threads that have been waiting on that instance
 	    /// \note broadcast() must be called between lock() and unlock(). This is only at
 	    /// the time unlock() is called that another thread exits from the suspended
 	    /// state.
-	void broadcast();
+	void broadcast(unsigned int instance = 0);
 
     private:
-	pthread_cond_t cond;
+	std::deque<pthread_cond_t> cond;
 
     };
 
