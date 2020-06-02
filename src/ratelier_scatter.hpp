@@ -104,6 +104,7 @@ namespace libthreadar
     template <class T> ratelier_scatter<T>::ratelier_scatter(unsigned int size): table(size)
     {
 	next_index = 0;
+	lowest_index = 0;
 
 	for(unsigned int i = 0; i < size; ++i)
 	    empty_slot.push_back(i);
@@ -119,7 +120,9 @@ namespace libthreadar
 	    while(empty_slot.empty())
 		verrou.wait();
 
+	    bool was_empty = corres.empty();
 	    tableindex = empty_slot.back();
+
 
 		// sanity checks
 
@@ -138,7 +141,8 @@ namespace libthreadar
 	    ++next_index;
 
 	    empty_slot.pop_back();
-	    verrou.signal();
+	    if(was_empty)
+		verrou.broadcast();
 		// awake one worker thread possibily suspended if ratelier_scatter
 		// was empty or had all its slot filled
 		// This signal will be effective exiting this critical section
