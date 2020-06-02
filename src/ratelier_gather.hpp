@@ -180,32 +180,44 @@ namespace libthreadar
 			break; // exiting the inner while loop
 		    }
 
-			// sanity checks
+		    if(it->first == next_index)
+		    {
 
-		    if(it->second >= table.size())
-			throw THREADAR_BUG;
-		    if(table[it->second].index != index)
-			throw THREADAR_BUG;
-		    if(table[it->second].empty)
-			throw THREADAR_BUG;
-		    if( ! table[it->second].obj)
-			throw THREADAR_BUG;
+			    // sanity checks
 
-			// recording the change
+			if(it->second >= table.size())
+			    throw THREADAR_BUG;
+			if(table[it->second].index != index)
+			    throw THREADAR_BUG;
+			if(table[it->second].empty)
+			    throw THREADAR_BUG;
+			if( ! table[it->second].obj)
+			    throw THREADAR_BUG;
 
-		    ones.push_back(std::move(table[it->second].obj));
-		    table[it->second].empty = true;
-		    empty_slot.push_back(it->second);
-		    tmp = it;
-		    ++it;
-		    corres.erase(tmp);
-		    ++next_index;
+			    // recording the change
+
+			ones.push_back(std::move(table[it->second].obj));
+			table[it->second].empty = true;
+			empty_slot.push_back(it->second);
+			tmp = it;
+			++it;
+			corres.erase(tmp);
+			++next_index;
+		    }
+		    else // integer overload occured for the index
+		    {
+			++it; // skipping this entry
+			if(it == corres.end())
+			    verrou.wait();
+			    // avoiding endless loop but rather
+			    // waiting for a feeder to add some data
+		    }
 		}
 	    }
 	    while(ones.empty());
 
 	    if(was_full)
-		verrou.broadcast();
+		verrou.broadcast(); // awake all workers pending for some room
 	}
 	catch(...)
 	{
