@@ -94,6 +94,7 @@ namespace libthreadar
 	};
 
 	unsigned int next_index; ///< index of the next slot to use (always increases but may overflood)
+	unsigned int lowest_index; ///< next index to provide to a worker
 	std::vector<slot> table; ///< table of slots to store data
 	std::map<unsigned int, unsigned int> corres; ///< associate infinite range index to index in table
 	std::deque<unsigned int> empty_slot; ///< empty slot of table

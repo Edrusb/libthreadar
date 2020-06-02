@@ -85,7 +85,7 @@ namespace libthreadar
 	    slot() { empty = true; };
 	};
 
-	unsigned int next_index; ///< next index to start the next get() with
+	unsigned int next_index; ///< next index to start the next gather() with
 	std::vector<slot> table; ///< table of slots to store data
 	std::map<unsigned int, unsigned int> corres; ///< associate infinite range index to index in table
 	std::deque<unsigned int> empty_slot; ///< empty slot of table
