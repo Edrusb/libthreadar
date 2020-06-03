@@ -1,6 +1,8 @@
 From release 1.2.x to 1.3.0
 - enhanced condition class with several instances to have a given
   mutex supporting several conditions
+- enhanced condition class to provide a counter of thread suspended on a given
+  instance
 - added ratelier_scatter class to scatter ordered messages to different workers
 - added ratelier_gather class to gather ordered messages from different workers
 

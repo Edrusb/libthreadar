@@ -40,7 +40,7 @@ using namespace std;
 namespace libthreadar
 {
 
-    condition::condition(unsigned int num): cond(num)
+    condition::condition(unsigned int num): cond(num), counter(num)
     {
 	for(unsigned int i = 0; i < num; ++i)
 	{
@@ -51,6 +51,7 @@ namespace libthreadar
 		    (void)pthread_cond_destroy(&(cond[dec]));
 		throw string("Error while creating condition");
 	    }
+	    counter[i] = 0;
 	}
     }
 
@@ -66,7 +67,9 @@ namespace libthreadar
     {
 	if(instance < cond.size())
 	{
+	    ++counter[instance];
 	    int ret = pthread_cond_wait(&(cond[instance]), &mut);
+	    --counter[instance];
 	    if(ret != 0)
 		throw string("Error while going to wait on condition");
 	}
