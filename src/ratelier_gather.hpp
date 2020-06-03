@@ -76,6 +76,10 @@ namespace libthreadar
 	void gather(std::vector<std::unique_ptr<T> > & ones);
 
     private:
+
+	static const unsigned int cond_pending_data = 0; ///< condition when the object is empty and thread is waiting for situation change
+	static const unsigned int cond_full = 1;         ///< condition when the object is full and thread is waiting for situation change
+
 	struct slot
 	{
 	    std::unique_ptr<T> obj;
@@ -92,7 +96,7 @@ namespace libthreadar
 	libthreadar::condition verrou;  ///< lock to manipulate private data
     };
 
-    template <class T> ratelier_gather<T>::ratelier_gather(unsigned int size): table(size)
+    template <class T> ratelier_gather<T>::ratelier_gather(unsigned int size): table(size), verrou(2)
     {
 	next_index = 0;
 
@@ -107,18 +111,9 @@ namespace libthreadar
 
 	try
 	{
-	    while(empty_slot.empty()) // no free slot available
-	    {
-		std::map<unsigned int, unsigned int>::iterator it = corres.begin();
-		if(it == corres.end())
-		    throw THREADAR_BUG; /// no empty slot but not correspondance with any used slot!
-		else
-		{
-		    if(it->first > next_index)
-			throw exception_range("ratelier_gather is full but has not the first expected slot needed to extract some data form it, dead-lock situation would arise, aborting");
-		}
-		verrou.wait(); // we can be awaken by another worker thread, so we loop to check the condition has changed
-	    }
+	    while(empty_slot.empty()  // no free slot available
+		  || (empty_slot.size() == 1 && slot != next_index)) // avoiding dead-lock
+		verrou.wait(cond_full);
 
 	    std::map<unsigned int, unsigned int>::iterator it = corres.find(slot);
 	    unsigned int index;
@@ -142,14 +137,16 @@ namespace libthreadar
 	    table[index].empty = false;
 	    table[index].index = slot;
 
-	    if(empty_slot.size() == table.size()) // all slots were empty
-		verrou.broadcast(); // awaking non-worker thread possibly waiting for data
-
 	    empty_slot.pop_back();
+
+	    if(verrou.get_waiting_thread_count(cond_pending_data) > 0)
+		if(corres.find(next_index) != corres.end()) // some data can be gathered
+		    verrou.signal(cond_pending_data); // awaking the gathering thread
 	}
 	catch(...)
 	{
-	    verrou.broadcast();
+	    verrou.broadcast(cond_pending_data);
+	    verrou.broadcast(cond_full);
 	    verrou.unlock();
 	    throw;
 	}
@@ -165,7 +162,6 @@ namespace libthreadar
 	{
 	    std::map<unsigned int, unsigned int>::iterator it;
 	    std::map<unsigned int, unsigned int>::iterator tmp;
-	    bool was_full = empty_slot.empty();
 
 	    do
 	    {
@@ -201,26 +197,21 @@ namespace libthreadar
 			++next_index;
 		    }
 		    else // integer overload occured for the index
-		    {
 			++it; // skipping this entry
-			if(it == corres.end())
-			    verrou.wait();
-			    // avoiding endless loop but rather
-			    // waiting for a feeder to add some data
-		    }
 		}
 
 		if(ones.empty())
-		    verrou.wait();
+		    verrou.wait(cond_pending_data);
 	    }
 	    while(ones.empty());
 
-	    if(was_full)
-		verrou.broadcast(); // awake all workers pending for some room
+	    if(verrou.get_waiting_thread_count(cond_full) > 0)
+		verrou.broadcast(cond_full); // awake all pending workers
 	}
 	catch(...)
 	{
-	    verrou.broadcast();
+	    verrou.broadcast(cond_pending_data);
+	    verrou.broadcast(cond_full);
 	    verrou.unlock();
 	    throw;
 	}
