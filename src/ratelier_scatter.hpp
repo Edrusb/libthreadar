@@ -84,6 +84,10 @@ namespace libthreadar
 	std::unique_ptr<T> worker_get_one(unsigned int & slot);
 
     private:
+
+	static const unsigned int cond_empty = 0; ///< condition when the object is empty and thread is waiting for situation change
+	static const unsigned int cond_full = 1;  ///< condition when the object is full and thread is waiting for situation change
+
 	struct slot
 	{
 	    std::unique_ptr<T> obj;
@@ -101,7 +105,7 @@ namespace libthreadar
 	libthreadar::condition verrou;  ///< lock to manipulate private data
     };
 
-    template <class T> ratelier_scatter<T>::ratelier_scatter(unsigned int size): table(size)
+    template <class T> ratelier_scatter<T>::ratelier_scatter(unsigned int size): table(size), verrou(2)
     {
 	next_index = 0;
 	lowest_index = 0;
@@ -117,12 +121,10 @@ namespace libthreadar
 	verrou.lock();
 	try
 	{
-	    while(empty_slot.empty())
-		verrou.wait();
+	    while(empty_slot.empty()) // ratelier_scatter is full
+		verrou.wait(cond_full);
 
-	    bool was_empty = corres.empty();
 	    tableindex = empty_slot.back();
-
 
 		// sanity checks
 
@@ -141,15 +143,14 @@ namespace libthreadar
 	    ++next_index;
 
 	    empty_slot.pop_back();
-	    if(was_empty)
-		verrou.signal();
-		// awake one worker thread possibily suspended if ratelier_scatter
-		// was empty or had all its slot filled
-		// This signal will be effective exiting this critical section
+	    if(verrou.get_waiting_thread_count(cond_empty) > 0)
+		verrou.signal(cond_empty);
 	}
 	catch(...)
 	{
-	    verrou.broadcast();
+
+	    verrou.broadcast(cond_empty);
+	    verrou.broadcast(cond_full);
 	    verrou.unlock();
 	    throw;
 	}
@@ -195,23 +196,20 @@ namespace libthreadar
 			    throw THREADAR_BUG;
 			++lowest_index;
 
-			    // awaking non-worker thread eventually pending for a free slot
-			    // this will be done at verrou.unlock() time
-			if(empty_slot.empty())
-			    verrou.broadcast();
-			    // need to use broadcast() to be sure the non-worker
-			    // thread is awaken if it was waiting
-
 			    // reusing quicker the last block used
 			    // as the back() be used first
 			empty_slot.push_back(it->second);
 			corres.erase(it); // removing the correspondance
-			it = corres.end();
+
+			if(verrou.get_waiting_thread_count(cond_full) > 0)
+			    verrou.signal(cond_full);
 		    }
 		}
 		else
 		{
-		    verrou.wait();
+			// ratelier_scatter is empty
+
+		    verrou.wait(cond_empty);
 		    it = corres.begin();
 		}
 	    }
@@ -219,7 +217,8 @@ namespace libthreadar
 	}
 	catch(...)
 	{
-	    verrou.broadcast();
+	    verrou.broadcast(cond_empty);
+	    verrou.broadcast(cond_full);
 	    verrou.unlock();
 	    throw;
 	}
