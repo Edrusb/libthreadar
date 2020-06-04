@@ -58,22 +58,32 @@ namespace libthreadar
     template <class T> class ratelier_gather
     {
     public:
-	ratelier_gather(unsigned int size);
+	ratelier_gather(unsigned int size, signed int flag = 0);
 	ratelier_gather(const ratelier_gather & ref) = delete;
 	ratelier_gather(ratelier_gather && ref) noexcept = default;
 	ratelier_gather & operator = (const ratelier_gather & ref) = delete;
 	ratelier_gather & operator = (ratelier_gather && ref) noexcept = default;
 	virtual ~ratelier_gather() = default;
 
-	    /// provides a worker thread a mean to given slot to the ratelier_gather
-	    ///
+	    /// provides to a worker thread a mean to given data with its associated index to a gathering thread
+
+	    /// \param[in] slot is the slot number associated to the provided object "one"
+	    /// \param[in] one is the object to push to the gathering thread
+	    /// \param[in] flag is a purpose free signal to send to the gathering thread and associated to this object.
+	    /// the value it had before this call with the value given in argument to the call
 	    /// \note if the slot is already full an exception is thrown
 	    /// \note if the ratelier_gather is full the caller will be suspended until the
 	    /// non-worker thread calls get() to make some room
-	void worker_push_one(unsigned int slot, std::unique_ptr<T> one);
+	void worker_push_one(unsigned int slot, std::unique_ptr<T> one, signed int flag = 0);
 
 	    /// obtain the lowest continuous filled slots of the ratelier_gather and free them
-	void gather(std::vector<std::unique_ptr<T> > & ones);
+
+	    /// \param[out] ones is a list of continuously indexed objects which immediately follows the list
+	    /// provided by a previous call to gather() and will be immediately followed by the list returned
+	    /// by a next call to gather().
+	    /// \param[out] flag is the purpose free signal give by the worker and associated to each data
+	void gather(std::deque<std::unique_ptr<T> > & ones, std::deque<signed int> & flag);
+
 
     private:
 
@@ -85,8 +95,10 @@ namespace libthreadar
 	    std::unique_ptr<T> obj;
 	    bool empty;
 	    unsigned int index;
+	    signed int flag;
 
-	    slot() { empty = true; };
+	    slot(signed int val) { empty = true; flag = val; };
+	    slot(const slot & ref) { obj.reset(); empty = ref.empty; index = ref.index; flag = ref.flag; };
 	};
 
 	unsigned int next_index; ///< next index to start the next gather() with
@@ -96,7 +108,9 @@ namespace libthreadar
 	libthreadar::condition verrou;  ///< lock to manipulate private data
     };
 
-    template <class T> ratelier_gather<T>::ratelier_gather(unsigned int size): table(size), verrou(2)
+    template <class T> ratelier_gather<T>::ratelier_gather(unsigned int size, signed int flag):
+	table(size, slot(flag)),
+	verrou(2)
     {
 	next_index = 0;
 
@@ -104,8 +118,7 @@ namespace libthreadar
 	    empty_slot.push_back(i);
     }
 
-
-    template <class T> void ratelier_gather<T>::worker_push_one(unsigned int slot, std::unique_ptr<T> one)
+    template <class T> void ratelier_gather<T>::worker_push_one(unsigned int slot, std::unique_ptr<T> one, signed int flag)
     {
 	verrou.lock();
 
@@ -136,6 +149,7 @@ namespace libthreadar
 	    table[index].obj = std::move(one);
 	    table[index].empty = false;
 	    table[index].index = slot;
+	    table[index].flag = flag;
 
 	    empty_slot.pop_back();
 
@@ -153,9 +167,10 @@ namespace libthreadar
 	verrou.unlock();
     }
 
-    template <class T> void ratelier_gather<T>::gather(std::vector<std::unique_ptr<T> > & ones)
+    template <class T> void ratelier_gather<T>::gather(std::deque<std::unique_ptr<T> > & ones, std::deque<signed int> & flag)
     {
 	ones.clear();
+	flag.clear();
 
 	verrou.lock();
 	try
@@ -189,6 +204,8 @@ namespace libthreadar
 			    // recording the change
 
 			ones.push_back(std::move(table[it->second].obj));
+			flag.push_back(table[it->second].flag);
+
 			table[it->second].empty = true;
 			empty_slot.push_back(it->second);
 			tmp = it;
@@ -216,6 +233,9 @@ namespace libthreadar
 	    throw;
 	}
 	verrou.unlock();
+
+	if(ones.size() != flag.size())
+	    throw THREADAR_BUG;
     }
 
 } // end of namespace
