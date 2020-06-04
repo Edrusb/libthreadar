@@ -89,6 +89,8 @@ namespace libthreadar
 	    /// the ratelier_scatter with new data
 	std::unique_ptr<T> worker_get_one(unsigned int & slot, signed int & flag);
 
+	    /// reset the object in its prestine state
+	void reset();
 
     private:
 
@@ -238,6 +240,27 @@ namespace libthreadar
 	verrou.unlock();
 
 	return ret;
+    }
+
+    template <class T> void ratelier_scatter<T>::reset()
+    {
+	unsigned int size = table.size();
+	next_index = 0;
+	lowest_index = 0;
+	corres.clear();
+	empty_slot.clear();
+
+	for(unsigned int i = 0; i < size; ++i)
+	{
+	    table[i].obj.reset();
+	    table[i].empty = true;
+	    empty_slot.push_back(i);
+	}
+
+	verrou.lock();
+	verrou.broadcast(cond_empty);
+	verrou.broadcast(cond_full);
+	verrou.unlock();
     }
 
 } // end of namespace

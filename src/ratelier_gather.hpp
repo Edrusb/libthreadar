@@ -84,6 +84,8 @@ namespace libthreadar
 	    /// \param[out] flag is the purpose free signal give by the worker and associated to each data
 	void gather(std::deque<std::unique_ptr<T> > & ones, std::deque<signed int> & flag);
 
+	    /// reset the object in its prestine state
+	void reset();
 
     private:
 
@@ -237,6 +239,27 @@ namespace libthreadar
 	if(ones.size() != flag.size())
 	    throw THREADAR_BUG;
     }
+
+    template <class T> void ratelier_gather<T>::reset()
+    {
+	unsigned int size = table.size();
+	next_index = 0;
+	corres.clear();
+	empty_slot.clear();
+
+	for(unsigned int i = 0; i < size; ++i)
+	{
+	    table[i].obj.reset();
+	    table[i].empty = true;
+	    empty_slot.push_back(i);
+	}
+
+	verrou.lock();
+	verrou.broadcast(cond_pending_data);
+	verrou.broadcast(cond_full);
+	verrou.unlock();
+    }
+
 
 } // end of namespace
 
