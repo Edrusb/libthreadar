@@ -47,7 +47,7 @@ namespace libthreadar
 	    int ret = pthread_cond_init(&(cond[i]), NULL);
 	    if(ret != 0)
 	    {
-		for(unsigned int dec = i - 1; dec >= 0; --dec)
+		for(signed int dec = i - 1; dec >= 0; --dec)
 		    (void)pthread_cond_destroy(&(cond[dec]));
 		throw string("Error while creating condition");
 	    }
@@ -60,7 +60,10 @@ namespace libthreadar
 	std::deque<pthread_cond_t>::iterator it = cond.begin();
 
 	while(it != cond.end())
+	{
 	    (void)pthread_cond_destroy(&(*it));
+	    ++it;
+	}
     }
 
     void condition::wait(unsigned int instance)
