@@ -197,6 +197,9 @@ namespace libthreadar
 	    atom() { mem = nullptr; data_size = 0; };
 	};
 
+	static const unsigned int cond_full = 0;
+	static const unsigned int cond_empty = 0;
+
 	condition modif;
 	atom *table;              //< datastructure holding data in transit between two threads
 	unsigned int table_size;  //< size of table, i.e. number of struct atom it holds
@@ -205,15 +208,13 @@ namespace libthreadar
 	unsigned int next_fetch;  //< index in table of the next atom to fetch from table
 	bool fetch_outside;       //< if set to true, table's index pointed to by next_fetch is used by the fetcher
 	bool feed_outside;        //< if set to true, table's index pointed to by next_feed is used by the feeder
-	bool feeder_go_lock;      //< true to inform fetcher than feeder is suspended on modif
-	bool fetcher_go_lock;     //< true to inform feeder than fetcher is suspended on modif
 
 	    /// cyclicly shift an index (next_feed or next_fetch) by one position
 	void shift_by_one(unsigned int & x) const;
 
     };
 
-    template <class T> fast_tampon<T>::fast_tampon(unsigned int max_block, unsigned int block_size)
+    template <class T> fast_tampon<T>::fast_tampon(unsigned int max_block, unsigned int block_size): modif(2)
     {
 	if(max_block < 2)
 	    throw exception_range("max_block for fast_tampon should be strictly greater than 1");
@@ -233,8 +234,6 @@ namespace libthreadar
 			throw exception_memory();
 		    table[i].data_size = 0;
 		}
-		feeder_go_lock = false;
-		fetcher_go_lock = false;
 		reset();
 	    }
 	    catch(...)
@@ -277,21 +276,27 @@ namespace libthreadar
 
 	if(is_full())
 	{
-	    modif.lock();  	// --- critical section START
-	    if(is_full())
+	    modif.lock();  // --- critical section START
+	    try
 	    {
-		feeder_go_lock = true;   // inform fetcher that we will suspend
-		modif.wait();
-		feeder_go_lock = false;  // remove the flag now we got released
-
 		if(is_full())
-		    throw THREADAR_BUG; // still full!
+		{
+		    modif.wait(cond_full);
+
+		    if(is_full())
+			throw THREADAR_BUG; // still full!
+		}
+		    // *else*
+		    // full condition was transitional
+		    // only the feeder (this is us) can make it happen again
+		    // so the full condition should not occur before we return
+		    // the block we are about to fetch
 	    }
-		// *else*
-		// full condition was transitional
-		// only the feeder (this is us) can make it happen again
-		// so the full condition should not occur before we return
-		// the block we are about to fetch
+	    catch(...)
+	    {
+		modif.unlock();
+		throw;
+	    }
 	    modif.unlock(); // --- critical section END
 	}
 
@@ -311,9 +316,17 @@ namespace libthreadar
 	table[next_feed].data_size = num;
 
 	modif.lock();   // --- critical section START
-	shift_by_one(next_feed);
-	if(fetcher_go_lock)
-	    modif.signal();  // releasing the fetcher when unlock() will complete
+	try
+	{
+	    shift_by_one(next_feed);
+	    if(modif.get_waiting_thread_count(cond_empty) > 0)
+		modif.signal(cond_empty);  // releasing the fetcher when unlock() will complete
+	}
+	catch(...)
+	{
+	    modif.unlock();
+	    throw;
+	}
 	modif.unlock(); // --- critical section END
     }
 
@@ -334,21 +347,26 @@ namespace libthreadar
 	if(is_empty())
 	{
 	    modif.lock();   // --- critical section START
-	    if(is_empty())
+	    try
 	    {
-		fetcher_go_lock = true;    // to inform feeder that we will suspend
-		modif.wait();
-		fetcher_go_lock = false;   // removing the flag now we got released
-
 		if(is_empty())
-		    throw THREADAR_BUG;
-	    }
-		// *else*
-		// the emptiness condition was transitional
-		// only the fetcher (this is us) can make it happen again
-		// so the empty condition should not occur before we return
-		// the block we are about to fetch
+		{
+		    modif.wait(cond_empty);
 
+		    if(is_empty())
+			throw THREADAR_BUG;
+		}
+		    // *else*
+		    // the emptiness condition was transitional
+		    // only the fetcher (this is us) can make it happen again
+		    // so the empty condition should not occur before we return
+		    // the block we are about to fetch
+	    }
+	    catch(...)
+	    {
+		modif.unlock();
+		throw;
+	    }
 	    modif.unlock(); // --- critical section END
 	}
 
@@ -366,9 +384,17 @@ namespace libthreadar
 	    throw exception_range("returned ptr is no the one given earlier for fetching");
 
 	modif.lock();   // --- critical section START
-	shift_by_one(next_fetch);
-	if(feeder_go_lock)
-	    modif.signal();  // releasing the fetcher when unlock() will complete
+	try
+	{
+	    shift_by_one(next_fetch);
+	    if(modif.get_waiting_thread_count(cond_full) > 0)
+		modif.signal(cond_full);  // releasing the fetcher when unlock() will complete
+	}
+	catch(...)
+	{
+	    modif.unlock();
+	    throw;
+	}
 	modif.unlock(); // --- critical section END
     }
 
@@ -387,21 +413,26 @@ namespace libthreadar
     template <class T> void fast_tampon<T>::reset()
     {
 	modif.lock(); // --- critical section START
-	if(feeder_go_lock && fetcher_go_lock)
-	    throw THREADAR_BUG; // both were locked ??? tampon was full *and* empty at the same time ???
-	if(feeder_go_lock || fetcher_go_lock)
-	    modif.signal();
-	modif.unlock(); // --- critical section END
+	try
+	{
+	    if(modif.get_waiting_thread_count(cond_full) > 0
+	       || modif.get_waiting_thread_count(cond_empty) > 0)
+	    {
+		modif.broadcast(cond_full);
+		modif.broadcast(cond_empty);
+		throw exception_range("reseting fast_tampon while some thread were waiting on it");
+	    }
 
-	    // pending thread is now released
-
-	modif.lock(); // --- critical section START
-	next_feed = 0;
-	next_fetch = 0;
-	fetch_outside = false;
-	feed_outside = false;
-	feeder_go_lock = false;
-	fetcher_go_lock = false;
+	    next_feed = 0;
+	    next_fetch = 0;
+	    fetch_outside = false;
+	    feed_outside = false;
+	}
+	catch(...)
+	{
+	    modif.unlock();
+	    throw;
+	}
 	modif.unlock(); // --- critical section END
     }
 
