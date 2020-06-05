@@ -42,6 +42,9 @@ namespace libthreadar
 
     condition::condition(unsigned int num): cond(num), counter(num)
     {
+	if(num < 1)
+	    throw exception_range("need at least one instance for to create a condition object");
+
 	for(unsigned int i = 0; i < num; ++i)
 	{
 	    int ret = pthread_cond_init(&(cond[i]), NULL);
