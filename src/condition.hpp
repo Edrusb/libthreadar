@@ -41,6 +41,23 @@ namespace libthreadar
 	/// as defined at constructor time. wait() takes as argument the condition number
 	/// and will be awaken by a signal() or broadcast() having this same number as
 	/// argument
+	/// \exemple
+	///   const int cond_full = 0;
+	///   const int cond_empty = 1;
+	///   condition verrou(2); // two instances will be available, instance 0 and instance 1
+        ///
+	///   // one thread reads a resource, the other writes to it
+	///
+	///   verrou.lock();
+	///   if(...) // resource empty
+	///       verrou.wait(cond_empty);
+	///   if(...) // resource is full
+	///       verrou.signal(cond_full); // will awake another thread when we will unlock()
+	///   resource.read();    // read the resource
+	///   verrou.unlock();
+	///
+	///   of course the use of try/except(...) to unlock upon uncaught exception is a good idea
+
 
     class condition : public mutex
     {
