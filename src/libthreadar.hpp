@@ -46,12 +46,12 @@
 
 #include "mutex.hpp"
 #include "semaphore.hpp"
+#include "condition.hpp"
+#include "barrier.hpp"
 #include "tampon.hpp"
 #include "fast_tampon.hpp"
 #include "thread.hpp"
-#include "barrier.hpp"
 #include "freezer.hpp"
-#include "condition.hpp"
 #include "ratelier_gather.hpp"
 #include "ratelier_scatter.hpp"
 
