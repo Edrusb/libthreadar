@@ -21,8 +21,8 @@
 //  to contact the author: dar.linux@free.fr
 /*********************************************************************/
 
-#ifndef CONDITION_HPP
-#define CONDITION_HPP
+#ifndef LIBTHREADAR_CONDITION_HPP
+#define LIBTHREADAR_CONDITION_HPP
 
     /// \file condition.hpp
     /// \brief defines the condition class
