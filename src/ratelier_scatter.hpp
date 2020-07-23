@@ -78,7 +78,7 @@ namespace libthreadar
 	    /// \note the data is added to increasingly higher indexes of the virtually infininte
 	    /// list of object. However the caller may be suspended if the ratelier_scatter
 	    /// is full
-	void scatter(std::unique_ptr<T> one, signed int flag = 0);
+	void scatter(std::unique_ptr<T> & one, signed int flag = 0);
 
 	    /// mean for a worker thread to obtain an object in the lowest slot available
 	    ///
@@ -127,7 +127,7 @@ namespace libthreadar
 	    empty_slot.push_back(i);
     }
 
-    template <class T> void ratelier_scatter<T>::scatter(std::unique_ptr<T> one, signed int flag)
+    template <class T> void ratelier_scatter<T>::scatter(std::unique_ptr<T> & one, signed int flag)
     {
 	unsigned int tableindex;
 
