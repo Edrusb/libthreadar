@@ -41,7 +41,7 @@ namespace libthreadar
 	/// as defined at constructor time. wait() takes as argument the condition number
 	/// and will be awaken by a signal() or broadcast() having this same number as
 	/// argument
-	/// \exemple
+	/// \example
 	///   const int cond_full = 0;
 	///   const int cond_empty = 1;
 	///   condition verrou(2); // two instances will be available, instance 0 and instance 1
