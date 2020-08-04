@@ -161,9 +161,9 @@ namespace libthreadar
 	}
 	catch(...)
 	{
+	    verrou.unlock(); // unlock first, as broadcast/signal may be the cause of the exception
 	    verrou.broadcast(cond_pending_data);
 	    verrou.broadcast(cond_full);
-	    verrou.unlock();
 	    throw;
 	}
 	verrou.unlock();
@@ -229,9 +229,9 @@ namespace libthreadar
 	}
 	catch(...)
 	{
+	    verrou.unlock(); // unlock first, as broadcast() may be the cause of the exception
 	    verrou.broadcast(cond_pending_data);
 	    verrou.broadcast(cond_full);
-	    verrou.unlock();
 	    throw;
 	}
 	verrou.unlock();

@@ -162,10 +162,9 @@ namespace libthreadar
 	}
 	catch(...)
 	{
-
+	    verrou.unlock();
 	    verrou.broadcast(cond_empty);
 	    verrou.broadcast(cond_full);
-	    verrou.unlock();
 	    throw;
 	}
 	verrou.unlock();
@@ -232,9 +231,9 @@ namespace libthreadar
 	}
 	catch(...)
 	{
+	    verrou.unlock();
 	    verrou.broadcast(cond_empty);
 	    verrou.broadcast(cond_full);
-	    verrou.unlock();
 	    throw;
 	}
 	verrou.unlock();
