@@ -87,17 +87,9 @@ namespace libthreadar
     {
 	if(instance < cond.size())
 	{
-	    try
-	    {
-		int ret = pthread_cond_signal(&(cond[instance]));
-		if(ret != 0)
-		    throw string("Error while unlocking and signaling");
-	    }
-	    catch(...)
-	    {
-		unlock();
-		throw;
-	    }
+	    int ret = pthread_cond_signal(&(cond[instance]));
+	    if(ret != 0)
+		throw string("Error while unlocking and signaling");
 	}
 	else
 	    throw exception_range("the instance number given to condition::signal() is out of range");
@@ -107,17 +99,9 @@ namespace libthreadar
     {
 	if(instance < cond.size())
 	{
-	    try
-	    {
-		int ret = pthread_cond_broadcast(&(cond[instance]));
-		if(ret != 0)
-		    throw string("Error while unlocking and broadcasting");
-	    }
-	    catch(...)
-	    {
-		unlock();
-		throw;
-	    }
+	    int ret = pthread_cond_broadcast(&(cond[instance]));
+	    if(ret != 0)
+		throw string("Error while unlocking and broadcasting");
 	}
 	else
 	    throw exception_range("the instance number given to condition::broadcast() is out of range");
