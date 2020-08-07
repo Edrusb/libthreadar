@@ -127,7 +127,8 @@ namespace libthreadar
 	try
 	{
 	    while(empty_slot.empty()  // no free slot available
-		  || (empty_slot.size() == 1 && slot != next_index)) // avoiding dead-lock
+		  || ((empty_slot.size() == 1 && slot != next_index) // one slot available and we do not provide the lowest expecting slot num
+		      && corres.begin() != corres.end() && (corres.begin())->first != next_index)) // and lowest slot is still not received
 		verrou.wait(cond_full);
 
 	    std::map<unsigned int, unsigned int>::iterator it = corres.find(slot);
