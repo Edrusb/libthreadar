@@ -1,10 +1,12 @@
 From release 1.2.x to 1.3.0
-- enhanced condition class with several instances to have a given
+- enhanced class condition with the addition of instances to have a given
   mutex supporting several conditions
-- enhanced condition class to provide a counter of thread suspended on a given
-  instance
-- added ratelier_scatter class to scatter ordered messages to different workers
-- added ratelier_gather class to gather ordered messages from different workers
+- enhanced class condition to provide a counter of thread suspended on
+  a given instance
+- added ratelier_scatter class to scatter ordered messages to
+  different workers
+- added ratelier_gather class to gather ordered messages from
+  different workers
 
 From release 1.2.3 to 1.2.2
 - nothing real, only copyright dates changed
@@ -13,7 +15,8 @@ From release 1.2.1 to 1.2.2
 - relying on condition object to simplify fast_tampon implementation
 
 From release 1.2.0 to 1.2.1
-- fixed compilation problem met with gcc-6.4.0 (destuctor throwing exceptions)
+- fixed compilation problem met with gcc-6.4.0 (destuctor throwing
+  exceptions)
 - simplified handling of package version information
 
 From release 1.1.x to 1.2.0
