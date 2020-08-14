@@ -88,9 +88,17 @@ namespace libthreadar
 	    /// return the barrier size
 	unsigned int get_count() const { return val; };
 
+	    /// return the number of thread waiting on the barrier or just released from it
+
+	    /// \note this is to be seen as an approximation as a thread can be about to
+	    /// be suspended but not yet counted, as well as a thread may be just released
+	    /// while not yet removed from the count
+	unsigned int get_waiting_count() const { return waiting_num; };
+
     private:
 	pthread_barrier_t bar;
 	const unsigned int val;
+	unsigned int waiting_num;
     };
 
 } // end of namespace

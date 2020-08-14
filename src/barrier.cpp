@@ -41,7 +41,7 @@ using namespace std;
 namespace libthreadar
 {
 
-    barrier::barrier(unsigned int num): val(num)
+    barrier::barrier(unsigned int num): val(num), waiting_num(0)
     {
         switch(pthread_barrier_init(&bar, NULL, num))
         {
@@ -77,17 +77,28 @@ namespace libthreadar
 
     void barrier::wait()
     {
-        switch(pthread_barrier_wait(&bar))
-        {
-        case PTHREAD_BARRIER_SERIAL_THREAD:
-            break;
-        case 0:
-            break;
-        case EINVAL:
-            throw THREADAR_BUG;
-        default:
-            throw THREADAR_BUG;
-        }
+	++waiting_num;
+
+	try
+	{
+	    switch(pthread_barrier_wait(&bar))
+	    {
+	    case PTHREAD_BARRIER_SERIAL_THREAD:
+		break;
+	    case 0:
+		break;
+	    case EINVAL:
+		throw THREADAR_BUG;
+	    default:
+		throw THREADAR_BUG;
+	    }
+	}
+	catch(...)
+	{
+	    --waiting_num;
+	    throw;
+	}
+	--waiting_num;
     }
 
 } // end of namespace
