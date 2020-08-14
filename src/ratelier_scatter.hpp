@@ -27,9 +27,9 @@
     /// \file ratelier_scatter.hpp
     /// \brief defines structure that is suitable to dispatch between many workers taking job order in consideration
     ///
-    /// many worker can get each one oject from the ratelier_scatter while a feeder thread add
-    /// new ones in sequence. The sequence index can be used on a ratelier_gather to gather job result in
-    /// in the same order, whatever is the worker execution order.
+    /// many worker can get each one oject from the ratelier_scatter while a feeder thread adds
+    /// new objects ones in sequence. The sequence index can be used on a ratelier_gather to gather job result in
+    /// in the same order, whatever is the worker execution order (more details given with ratelier_gather's doc)
 
 #include "config.h"
 
@@ -108,12 +108,12 @@ namespace libthreadar
 	    slot(const slot & ref) { obj.reset(); empty = ref.empty; index = ref.index; flag = ref.flag; };
 	};
 
-	unsigned int next_index; ///< index of the next slot to use (always increases but may overflood)
-	unsigned int lowest_index; ///< next index to provide to a worker
-	std::vector<slot> table; ///< table of slots to store data
+	unsigned int next_index;       ///< index of the next slot to use (always increases but may overflood)
+	unsigned int lowest_index;     ///< next index to provide to a worker
+	std::vector<slot> table;       ///< table of slots to store data
 	std::map<unsigned int, unsigned int> corres; ///< associate infinite range index to index in table
-	std::deque<unsigned int> empty_slot; ///< empty slot of table
-	libthreadar::condition verrou;  ///< lock to manipulate private data
+	std::deque<unsigned int> empty_slot;         ///< empty slot of table
+	libthreadar::condition verrou;               ///< lock to manipulate private data
     };
 
     template <class T> ratelier_scatter<T>::ratelier_scatter(unsigned int size, signed int flag):

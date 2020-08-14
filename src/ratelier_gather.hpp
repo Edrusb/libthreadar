@@ -29,6 +29,45 @@
     ///
     /// each worker can fill its job result to the ratelier_gather with an index number.
     /// This index is used for to provide the jobs in sequence to the gathering thread
+    /// and starts to zero. If a index is missing no data is delivered to the gathering
+    /// thread until a worker thread provide it. The gathering thread is thus garantied
+    /// that whatever the execution order of workers their resulting job is provided
+    /// in sequence to the gathering thread.
+    ///
+    /// the original design for this class is to work in conjunction
+    /// with a ratelier_scatter when a sequences data has to be processed
+    /// by many workers but the resulting of the process should also be
+    /// ordered following the original data the process worked in
+    ///
+    ///
+    ///       +--------------------+
+    ///       | scattering thread  |
+    ///       +--------------------+
+    ///                  |
+    ///                  |
+    ///                  V
+    ///         <ratelier_scatter>
+    ///         /        |       \
+    ///        /         |        \
+    ///   +-------+  +-------+  +-------+
+    ///   |worker1|  |worker2|  |worker3|
+    ///   +-------+  +-------+  +-------+
+    ///        \         |        /
+    ///         \        |       /
+    ///          V       V      V
+    ///         <ratelier_gather>
+    ///                  |
+    ///                  |
+    ///                  V
+    ///       +--------------------+
+    ///       | gathering  thread  |
+    ///       +--------------------+
+    ///
+    /// \note "ratelier" is a french word that translates here to "rack" in
+    /// the meaning of the structure where a soldier puts its weapon, or if
+    /// you prefer piece of metal that can hold and park a set of bicycles.
+
+
 
 #include "config.h"
 
