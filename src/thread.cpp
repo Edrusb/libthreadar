@@ -141,7 +141,7 @@ namespace libthreadar
 	pthread_t dyn_tid;
 	thread *me = const_cast<thread *>(this);
 
-	if(joignable || is_running())
+	if(joignable)
 	{
 	    void *returned_exception;
 	    int ret = pthread_join(tid, &returned_exception);
@@ -236,11 +236,6 @@ namespace libthreadar
 		throw;
 	    }
 	    tobj->running = false;
-
-		// no need to use mutex here neither as the thread is ending and
-		// whatever another thread reads (true or false) both will work
-		// as no exception has to be catched and delete.
-	    tobj->joignable = false;
 	}
 	catch(...)
 	{
