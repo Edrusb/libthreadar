@@ -1,5 +1,5 @@
 noinst_PROGRAMS = hello_world
-dist_noinst_DATA = fast_tampon_example.cpp thread_example.cpp
+dist_noinst_DATA = fast_tampon_example.cpp thread_example.cpp barrier_example.cpp condition_example.cpp
 
 LDADD = -L../../src -lthreadar
 
