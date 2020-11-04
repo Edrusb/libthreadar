@@ -36,6 +36,8 @@
     /// - class thread
     /// - class freezer
     /// - class condition
+    /// - class ratelier_gather
+    /// - class ratelier_scatter
     /// .
     /// These classes are to be used independently from each others and are defined within the libthreadar namespace.
     /// An example of use "hello word" is available in the example subdirectory of source package.

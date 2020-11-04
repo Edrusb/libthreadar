@@ -101,6 +101,8 @@ namespace libthreadar
 	unsigned int waiting_num;
     };
 
+        /// \example ../doc/examples/barrier_example.cpp
+
 } // end of namespace
 
 #endif

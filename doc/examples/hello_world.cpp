@@ -92,7 +92,7 @@ int main()
     while(! t1.is_running())
 	sleep(1);
 
-    cout << "type the word \"stop\" to end the process" << endl;
+    cout << "type any string then return, the word \"stop\" ends the process" << endl;
 
     do
     {

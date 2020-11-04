@@ -46,7 +46,7 @@
     ///                  |
     ///                  |
     ///                  V
-    ///         <ratelier_scatter>
+    ///         (ratelier_scatter)
     ///         /        |       \
     ///        /         |        \
     ///   +-------+  +-------+  +-------+
@@ -55,7 +55,7 @@
     ///        \         |        /
     ///         \        |       /
     ///          V       V      V
-    ///         <ratelier_gather>
+    ///         (ratelier_gather)
     ///                  |
     ///                  |
     ///                  V
