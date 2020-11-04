@@ -27,8 +27,6 @@
     /// \file barrier.hpp
     /// \brief defines the barrier C++ class, to synchronize several threads
 
-    /// \example ../doc/examples/barrier_example.cpp
-
 #include "config.h"
 
     // C system headers
@@ -94,6 +92,8 @@ namespace libthreadar
 	pthread_barrier_t bar;
 	const unsigned int val;
     };
+
+        /// \example ../doc/examples/barrier_example.cpp
 
 } // end of namespace
 

@@ -41,7 +41,6 @@ namespace libthreadar
 	/// as defined at constructor time. wait() takes as argument the condition number
 	/// and will be awaken by a signal() or broadcast() having this same number as
 	/// argument
-	/// \example ../doc/examples/condition_example.cpp
 
     class condition : public mutex
     {
@@ -103,6 +102,8 @@ namespace libthreadar
 	std::deque<unsigned int> counter;
 
     };
+
+    	/// \example ../doc/examples/condition_example.cpp
 
 } // end of namespace
 
