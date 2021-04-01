@@ -48,7 +48,7 @@ namespace libthreadar
 
 	    /// constructor
 
-	    /// \param[in] number of instance to create, each instance is a separated condition
+	    /// \param[in] num number of instance to create, each instance is a separated condition
 	    /// relying on the same mutex. First instance starts with index 0
 	condition(unsigned int num = 1);
 
