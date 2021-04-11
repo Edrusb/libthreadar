@@ -99,7 +99,7 @@ namespace libthreadar
     public:
 	ratelier_gather(unsigned int size, signed int flag = 0);
 	ratelier_gather(const ratelier_gather & ref) = delete;
-	ratelier_gather(ratelier_gather && ref) noexcept = default;
+	ratelier_gather(ratelier_gather && ref) = default;
 	ratelier_gather & operator = (const ratelier_gather & ref) = delete;
 	ratelier_gather & operator = (ratelier_gather && ref) noexcept = default;
 	virtual ~ratelier_gather() = default;
