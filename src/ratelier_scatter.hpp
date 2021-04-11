@@ -65,7 +65,7 @@ namespace libthreadar
     public:
 	ratelier_scatter(unsigned int size, signed int flag = 0);
 	ratelier_scatter(const ratelier_scatter & ref) = delete;
-	ratelier_scatter(ratelier_scatter && ref) noexcept = default;
+	ratelier_scatter(ratelier_scatter && ref) = default;
 	ratelier_scatter & operator = (const ratelier_scatter & ref) = delete;
 	ratelier_scatter & operator = (ratelier_scatter && ref) noexcept = default;
 	virtual ~ratelier_scatter() = default;
