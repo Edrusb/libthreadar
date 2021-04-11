@@ -61,7 +61,7 @@ namespace libthreadar
 	freezer(const freezer & ref) = delete;
 
 	    /// no move constructor
-	freezer(freezer && ref) noexcept = default;
+	freezer(freezer && ref) = default;
 
 	    /// no assignment operator (made private)
 	freezer & operator = (const freezer & ref) = delete;

@@ -56,7 +56,7 @@ namespace libthreadar
 	condition(const condition & ref) = delete;
 
 	    /// no move constructor
-	condition(condition && ref) noexcept = default;
+	condition(condition && ref) = default;
 
 	    /// no assignment operator
 	condition & operator = (const condition & ref) = delete;

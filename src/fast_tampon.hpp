@@ -98,7 +98,7 @@ namespace libthreadar
 	fast_tampon(const fast_tampon & ref) = delete;
 
 	    /// no move constructor
-	fast_tampon(fast_tampon && ref) noexcept = default;
+	fast_tampon(fast_tampon && ref) = default;
 
 	    /// no assignment operator
 	fast_tampon & operator = (const fast_tampon & ref) = delete;
