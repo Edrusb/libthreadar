@@ -28,7 +28,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_LANG([C++])
 AC_CONFIG_SRCDIR([src/tampon.hpp])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 # AM_GNU_GETTEXT([external])
 # AM_GNU_GETTEXT_VERSION
 # AM_ICONV
@@ -107,6 +107,26 @@ AC_C_INLINE
 AC_PROG_GCC_TRADITIONAL
 AC_HEADER_MAJOR
 AC_TYPE_SIGNAL
+AC_CHECK_FUNCS([strerror_r])
+
+AC_MSG_CHECKING([for strerror_r flavor])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[extern "C"
+                                     {
+                                     #if HAVE_STRING_H
+                                     #include <string.h>
+                                     #endif
+                                     } // externe "C"
+                                   ]],
+                                   [[
+                                        char *ptr = strerror_r(0, 0, 0);
+                                   ]])
+                  ],
+                  [ AC_DEFINE(HAVE_STRERROR_R_CHAR_PTR, 1, [strerror_r() returns a char *])
+                    AC_MSG_RESULT([GNU specific])
+                  ],
+                  [
+                    AC_MSG_RESULT([XSI compliant])
+                  ])
 
 AC_MSG_CHECKING([for sed -r/-E option])
 if sed -r -e 's/(c|o)+/\1/g' > /dev/null < /dev/null ; then
