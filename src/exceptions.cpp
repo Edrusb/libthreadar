@@ -29,6 +29,7 @@ extern "C"
 
 }
     // C++ standard headers
+#include <sstream>
 
     // libthreadar headers
 
@@ -39,7 +40,7 @@ using namespace std;
 
 namespace libthreadar
 {
-
+    static string tools_strerror_r(int errnum);
 
     string exception_base::get_message(const string & sep) const
     {
@@ -56,25 +57,55 @@ namespace libthreadar
 
     exception_system::exception_system(const std::string & context, int error_code) : exception_base("")
     {
-	const unsigned int MSGSIZE = 300;
-	char buffer[MSGSIZE];
-
-#if (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && ! _GNU_SOURCE
-	    // we expect the XSI-compliant strerror_r
-	int val = strerror_r(error_code, buffer, MSGSIZE);
-	if(val != 0)
-	    strncpy(buffer, "Error code to message conversion, failed", MSGSIZE);
-#else
-	char *val = strerror_r(error_code, buffer, MSGSIZE);
-	if(val != buffer)
-	    strncpy(buffer, val, MSGSIZE);
-#endif
-	buffer[MSGSIZE-1] = '\0';
-
-	reset_first_message(buffer);
+	reset_first_message(tools_strerror_r(error_code));
 	push_message(context);
     }
 
+	// borrowing from libdar tools.cpp
+	//
+
+    string tools_int2str(signed int x)
+    {
+        ostringstream tmp;
+
+        tmp << x;
+
+        return tmp.str();
+    }
+
+#define MSGSIZE 200
+
+    static string tools_strerror_r(int errnum)
+    {
+        char buffer[MSGSIZE];
+        string ret;
+
+#ifdef HAVE_STRERROR_R
+#ifdef HAVE_STRERROR_R_CHAR_PTR
+        char *val = strerror_r(errnum, buffer, MSGSIZE);
+        if(val != buffer)
+            strncpy(buffer, val, MSGSIZE);
+#else
+            // we expect the XSI-compliant strerror_r
+        int val = strerror_r(errnum, buffer, MSGSIZE);
+        if(val != 0)
+	{
+	    string tmp = "failed converting to message the error code " + tools_int2str(errnum);
+            strncpy(buffer, tmp.c_str(), tmp.size()+1 < MSGSIZE ? tmp.size()+1 : MSGSIZE);
+	}
+#endif
+#else
+	char *tmp = strerror(errnum);
+	(void)strncpy(buffer, tmp, MSGSIZE);
+#endif
+        buffer[MSGSIZE-1] = '\0';
+        ret = buffer;
+
+        return ret;
+    }
+
+	//
+	// borrowing end
 
 } // end of namespace
 
