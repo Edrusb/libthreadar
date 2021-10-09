@@ -1,6 +1,11 @@
 From release 1.3.0 to 1.4.0
 - added method get_waiting_count() to barrier class
 
+From 1.3.3 to 1.3.4
+- removes const qualifier of field val in class barrier to
+  keep the possibility of having a move assignment operator
+  for that class (restriction seen under FreeBSD)
+
 From 1.3.2 to 1.3.3
 - fixing compilation issue under FreeBSD
 

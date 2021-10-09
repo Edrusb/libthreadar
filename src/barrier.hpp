@@ -97,7 +97,7 @@ namespace libthreadar
 
     private:
 	pthread_barrier_t bar;
-	const unsigned int val;
+	unsigned int val;
 	unsigned int waiting_num;
     };
 
