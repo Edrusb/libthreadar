@@ -90,7 +90,7 @@ namespace libthreadar
 
     private:
 	pthread_barrier_t bar;
-	const unsigned int val;
+	unsigned int val;
     };
 
         /// \example ../doc/examples/barrier_example.cpp
