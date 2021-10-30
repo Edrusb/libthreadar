@@ -1,6 +1,11 @@
 From release 1.3.0 to 1.4.0
 - added method get_waiting_count() to barrier class
 
+From 1.3.4 to 1.3.5
+- removing const qualifier for private field in class semaphore
+  which conflicted with assignment operator as reported by clang
+  compiler
+
 From 1.3.3 to 1.3.4
 - removes const qualifier of field val in class barrier to
   keep the possibility of having a move assignment operator
