@@ -112,7 +112,7 @@ namespace libthreadar
 	int value;            //< this is the semaphore value
 	mutex val_mutex;      //< this controls modification to value
 	mutex semaph;         //< this mutex is used to suspend thread semaphore value get negative
-	const int max_value;  //< maximum value the semaphore cannot exceed
+	int max_value;        //< maximum value the semaphore cannot exceed
     };
 
 } // end of namespace
