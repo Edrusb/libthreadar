@@ -77,10 +77,17 @@ namespace libthreadar
 	/// started or which has ended and for which join() has already been run, does nothing:
 	/// the join() method returns immediately.
 	///
-	/// \note Class thread object destruction kills the thread and may also generate an exception
-	/// if one has been thrown from inherited_run(). For that reason it is advised to always
-	/// call join() before destructor get called to avoid having to manage exception at
-	/// destuction time.
+	/// \note Class thread object destruction kills the thread and could have generated an exception
+	/// from inherited_run(), but this one will be caught and ignored by the thread::thread parent
+	/// destructor. Under some context implementation (Cygwin) if a pthread has already started but
+	/// has not yet reached the time it calls inherited_run() method, when object destructor is
+	/// called, when the subthread calls the inherited_run() method, the system may report a SEGFAULT
+	/// in particular when the fields of the object that are from the inherited class do
+	/// not exist anymore. The kill() and join() present in the thread::~thread destructor, cannot
+	/// prevent this as when the execution pointer reach them, all inherited class fields do no more
+	/// exist.
+	///
+	/// IT IS THUS IMPORTANT FOR ANY INHERITED CLASS TO INVOKE kill() THEN join() IN THEIR DESTRUCTOR
 	///
 	/// Once the thread is no more running a new call to run() is allowed if a join() call has been issued
 	/// since the thread was last run. This allows to run again a thread without having
