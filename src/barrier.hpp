@@ -40,8 +40,9 @@ extern "C"
 
 
     // libthreadar headers
+#include "condition.hpp"
 
-
+#define HAVE_PTHREAD_BARRIER_T 0
 
 namespace libthreadar
 {
@@ -89,8 +90,13 @@ namespace libthreadar
 	unsigned int get_count() const { return val; };
 
     private:
-	pthread_barrier_t bar;
 	unsigned int val;
+
+#if HAVE_PTHREAD_BARRIER_T
+	pthread_barrier_t bar;
+#else
+	condition cond;
+#endif
     };
 
         /// \example ../doc/examples/barrier_example.cpp
