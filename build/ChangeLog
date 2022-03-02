@@ -1,5 +1,8 @@
 From release 1.3.0 to 1.4.0
 - added method get_waiting_count() to barrier class
+- added alternative implementation for class barrier relying on
+  pthread_cond_t when pthread_barrier_t is not available (Mac OS)
+- added static method to class barrier to return the implementation used
 
 From 1.3.4 to 1.3.5
 - removing const qualifier for private field in class semaphore
