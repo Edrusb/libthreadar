@@ -40,8 +40,7 @@ extern "C"
 
 
     // libthreadar headers
-
-
+#include "condition.hpp"
 
 namespace libthreadar
 {
@@ -95,10 +94,24 @@ namespace libthreadar
 	    /// while not yet removed from the count
 	unsigned int get_waiting_count() const { return waiting_num; };
 
+	static std::string used_implementation()
+	{
+#if HAVE_PTHREAD_BARRIER_T
+	    return "pthread_barrier_t";
+#else
+	    return "pthread_cond_t";
+#endif
+	}
+
     private:
-	pthread_barrier_t bar;
 	unsigned int val;
 	unsigned int waiting_num;
+
+#if HAVE_PTHREAD_BARRIER_T
+	pthread_barrier_t bar;
+#else
+	condition cond;
+#endif
     };
 
         /// \example ../doc/examples/barrier_example.cpp

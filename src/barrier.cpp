@@ -41,7 +41,8 @@ using namespace std;
 namespace libthreadar
 {
 
-    barrier::barrier(unsigned int num): val(num), waiting_num(0)
+#if HAVE_PTHREAD_BARRIER_T
+	barrier::barrier(unsigned int num): val(num), waiting_num(0)
     {
         switch(pthread_barrier_init(&bar, NULL, num))
         {
@@ -59,9 +60,16 @@ namespace libthreadar
             throw THREADAR_BUG;
         }
     }
+#else
+    barrier::barrier(unsigned int num): val(num), cond(1)
+    {
+	    //nothing to do here
+    }
+#endif
 
     barrier::~barrier() noexcept(false)
     {
+#if HAVE_PTHREAD_BARRIER_T
         switch(pthread_barrier_destroy(&bar))
         {
         case 0:
@@ -73,6 +81,24 @@ namespace libthreadar
         default:
             throw THREADAR_BUG;
         }
+#else
+	if(cond.try_lock())
+	{
+	    try
+	    {
+		cond.broadcast();
+	    }
+	    catch(...)
+	    {
+		cond.unlock();
+		throw;
+	    }
+	    cond.unlock();
+	}
+	    // else
+	    // nothing done to reduce the risk of dead lock
+	    // in case of unexpected circumpstance
+#endif
     }
 
     void barrier::wait()
@@ -81,6 +107,7 @@ namespace libthreadar
 
 	try
 	{
+#if HAVE_PTHREAD_BARRIER_T
 	    switch(pthread_barrier_wait(&bar))
 	    {
 	    case PTHREAD_BARRIER_SERIAL_THREAD:
@@ -92,6 +119,22 @@ namespace libthreadar
 	    default:
 		throw THREADAR_BUG;
 	    }
+#else
+	    cond.lock();
+	    try
+	    {
+		if(cond.get_waiting_thread_count() + 1 < val)
+		    cond.wait();
+		else
+		    cond.broadcast();
+	    }
+	    catch(...)
+	    {
+		cond.unlock();
+		throw;
+	    }
+	    cond.unlock();
+#endif
 	}
 	catch(...)
 	{
