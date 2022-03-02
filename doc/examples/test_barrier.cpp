@@ -17,6 +17,12 @@ public:
 	    throw THREADAR_BUG;
     };
 
+    ~myfile()
+    {
+	kill();
+	join();
+    }
+
 protected:
     virtual void inherited_run() override
     {
