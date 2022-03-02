@@ -42,8 +42,6 @@ extern "C"
     // libthreadar headers
 #include "condition.hpp"
 
-#define HAVE_PTHREAD_BARRIER_T 0
-
 namespace libthreadar
 {
         /// the class barrier allows several threads to synchronize between them

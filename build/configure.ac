@@ -115,7 +115,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[extern "C"
                                      #if HAVE_STRING_H
                                      #include <string.h>
                                      #endif
-                                     } // externe "C"
+                                     } // extern "C"
                                    ]],
                                    [[
                                         char *ptr = strerror_r(0, 0, 0);
@@ -127,6 +127,31 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[extern "C"
                   [
                     AC_MSG_RESULT([XSI compliant])
                   ])
+
+AC_MSG_CHECKING([for pthread_barrier_t availability])
+
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[extern "C"
+				   {
+				   #if HAVE_PTHREAD_H
+				   #include <pthread.h>
+				   #endif
+				   } // extern "C"
+				   ]],
+				   [[
+					pthread_barrier_t demo;
+
+					(void)pthread_barrier_init(&demo, NULL, 1);
+					(void)pthread_barrier_destroy(&demo);
+				   ]])
+		 ],
+		 [
+		   AC_DEFINE(HAVE_PTHREAD_BARRIER_T, 1, [pthread_barrier_t availability])
+		   AC_MSG_RESULT([yes])
+		 ],
+		 [
+		   AC_DEFINE(HAVE_PTHREAD_BARRIER_T, 0, [pthread_barrier_t availability])
+		   AC_MSG_RESULT([absent! will emulate barrier using pthead_cond_t])
+		 ])
 
 AC_MSG_CHECKING([for sed -r/-E option])
 if sed -r -e 's/(c|o)+/\1/g' > /dev/null < /dev/null ; then
