@@ -42,6 +42,8 @@ int main()
     barrier bar(num);
     deque<unique_ptr<myfile> > file;
 
+    cout << "barrier implementation: " << barrier::used_implementation() << endl;
+
     for(unsigned int i = 0 ; i < num ; ++i)
 	file.push_back(make_unique<myfile>(&bar, i));
 

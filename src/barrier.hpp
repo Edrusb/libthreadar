@@ -87,6 +87,15 @@ namespace libthreadar
 	    /// return the barrier size
 	unsigned int get_count() const { return val; };
 
+	static std::string used_implementation()
+	{
+#if HAVE_PTHREAD_BARRIER_T
+	    return "pthread_barrier_t";
+#else
+	    return "pthread_cond_t";
+#endif
+	}
+
     private:
 	unsigned int val;
 
