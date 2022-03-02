@@ -63,6 +63,7 @@ namespace libthreadar
 #else
     barrier::barrier(unsigned int num): val(num), cond(1)
     {
+	    //nothing to do here
     }
 #endif
 
