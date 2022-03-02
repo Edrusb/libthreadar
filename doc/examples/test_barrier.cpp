@@ -3,7 +3,7 @@ extern "C"
     #include <unistd.h>
 }
 
-#include <libthreadar/libthreadar.hpp>
+#include "../../src/libthreadar.hpp"
 
 using namespace libthreadar;
 using namespace std;
@@ -33,7 +33,7 @@ private:
 int main()
 {
     unsigned int num = 10;
-    barrier bar(num-1);
+    barrier bar(num);
     deque<unique_ptr<myfile> > file;
 
     for(unsigned int i = 0 ; i < num ; ++i)
