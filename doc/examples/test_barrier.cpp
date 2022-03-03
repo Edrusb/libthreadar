@@ -5,16 +5,15 @@ extern "C"
 
 #include "../../src/libthreadar.hpp"
 
-using namespace libthreadar;
 using namespace std;
 
-class myfile: public thread
+class myfile: public libthreadar::thread
 {
 public:
-    myfile(barrier* ptr, unsigned int index): syncr(ptr), ind(index)
+    myfile(libthreadar::barrier* ptr, unsigned int index): syncr(ptr), ind(index)
     {
 	if(ptr == nullptr)
-	    throw THREADAR_BUG;
+	    throw libthreadar::THREADAR_BUG;
     };
 
     ~myfile()
@@ -32,17 +31,17 @@ protected:
     }
 
 private:
-    barrier* syncr;
+    libthreadar::barrier* syncr;
     unsigned int ind;
 };
 
 int main()
 {
     unsigned int num = 10;
-    barrier bar(num);
+    libthreadar::barrier bar(num);
     deque<unique_ptr<myfile> > file;
 
-    cout << "barrier implementation: " << barrier::used_implementation() << endl;
+    cout << "barrier implementation: " << libthreadar::barrier::used_implementation() << endl;
 
     for(unsigned int i = 0 ; i < num ; ++i)
 	file.push_back(make_unique<myfile>(&bar, i));
