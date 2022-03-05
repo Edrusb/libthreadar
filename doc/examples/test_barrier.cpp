@@ -3,6 +3,8 @@ extern "C"
     #include <unistd.h>
 }
 
+#include <memory>
+
 #include "../../src/libthreadar.hpp"
 
 using namespace std;
