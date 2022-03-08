@@ -26,8 +26,6 @@ extern "C"
     #include <unistd.h>
 }
 
-#include <memory>
-
 #include "../../src/libthreadar.hpp"
 
 using namespace std;
@@ -60,20 +58,52 @@ private:
     unsigned int ind;
 };
 
+void release_deque(deque<myfile*> & dek)
+{
+    deque<myfile*>::iterator it = dek.begin();
+
+    while(it != dek.end())
+    {
+	if(*it != nullptr)
+	    delete *it;
+	++it;
+    }
+    dek.clear();
+}
+
 int main()
 {
     unsigned int num = 10;
     libthreadar::barrier bar(num);
-    deque<unique_ptr<myfile> > file;
+    deque<myfile*> file;
+    myfile* ptr = nullptr;
 
     cout << "barrier implementation: " << libthreadar::barrier::used_implementation() << endl;
 
-    for(unsigned int i = 0 ; i < num ; ++i)
-	file.push_back(make_unique<myfile>(&bar, i));
+    try
+    {
 
-    for(deque<unique_ptr<myfile> >::iterator it = file.begin(); it != file.end(); ++it)
-	(*it)->run();
+	for(unsigned int i = 0 ; i < num ; ++i)
+	{
+	    ptr = new myfile(&bar, i);
+	    if(ptr == nullptr)
+		release_deque(file);
+	    else
+		file.push_back(ptr);
+	}
 
-    for(deque<unique_ptr<myfile> >::iterator it = file.begin(); it != file.end(); ++it)
-	(*it)->join();
+	for(deque<myfile*>::iterator it = file.begin(); it != file.end(); ++it)
+	    (*it)->run();
+
+	for(deque<myfile*>::iterator it = file.begin(); it != file.end(); ++it)
+	    (*it)->join();
+    }
+    catch(...)
+    {
+	release_deque(file);
+	throw;
+    }
+    release_deque(file);
+
+    return 0;
 }
