@@ -52,9 +52,9 @@ namespace libthreadar
         /// the class ratelier_scatter has a fixed length range of slots of arbitrary defined object type
 
 	/// the number of slot should be greater than the expected number of worker that
-	/// will fetch data from. This not mandatory though.
-	/// worker fetch an object, use it and release it which once the job is completed.
-	/// While a non-worker thread feeds
+	/// will fetch data from. This is not mandatory though.
+	/// Workers fetch an object, use it and "release" it once the job is completed with it.
+	/// While a single non-worker thread feeds
 	/// the ratelier_scatter with new objects. Each object taken from the ratelier by a worker is given an index
 	/// number for the worker can put this object in a given slot of a ratelier_gather object which
 	/// will be in charge to deliver the in-sequence result of the different jobs to a gathering thread
@@ -84,7 +84,8 @@ namespace libthreadar
 	    ///
 	    /// \param[out] slot the slot associated to the object obtained in return of this call
 	    /// \param[out] flag a signal associated to this object by from the scattering thread
-	    /// \return the slot number that will be needed to release the slot once work is completed
+	    /// \return the next object available from the ratelier_scaller that has been give by
+	    /// the non-worker thread calling the scatter() method
 	    /// \note this call may suspended the caller until the non-worker thread feeds
 	    /// the ratelier_scatter with new data
 	std::unique_ptr<T> worker_get_one(unsigned int & slot, signed int & flag);
