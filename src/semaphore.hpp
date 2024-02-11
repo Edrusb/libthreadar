@@ -55,11 +55,13 @@ namespace libthreadar
 	    /// semaphore constuctor
 
 	    /// \param[in] max_value is the maximum number of thread that can concurrently request wait() without being suspended
-	    /// \note the initial value is set to the max value, calling lock() can decrease this initial value at will, but
-	    /// calling unlock() which increases the semaphore value that must not lead it to exceed maximum value. In other
+	    /// \note the initial value is set to the max value, calling lock() decrease the semaphore value by one, this can be done at will, but
+	    /// calling unlock() which increases the semaphore value, must not lead it to exceed maximum value. In other
 	    /// words there must not be more unlock() calls than lock() calls invoked so far.
-	    /// \note A thread calling lock() when the value is less than or equal to zero is suspended
-	    /// up to the time another thread calls unlock(). If more than one was pending on that semaphore, unlock() awakes a single thread.
+	    /// \note A thread calling lock() when the value is less than or equal to zero is suspended. For example, if the value is one before
+	    /// calling lock() the thread will not be suspended, but the next thread calling lock() now that the value is zero, will be suspended.
+	    /// If more than one thread was pending on a semaphore, unlock() awakes a single thread (I must *not* be assumed this will be the oldest
+	    /// waiting on this semaphore.
 	semaphore(unsigned int max_value);
 
 	    /// no copy constructor
@@ -104,7 +106,7 @@ namespace libthreadar
 
 	    /// Return the value of the semaphore, that's to say the number of available "resources".
 
-	    /// \note a negative value gives the total number of threads that are suspended by calling lock() (well the opposit value of
+	    /// \note a negative value gives the total number of threads that are suspended by calling lock() (well, the opposit value of
 	    /// the number of threads more precisely).
 	int get_value() const { return value; };
 

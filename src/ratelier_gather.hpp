@@ -90,9 +90,9 @@ namespace libthreadar
         /// the class ratelier_gather has a fixed length range of slots of arbitrary defined object type
 
 	/// the number of slot should be greater than the number of workers that
-	/// fill the ratelier with data
-	/// workers put objects at a given slot and a non-worker thread (or gathering thread)
-	/// get those objects in order, this releases the corresponding slots of the ratelier_gather
+	/// fill the ratelier with data.
+	/// Workers put objects each at a given slot and a non-worker thread (or gathering thread)
+	/// get those objects in order, which releases the corresponding slots of the ratelier_gather object
 
     template <class T> class ratelier_gather
     {
@@ -108,18 +108,16 @@ namespace libthreadar
 
 	    /// \param[in] slot is the slot number associated to the provided object "one"
 	    /// \param[in] one is the object to push to the gathering thread
-	    /// \param[in] flag is a purpose free signal to send to the gathering thread and associated to this object.
-	    /// the value it had before this call with the value given in argument to the call
+	    /// \param[in] flag is a purpose free signal to send to the gathering thread as associated to this object.
 	    /// \note if the slot is already full an exception is thrown
 	    /// \note if the ratelier_gather is full the caller will be suspended until the
-	    /// non-worker thread calls get() to make some room
+	    /// non-worker thread calls gather() to make some room
 	void worker_push_one(unsigned int slot, std::unique_ptr<T> & one, signed int flag = 0);
 
 	    /// obtain the lowest continuous filled slots of the ratelier_gather and free them
 
 	    /// \param[out] ones is a list of continuously indexed objects which immediately follows the list
-	    /// provided by a previous call to gather() and will be immediately followed by the list returned
-	    /// by a next call to gather().
+	    /// provided by a previous call to gather().
 	    /// \param[out] flag is the purpose free signal give by the worker and associated to each data
 	void gather(std::deque<std::unique_ptr<T> > & ones, std::deque<signed int> & flag);
 
