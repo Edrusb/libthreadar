@@ -66,3 +66,9 @@ libthreadar Licensing:
 
 	For details about this library license see the
 	COPYING and COPYING.LESSER files.
+
+Detailed documentation documentation is available online here
+
+   https://libthreadar.sourceforge.net/
+
+it is built from Doxygen comments found in source code.
