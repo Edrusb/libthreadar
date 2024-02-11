@@ -50,7 +50,7 @@ public:
     }
 
 protected:
-    void inherited_run()
+    virtual void inherited_run() override
     {
 	char *ptr;
 	unsigned int size;

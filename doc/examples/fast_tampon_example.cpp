@@ -75,7 +75,7 @@ public:
 
 protected:
 	// the subthread will be the feeder of object inter
-    void inherited_run()
+    virtual void inherited_run() override
     {
 	char *ptr;
 	unsigned int size, read;
