@@ -41,7 +41,7 @@ protected:
 	// the way the inherited_run() thread access these
 	// in concurrence with the thread caller by mean
 	// of provided method like unlock_thread() above
-    void inherited_run()
+    virtual void inherited_run() override
     {
 	while(1)
 	{
