@@ -134,6 +134,11 @@ namespace libthreadar
 
 	    /// \note if the thread is suspended by the system reading or writing to a filedescriptor for
 	    /// example, the thread survives up to the time it exits from that suspended state
+	    /// \note libthreadar::thread::kill() is implemented over pthread_cancel which
+	    /// under Linux does not work well inside C++ code when exception are caught. Starting
+	    /// libthreadar 1.5.x and above the class will provide a routine implementing a cancellation
+	    /// checkpoint that the subthread will have the ability to run to eventually trigger its
+	    /// cancellation.
 	void kill() const;
 
     protected:
