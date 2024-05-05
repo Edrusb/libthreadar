@@ -132,11 +132,26 @@ namespace libthreadar
 
 	    /// the caller send a cancellation request to this object's running thread if any
 
-	    /// \note if the thread is suspended by the system reading or writing to a filedescriptor for
-	    /// example, the thread survives up to the time it exits from that suspended state
+	    /// \note the thread will effectively end if it runs its cancellation_checkpoint()
+	    /// protected method, see below.
+
 	void kill() const;
 
     protected:
+
+	    /// exception used to trigger thread cancellation
+
+	    /// \note IMPORTANT: this exception should not be caught within inherited_run()
+	class cancel_except
+	{
+	public:
+	    cancel_except() {};
+	    cancel_except(cancel_except &) = default;
+	    cancel_except(cancel_except &&) noexcept = default;
+	    cancel_except & operator = (cancel_except &) = default;
+	    cancel_except & operator = (cancel_except &&) noexcept = default;
+	    ~cancel_except() = default;
+	};
 
 	    /// action to be performed in the separated thread
 
@@ -146,28 +161,23 @@ namespace libthreadar
 	    /// or both and in that case which way to avoid concurrent access to such fields.
 	virtual void inherited_run() = 0;
 
-	    /// available for inherited class to avoid thread cancellation to occur in a critical section
+	    /// available withing the inherited_run() method to trigger thread cancellation,
 
-	    /// any cancellation request received after a call to suspend_cancellation_requests() is delayed
-	    /// until a call to resume_cancellation_requests() is issued
-	void suspend_cancellation_requests() const;
-
-	    /// available for inherited class to avoid thread cancellation to occur in a critical section
-	void resume_cancellation_requests() const;
+	    /// \note since release 1.5.0 the kill() method does no more rely on pthread_cancel which
+	    /// is does not work well under C++ context. The cancellation point are this defined manually
+	void cancellation_checkpoint() const;
 
     private:
-	mutex field_control;           //< mutex protecting access to object's data
-	bool running;                  //< whether a thread is running
-	pthread_t tid;                 //< the thread ID of the running thread if any
-	bool joignable;                //< whether exist status of thread has to be retrieved
-	unsigned int cancellable;      //< this field is not protected by mutex as it ougth to be modified only by the spawn thread. It allows suspend/resume cancellation requests to be re-entrant (0 = cancellation accepted)
-	sigset_t sigmask;              //< signal mask to use for the thread
+	mutable mutex field_control;   ///< mutex protecting access to object's data
+	bool running;                  ///< whether a thread is running
+	pthread_t tid;                 ///< the thread ID of the running thread if any
+	bool joignable;                ///< whether exist status of thread has to be retrieved
+	mutable bool do_cancel;        ///< whether thread should cancel/stop
+	sigset_t sigmask;              ///< signal mask to use for the thread
 
 	    // static members
 
 	static void *run_obj(void *obj);  //< called by pthread_create to spawn a new thread
-	static void primitive_suspend_cancellation_requests();
-	static void primitive_resume_cancellation_requests();
     };
 
     	/// \example ../doc/examples/thread_example.cpp

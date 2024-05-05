@@ -52,7 +52,7 @@ namespace libthreadar
     {
 	running = false;
 	joignable = false;
-	cancellable = 0; // is cancellable at startup
+	do_cancel = false;
 	sigemptyset(&sigmask);
     }
 
@@ -73,36 +73,26 @@ namespace libthreadar
 
     void thread::run()
     {
-	thread::primitive_suspend_cancellation_requests();
+	field_control.lock();
+
 	try
 	{
-	    field_control.lock();
-
-	    try
-	    {
-		if(running)
-		    throw exception_thread("Cannot run thread, object already running in a sperated thread");
-		if(joignable)
-		    throw exception_thread("Previous thread has not been joined and possibly returned exception is deleted");
-		cancellable = 0; // should not be needed, but does not hurt
-		if(pthread_create(&tid, NULL, run_obj, this) != 0)
-		    throw exception_system("Failed creating a new thread: ", errno);
-		running = true;
-		joignable = true;
-	    }
-	    catch(...)
-	    {
-		field_control.unlock();
-		throw;
-	    }
-	    field_control.unlock();
+	    if(running)
+		throw exception_thread("Cannot run thread, object already running in a sperated thread");
+	    if(joignable)
+		throw exception_thread("Previous thread has not been joined and possibly returned exception is deleted");
+	    do_cancel = false;
+	    if(pthread_create(&tid, NULL, run_obj, this) != 0)
+		throw exception_system("Failed creating a new thread: ", errno);
+	    running = true;
+	    joignable = true;
 	}
 	catch(...)
 	{
-	    thread::primitive_resume_cancellation_requests();
+	    field_control.unlock();
 	    throw;
 	}
-	thread::primitive_resume_cancellation_requests();
+	field_control.unlock();
     }
 
     bool thread::is_running(pthread_t & id) const
@@ -112,23 +102,13 @@ namespace libthreadar
 
 	if(is_running())
 	{
-	    thread::primitive_suspend_cancellation_requests();
-	    try
-	    {
-		mut->lock();
+	    mut->lock();
 
-		ret = running;
-		if(running)
-		    id = tid;
+	    ret = running;
+	    if(running)
+		id = tid;
 
-		mut->unlock();
-	    }
-	    catch(...)
-	    {
-		thread::primitive_resume_cancellation_requests();
-		throw;
-	    }
-	    thread::primitive_resume_cancellation_requests();
+	    mut->unlock();
 
 	    return ret;
 	}
@@ -170,39 +150,30 @@ namespace libthreadar
 
     void thread::kill() const
     {
-	pthread_t dyn_tid;
-
-	if(is_running(dyn_tid))
+	field_control.lock();
+	try
 	{
-	    thread *me = const_cast<thread *>(this);
-	    int ret;
-
-	    ret = pthread_cancel(dyn_tid);
-	    if(ret != ESRCH && ret != 0)
-		throw exception_system("Failed killing thread: ", errno);
-
-	    if(me == nullptr)
-		throw THREADAR_BUG;
-	    me->running = false;
+	    do_cancel = true;
 	}
+	catch(...)
+	{
+	    field_control.unlock();
+	    throw;
+	}
+	field_control.unlock();
     }
 
-    void thread::suspend_cancellation_requests() const
+    void thread::cancellation_checkpoint() const
     {
-	if(cancellable == 0)
-	    thread::primitive_suspend_cancellation_requests();
-	++(*(const_cast<unsigned int *>(&cancellable)));
+	    // we run without lock the field_control mutex
+	    // for efficiency
+	    // either do_cancel value is still true
+	    // either is not but it cannot have other
+	    // values so locking is not necessary to read
+	    // this value
+	if(do_cancel)
+	    throw cancel_except();
     }
-
-    void thread::resume_cancellation_requests() const
-    {
-	if(cancellable == 0)
-	    throw THREADAR_BUG;
-	--(*(const_cast<unsigned int *>(&cancellable)));
-	if(cancellable == 0)
-	    thread::primitive_resume_cancellation_requests();
-    }
-
 
     void *thread::run_obj(void *obj)
     {
@@ -216,17 +187,22 @@ namespace libthreadar
 
 		// locking and unlocking object's mutex is a simple form of barrier
 		// this way we start working only when the caller has exited run()
-	    thread::primitive_suspend_cancellation_requests();
 	    tobj->field_control.lock();
 	    tobj->field_control.unlock();
 	    if(pthread_sigmask(SIG_SETMASK , &(tobj->sigmask), NULL) != 0)
 		throw exception_system("Failing setting signal mask for thread", errno);
-		//
-	    thread::primitive_resume_cancellation_requests();
 
 	    try
 	    {
 		tobj->inherited_run();
+	    }
+	    catch(cancel_except &)
+	    {
+		    // nothing to do
+		    // this exception
+		    // must not been
+		    // rethrown when another
+		    // thread will call join()
 	    }
 	    catch(...)
 	    {
@@ -243,22 +219,6 @@ namespace libthreadar
 	}
 
 	return ret;
-    }
-
-    void thread::primitive_suspend_cancellation_requests()
-    {
-	int previous_state;
-
-	if(pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &previous_state) != 0)
-	    throw exception_thread("unable to set cancellation state to disable");
-    }
-
-    void thread::primitive_resume_cancellation_requests()
-    {
-	int previous_state;
-
-	if(pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &previous_state) != 0)
-	    throw exception_thread("unable to set cancellation state to disable");
     }
 
 } // end of namespace
