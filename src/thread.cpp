@@ -148,7 +148,7 @@ namespace libthreadar
 	}
     }
 
-    void thread::cancel() const
+    void thread::cancel()
     {
 	field_control.lock();
 	try

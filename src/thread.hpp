@@ -135,8 +135,7 @@ namespace libthreadar
 
 	    /// \note the thread will effectively end if it runs its cancellation_checkpoint()
 	    /// regularly in its loop(s), see below.
-
-	void cancel() const;
+	void cancel();
 
     protected:
 
@@ -190,9 +189,15 @@ namespace libthreadar
 	    ///   }
 	    ///   catch(...)
 	    ///   {
-	    ///      // the catch-all statement you want/need
+	    ///      // a catch-all statement you want/need
+	    ///      // not rethrowing the exception
 	    ///   }
 	    /// }
+	    ///
+	    /// of course if the catch-all statement do rethrow all exception
+	    /// nothing special is to modified as the cancel_except exception
+	    /// will drive the thread cancellation to its end.
+	    ///
 	void cancellation_checkpoint() const;
 
     private:
