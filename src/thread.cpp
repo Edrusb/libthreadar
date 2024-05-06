@@ -60,7 +60,7 @@ namespace libthreadar
     {
 	try
 	{
-	    kill();
+	    cancel();
 	    join();
 	}
 	catch(...)
@@ -148,7 +148,7 @@ namespace libthreadar
 	}
     }
 
-    void thread::kill() const
+    void thread::cancel() const
     {
 	field_control.lock();
 	try

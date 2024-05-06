@@ -41,7 +41,7 @@ public:
 
     ~myfile()
     {
-	kill();
+	cancel();
 	join();
     }
 

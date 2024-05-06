@@ -87,7 +87,8 @@ namespace libthreadar
 	/// prevent this as when the execution pointer reach them, all inherited class fields do no more
 	/// exist.
 	///
-	/// IT IS THUS IMPORTANT FOR ANY INHERITED CLASS TO INVOKE kill() THEN join() IN THEIR DESTRUCTOR
+	/// IT IS THUS IMPORTANT FOR ANY INHERITED CLASS TO INVOKE cancel() [or other mechanism to stop the
+	/// threand] and THEN join() IN THEIR DESTRUCTOR
 	///
 	/// Once the thread is no more running a new call to run() is allowed if a join() call has been issued
 	/// since the thread was last run. This allows to run again a thread without having
@@ -133,9 +134,9 @@ namespace libthreadar
 	    /// the caller send a cancellation request to this object's running thread if any
 
 	    /// \note the thread will effectively end if it runs its cancellation_checkpoint()
-	    /// protected method, see below.
+	    /// regularly in its loop(s), see below.
 
-	void kill() const;
+	void cancel() const;
 
     protected:
 
@@ -161,10 +162,37 @@ namespace libthreadar
 	    /// or both and in that case which way to avoid concurrent access to such fields.
 	virtual void inherited_run() = 0;
 
-	    /// available withing the inherited_run() method to trigger thread cancellation,
+	    /// available withing the inherited_run() method to eventually trigger thread cancellation
 
-	    /// \note since release 1.5.0 the kill() method does no more rely on pthread_cancel which
-	    /// is does not work well under C++ context. The cancellation point are this defined manually
+	    /// \note since release 1.5.0 the kill() method has been renamed as cancel() and does no more
+	    /// rely on pthread_cancel which does not work well under C++ context since the NPTL implementation
+	    /// used under Linux. The cancellation point are thus defined manually by cancellation_checkpoint()
+	    /// which has to be called regularly in the implementation of your threads (see inherited_run()),
+	    /// if you want to be able to call the cancel() method to stop the thread properly. Thread
+	    /// cancellation relies on the libhtreadar::thread::cancel_except exception that should never
+	    /// be caught in your code, either by cathing explicitely other exceptions or by preventing
+	    /// it to be catch by a cath-all statement:
+	    /// void inherited_run()
+	    /// {
+	    ///   try
+	    ///   {
+	    ///     while(something)
+	    ///      {
+	    ///       ... // code to protect
+	    ///        cancellation_checkpoint();
+	    ///      }
+	    ///   }
+	    ///   catch(cancel_except &)
+	    ///   {
+	    ///        // eventually release some resource
+	    ///        // but propagate the exception!
+	    ///      throw;
+	    ///   }
+	    ///   catch(...)
+	    ///   {
+	    ///      // the catch-all statement you want/need
+	    ///   }
+	    /// }
 	void cancellation_checkpoint() const;
 
     private:
