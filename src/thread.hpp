@@ -200,6 +200,16 @@ namespace libthreadar
 	    ///
 	void cancellation_checkpoint() const;
 
+
+	    /// this method is called by cancel() which is expected to be from the parent thread
+	    /// to let inherited classes define alternative method to stop the thread running
+	    /// inherited_run() than the cancellation_checkpoint() mechanism, or in complement to
+	    /// it. Attention should be taken to the fact the caller of cancel() is not likely to
+	    /// be the same thread as the one running inherited_run(), and mutex or other mechanism
+	    /// may be necessary to avoid concurrent access to some field of the object used to
+	    /// communicate the cancellation requested to the thread.
+	virtual void inherited_cancel() {};
+
     private:
 	mutable mutex field_control;   ///< mutex protecting access to object's data
 	bool running;                  ///< whether a thread is running

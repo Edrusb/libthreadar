@@ -154,6 +154,7 @@ namespace libthreadar
 	try
 	{
 	    do_cancel = true;
+	    inherited_cancel();
 	}
 	catch(...)
 	{
