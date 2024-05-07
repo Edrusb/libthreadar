@@ -154,7 +154,6 @@ namespace libthreadar
 	try
 	{
 	    do_cancel = true;
-	    inherited_cancel();
 	}
 	catch(...)
 	{
@@ -162,6 +161,8 @@ namespace libthreadar
 	    throw;
 	}
 	field_control.unlock();
+
+	inherited_cancel();
     }
 
     void thread::cancellation_checkpoint() const
