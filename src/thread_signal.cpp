@@ -69,7 +69,11 @@ namespace libthreadar
 	verrou.lock();
 	try
 	{
+	    if(awaking_signal == SIGCHLD
+	       || awaking_signal == SIGKILL)
+		throw exception_range("forbidden signal given for libthreadar::thread_signal::change_default_signal()");
 	    initialized = false;
+	    awaking_signal = sig;
 	}
 	catch(...)
 	{
