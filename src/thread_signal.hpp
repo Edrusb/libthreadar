@@ -81,25 +81,26 @@ namespace libthreadar
 	    //  will ignore it
 	void set_signal_mask(const sigset_t & mask);
 
-
 	    /// change the signal used to awake threads
 
 	    /// \note by default the signal used to awake a thread is SIGUSR2
 	static void change_default_signal(int sig);
 
     protected:
-	    // thread::inherited_run() still need to be implemented
-	    // virtual void inherited_run() override = 0;
 
 	    /// replaces thread::inherited_cancel()
 
 	    /// \note except the method name that changes, the purpose is the same
-	virtual void signal_inherited_cancel() {};
+	virtual void signaled_inherited_cancel() {};
 
     private:
 
-	    // thread::inherited_cancel() is made private and replaced by
-	    // signal_inherited_cancel()
+	    /// inherited from thread , made private
+	    /// \note but this does not seem to prevent inherited
+	    /// classes to override the method thread::inherited_cancel() ...
+	    /// Compilation succeeded having an thread_signal derived
+	    /// class overriding inherited_cancel()
+	    /// instead of signaled_inherited_cancel() using g++ 10.2.1
 	virtual void inherited_cancel() override;
 
 	static mutex verrou;

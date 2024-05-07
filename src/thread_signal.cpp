@@ -88,12 +88,17 @@ namespace libthreadar
     void thread_signal::inherited_cancel()
     {
 	pthread_t tid;
+
+	    // preparing the thread to report cancellation request status
+	    // (if implemented in inherited class)
+	signaled_inherited_cancel();
+
+	    // awaking the thread if it was pending on a system call
 	if(is_running(tid))
 	{
 	    if(pthread_kill(tid, awaking_signal) != 0)
 		throw exception_system("Error calling pthread_kill(): ", errno);
 	}
-	signal_inherited_cancel();
     }
 
 
