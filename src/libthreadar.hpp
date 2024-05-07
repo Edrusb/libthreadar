@@ -34,6 +34,7 @@
     /// - class semaphore
     /// - class fast_tampon
     /// - class thread
+    /// - class thread_signal
     /// - class freezer
     /// - class condition
     /// - class ratelier_gather
@@ -53,6 +54,7 @@
 #include "tampon.hpp"
 #include "fast_tampon.hpp"
 #include "thread.hpp"
+#include "thread_signal.hpp"
 #include "freezer.hpp"
 #include "ratelier_gather.hpp"
 #include "ratelier_scatter.hpp"
