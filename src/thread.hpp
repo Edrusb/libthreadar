@@ -131,11 +131,21 @@ namespace libthreadar
 	    /// the caller will be suspended until the current object's thread ends
 	void join() const;
 
+	    /// \deprecated WARNING! kill() is DEPRECATED since release 1.5.0 and will be removed in
+	    /// the future as it does not work for some glibc implementations when using
+	    /// C++ code (collides with exceptions). USE cancel() feature instead.
+	    /// See documentation about cancel() this is *not* a 1:1 replacement of kill().
+	    /// See also inherited_cancel(), and cancellation_checkpoint() methods.
+	void kill() const;
+
+
 	    /// the caller send a cancellation request to this object's running thread if any
 
 	    /// \note the thread will effectively end if it runs its cancellation_checkpoint()
 	    /// regularly in its loop(s), see below.
 	void cancel();
+
+
 
     protected:
 

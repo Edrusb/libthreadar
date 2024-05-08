@@ -148,6 +148,25 @@ namespace libthreadar
 	}
     }
 
+    void thread::kill() const
+    {
+	pthread_t dyn_tid;
+
+	if(is_running(dyn_tid))
+	{
+	    thread *me = const_cast<thread *>(this);
+	    int ret;
+
+	    ret = pthread_cancel(dyn_tid);
+	    if(ret != ESRCH && ret != 0)
+		throw exception_system("Failed killing thread: ", errno);
+
+	    if(me == nullptr)
+		throw THREADAR_BUG;
+	    me->running = false;
+	}
+    }
+
     void thread::cancel()
     {
 	field_control.lock();
