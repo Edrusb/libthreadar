@@ -104,7 +104,7 @@ namespace libthreadar
 
     void thread_signal::set_signal_handler()
     {
-     	if(!initialized) // reading only without acquiring the lock for efficiency
+	if(!initialized) // reading only without acquiring the lock for efficiency
 	{
 	    verrou.lock();
 	    try
