@@ -22,7 +22,7 @@
 #######################################################################
 
 # Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.69)
+AC_PREREQ(2.71)
 AC_INIT([LIBTHREADAR], [1.5.0_dev], [])
 AC_CONFIG_HEADERS([config.h])
 AC_LANG([C++])
@@ -36,7 +36,7 @@ AM_INIT_AUTOMAKE([subdir-objects])
 # have a specific variable for pkgconfig, setting the default value:
 AC_SUBST(pkgconfigdir, [${libdir}/pkgconfig])
 AC_ARG_WITH([pkgconfigdir],
-            AC_HELP_STRING(--with-pkgconfigdir=DIR, [defines an alternative directory to install pkconfig files, default is '${libdir}/pkgconfig']),
+            AS_HELP_STRING([--with-pkgconfigdir=DIR],[defines an alternative directory to install pkconfig files, default is '${libdir}/pkgconfig']),
             [
                if [ ! -z "$withval" ] ; then
                  AC_SUBST(pkgconfigdir, $withval)
@@ -48,7 +48,7 @@ AC_ARG_WITH([pkgconfigdir],
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
@@ -91,7 +91,8 @@ AC_CHECK_LIB(pthread, [pthread_mutex_init], [], [])
 
 
 # Checks for header files.
-AC_HEADER_STDC
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
 AC_HEADER_SYS_WAIT
 
 
@@ -106,7 +107,7 @@ AC_C_INLINE
 # Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 AC_HEADER_MAJOR
-AC_TYPE_SIGNAL
+
 AC_CHECK_FUNCS([strerror_r])
 
 AC_MSG_CHECKING([for strerror_r flavor])
@@ -169,7 +170,7 @@ fi
 AC_SUBST(SED_REGEX, [${local_sed}])
 
 AC_ARG_ENABLE( [build-html],
-               AC_HELP_STRING(--disable-build-html, [don't build programming documentation]),
+               AS_HELP_STRING([--disable-build-html],[don't build programming documentation]),
                [ doxygen="no"
                  groff="no"
                ],

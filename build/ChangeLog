@@ -1,3 +1,7 @@
+From 1.4.0 to 1.4.1
+- configure.ac and makefile.am adaptation to autoconf 2.71
+  (no change in libthreadar code and API compared to 1.4.0)
+
 From release 1.3.0 to 1.4.0
 - added method get_waiting_count() to barrier class
 - added alternative implementation for class barrier relying on
