@@ -1,4 +1,10 @@
 
+ If using code directly from git (github or sourceforge) first read the file
+ USING_SOURCE_FROM_GIT to generate the configure script. Then follow the steps
+ below. If downloading tarball package from sourceforge the configure script
+ is included so you can directly follow the steps detailed below.
+
+
  installation instructions for libthreadar
 
  1 -  run './configure [options]'
