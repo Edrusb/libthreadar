@@ -1,27 +1,27 @@
-### What is libthreadar
+What is libthreadar
 	libthreadar provides C++ classes for manipulating threads and
 	propagating back exception from thread to parent thread when the
 	parent calls the join() method
 	[ same paradygm as what wait() system calls does for a forked  ]
 	[ process to its parent                                        ]
 
-### What it is relying on
+What it is relying on
 	libthreadar relies on Posix thread for historical reason, this might
 	change in the future to rely on C++11 thread without any impact on
 	the API.
 
-### which compiler to use with libthreadar
+Which compiler to use with libthreadar
 	To propagate exception of any type libthreadar use C++11 specific
 	construction, so it requires such compiler to be compiled and linked
 	with.
 
-### Why that strange name
+Why that strange name
 	libthreadar has been extracted from code initially part of webdar and
 	also now used by dar and libdar, where from its "dar" ending name.
 	However	this library is not part of webdar, libdar or dar, is
 	released separately and can be used independently of them.
 
-### What the advantages of libthreadar over c++11 or boost thread?
+What the advantages of libthreadar over c++11 or boost thread?
         C++11 defines threads as function base operation while libthreadar
 	defines it as a class base operation. Boost cannot transmit any type
 	of exception back to a parent thread:
@@ -53,13 +53,13 @@
 	current version is very simple (no detached thread, no interface to
 	scheduler, just threads in there pure simple form...)
 
-### libthreadar has not the pretention to replace boost or any other library or
+Libthreadar has not the pretention to replace boost or any other library or
  	C++ standard managing threads from C++ code. Is is rather to be seen
 	as a more convenient and simple way to use thread withing C++ code.
 	However this project is extensible (this project is open source), any
 	contribution that has some value is welcome.
 
-### libthreadar Licensing:
+Libthreadar Licensing:
 	Libthreadar is released under the
 
 		GNU LESSER GENERAL PUBLIC LICENSE.
@@ -67,20 +67,19 @@
 	For details about this library license see the
 	COPYING and COPYING.LESSER files.
 
-### Download
+Download
+	You can download from github or git at sourceforge but you will need
+	the auto-tools (automake, autoconf, libtool...) to create the configure
+	script. You can instead download ready for use source code (having an
+	the configure script built) from sourceforge:
 
-    You can download from github or git at sourceforge but you will need
-    the auto-tools (automake, autoconf, libtool...) to create the configure
-    script. You can instead download ready for use source code (having an
-    the configure script built) from sourceforge:
+	   https://sourceforge.net/projects/libthreadar/files/
 
-    https://sourceforge.net/projects/libthreadar/files/
+	You will find signature beside those packages, see the "Authentication"
+	paragraph at http://dar.linux.free.fr/ for signature validation.
 
-    You will find signature beside those packages, see the "Authentication"
-    paragraph at http://dar.linux.free.fr/ for signature validation.
+Detailed documentation documentation is available online here
 
-### Detailed documentation documentation is available online here
+	  https://libthreadar.sourceforge.net/
 
-   https://libthreadar.sourceforge.net/
-
-it is built from Doxygen comments found in source code.
+	it is built from Doxygen comments found in source code.
