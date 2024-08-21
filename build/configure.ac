@@ -23,7 +23,7 @@
 
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.71)
-AC_INIT([LIBTHREADAR], [1.5.0_dev], [])
+AC_INIT([LIBTHREADAR], [1.5.0], [])
 AC_CONFIG_HEADERS([config.h])
 AC_LANG([C++])
 AC_CONFIG_SRCDIR([src/tampon.hpp])
