@@ -1,6 +1,6 @@
 #######################################################################
 ## libthreadar - is a library providing several C++ classes to work with threads
-## Copyright (C) 2014-2020 Denis Corbin
+## Copyright (C) 2014-2024 Denis Corbin
 ##
 ## This file is part of libthreadar
 ##
