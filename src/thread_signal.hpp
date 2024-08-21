@@ -111,10 +111,6 @@ namespace libthreadar
 	static void handler(int sig);
     };
 
-    	/// \example ../doc/examples/thread_signal_example.cpp
-	/// this is an example of use of class libthread_signalar::thread_signal
-	///
-
 } // end of namespace
 
 #endif
