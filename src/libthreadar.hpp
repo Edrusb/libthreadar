@@ -82,10 +82,10 @@ extern "C"
 {
 	/// in case you use autoconf AC_CHECK_LIB in your program to detect the availability of libthreadar
 
-	/// use AC_CHECK_LIB(threadar, [for_autoconf], [], [])
+	/// use AC_CHECK_LIB(threadar, [libthreadar_for_autoconf], [], [])
 	/// to have autoconf based configure script properly detecting
 	/// the presence and usability of libthreadar
-    extern unsigned int for_autoconf(unsigned int x);
+    extern unsigned int libthreadar_for_autoconf(unsigned int x);
 }
 
 #endif

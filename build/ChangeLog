@@ -1,3 +1,8 @@
+From 1.5.0 to 1.5.1
+- renaming for_autoconf as libthreadar_for_autoconf to
+  solve conflict with libdar using the same function name
+  to be used with autoconf AC_CHECK_LIB
+
 From 1.4.x to 1.5.0
 - added class thread_signal
 - added method thread::cancel as replacement of thread::kill

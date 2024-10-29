@@ -51,7 +51,7 @@ namespace libthreadar
 
 extern "C"
 {
-    unsigned int for_autoconf(unsigned int x)
+    unsigned int libthreadar_for_autoconf(unsigned int x)
     {
 	return x+1;
     }
