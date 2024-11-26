@@ -103,6 +103,9 @@ namespace libthreadar
 	    /// instead of signaled_inherited_cancel() using g++ 10.2.1
 	virtual void inherited_cancel() override;
 
+	    /// send the awaking signal to the thread
+	void send_signal();
+
 	static mutex verrou;
 	static bool initialized;
 	static int awaking_signal;

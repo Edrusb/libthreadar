@@ -89,10 +89,26 @@ namespace libthreadar
     {
 	pthread_t tid;
 
-	    // preparing the thread to report cancellation request status
-	    // (if implemented in inherited class)
-	signaled_inherited_cancel();
+	try
+	{
+		// preparing the thread to report cancellation request status
+		// (if implemented in inherited class)
+	    signaled_inherited_cancel();
+	    send_signal();
+	}
+	catch(exception_signal & e)
+	{
+	    throw;
+	}
+	catch(...)
+	{
+	    send_signal();
+	    throw;
+	}
+    }
 
+    void thread_signal::send_signal()
+    {
 	    // awaking the thread if it was pending on a system call
 	if(is_running(tid))
 	{
