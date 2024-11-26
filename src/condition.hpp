@@ -73,7 +73,7 @@ namespace libthreadar
 	    /// \param[in] instance the instance number to have the caller waiting on
 	    /// \note wait() must be called between lock() and unlock(). Once suspendend, the
 	    /// calling thread unlocks the mutex and acquires the mutex lock() again once
-	    /// awaken after another thread called signal
+	    /// awaken after another thread has called signal
 	void wait(unsigned int instance = 0);
 
 	    /// awakes a single thread suspended after having called wait()

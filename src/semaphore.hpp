@@ -61,7 +61,7 @@ namespace libthreadar
 	    /// \note A thread calling lock() when the value is less than or equal to zero is suspended. For example, if the value is one before
 	    /// calling lock() the thread will not be suspended, but the next thread calling lock() now that the value is zero, will be suspended.
 	    /// If more than one thread was pending on a semaphore, unlock() awakes a single thread (I must *not* be assumed this will be the oldest
-	    /// waiting on this semaphore.
+	    /// waiting on this semaphore).
 	semaphore(unsigned int max_value);
 
 	    /// no copy constructor
