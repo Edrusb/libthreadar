@@ -38,6 +38,7 @@ extern "C"
 
     // libthreadar headers
 #include "exceptions.hpp"
+#include "tools.hpp"
 
     // this module's header
 #include "thread.hpp"
@@ -128,7 +129,23 @@ namespace libthreadar
 
 	    me->joignable = false;
 	    if(ret != ESRCH && ret != 0)
-		throw exception_system("Failed joining thread: ", errno);
+		if(errno != 0)
+		    throw exception_system("Failed joining thread: ", errno);
+		else
+		{
+		    switch(ret)
+		    {
+		    case EDEADLK:
+			throw exception_thread("Deadlock was detected");
+		    case EINVAL:
+			throw exception_thread("Tried to join a non-joinable thread or another thread is already waiting to join this same target thread");
+		    case ESRCH:
+			throw THREADAR_BUG; // this has condition has already been treated above
+		    default:
+			throw exception_thread(string("pthread_join() system called returned an unknown error: ") + tools_convert_to_string(ret));
+		    }
+		}
+
 	    if(returned_exception != nullptr && returned_exception != PTHREAD_CANCELED)
 	    {
 		exception_ptr *ebase = reinterpret_cast<exception_ptr *>(returned_exception);

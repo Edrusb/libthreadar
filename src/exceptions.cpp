@@ -57,8 +57,8 @@ namespace libthreadar
 
     exception_system::exception_system(const std::string & context, int error_code) : exception_base("")
     {
-	reset_first_message(tools_strerror_r(error_code));
 	push_message(context);
+	push_message(tools_strerror_r(error_code));
     }
 
 	// borrowing from libdar tools.cpp

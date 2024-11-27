@@ -107,7 +107,7 @@ namespace libthreadar
 	    /// destructor
 	virtual ~exception_base() = default;
 
-	    /// to be used in a catch clause to add context information before rethrowing the exception
+	    /// to be used in a catch clause to more detailed information of the problem cause, before rethrowing the exception
 	void push_message(const std::string & x_msg) { msg_table.push_back(x_msg); };
 
 	    /// for site which need to display the information to the user
