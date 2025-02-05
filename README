@@ -24,11 +24,14 @@ Example of use:
         class my_thread: public libthreadar::thread
         {
             public:
-                my_thread() { secs = 5; };
+                    // class constructor
+                my_thread(unsigned int t = 5) { secs = t; };
+
+                    // example method to setup the thread before (re)running it
                 void set_time_to_wait(unsigned int t) { secs = t; };
 
             protected:
-                // this is the code that will run in a separated thread
+                   // this is the code that will run in a separated thread
                 virtual void inherited_run() override { sleep(secs); };
 
            private:
@@ -39,13 +42,14 @@ Example of use:
 
         t2.set_time_to_wait(20);
 
-        t1.run();  // this fires the first thread, sleeping 10 seconds before it ends
-        t2.run();  // runs the second thread, sleeping 20 seconds
-        t3.run();  // runs the third thread, sleep 5 seconds
+            // each of the following run() call returns almost immediately:
+        t1.run();  // this fires the first thread which sleeps 10 seconds before it ends
+        t2.run();  // runs the second thread, it sleeps 20 seconds
+        t3.run();  // runs the third thread, which sleeps 5 seconds
 
-        t1.join(); // will wait ~10 seconds for t1 to end
-        t2.join(); // should wait again ~10 seconds for t2 to complete
-        t3.join(); // should return immediately as t3 has already finished
+        t1.join(); // will wait ~10 seconds for t1 to complete
+        t2.join(); // should wait ~10 seconds more for t2 to complete its 20 seconds sleep
+        t3.join(); // should return immediately as t3 has already finished its 5 secs sleep
 
             // a thread object can be run at will several times without having to reset
             // the possibly many parameters it requires to execute:
@@ -65,13 +69,13 @@ Libthreadar advantage summary:
           - your C++ Class inheriting from libthreadar::thread provides a shelter for
             thread dedicated data as private fields.
           - your C++ Class can provide many simple methods to setup the thread parameters
-            rather than a long list of parameters provided to a function
+            rather than a long list of parameters provided to a function.
           - Over time it is easy to have a thread class getting new features without breaking
             backward compatibility as it is just a matter of adding new method beside the others
-            and setting default values/behavior for those new ones at object construction time
+            and setting default values/behavior for those new ones at object construction time.
           - private/protected fields of the class can also hold mutex, semaphores, conditions
-            and other construct to setup communication channels with the running thread, all
-            wrapped in public methods for the outside world able to communicate with the thread
+            and other constructs to setup communication channels with the running thread, all
+            wrapped in public methods for the outside world be able to communicate with the thread
             without having to know the implementation.
 
 
