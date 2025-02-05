@@ -71,8 +71,8 @@ Libthreadar advantage summary:
             and setting default values/behavior for those new ones at object construction time
           - private/protected fields of the class can also hold mutex, semaphores, conditions
             and other construct to setup communication channels with the running thread, all
-            wrapped in public methods for the outside word to have communicate with the thread
-            without having to know the class implementation.
+            wrapped in public methods for the outside world able to communicate with the thread
+            without having to know the implementation.
 
 
 Libthreadar Licensing:
