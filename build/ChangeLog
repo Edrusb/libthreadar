@@ -1,3 +1,7 @@
+From 1.5.1 to 1.5.2
+- condition::get_waiting_thread_count() passed as const method to
+  be also available to const objects
+
 From 1.5.0 to 1.5.1
 - renaming for_autoconf as libthreadar_for_autoconf to
   solve conflict with libdar using the same function name

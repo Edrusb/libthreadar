@@ -95,7 +95,7 @@ namespace libthreadar
 	    /// return the number of thread currently waiting on that condition
 
 	    /// \param[in] instance the condition instance number to count the waiting thread on
-	unsigned int get_waiting_thread_count(unsigned int instance = 0) { return counter[instance]; };
+	unsigned int get_waiting_thread_count(unsigned int instance = 0) const { return counter[instance]; };
 
     private:
 	std::deque<pthread_cond_t> cond;
