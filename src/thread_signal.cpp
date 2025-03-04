@@ -136,7 +136,6 @@ namespace libthreadar
 		    if(sigemptyset(& sigac.sa_mask) != 0)
 			throw exception_system("Error calling sigemptyset(): ", errno);
 		    sigac.sa_flags = 0;
-		    sigac.sa_restorer = nullptr;
 
 		    if(sigaction(awaking_signal, &sigac, nullptr) != 0)
 			throw exception_system("Error calling sigaction(): ", errno);
