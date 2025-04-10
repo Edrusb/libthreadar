@@ -129,6 +129,7 @@ namespace libthreadar
 
 	    me->joignable = false;
 	    if(ret != ESRCH && ret != 0)
+	    {
 		if(errno != 0)
 		    throw exception_system("Failed joining thread: ", errno);
 		else
@@ -145,6 +146,7 @@ namespace libthreadar
 			throw exception_thread(string("pthread_join() system called returned an unknown error: ") + tools_convert_to_string(ret));
 		    }
 		}
+	    }
 
 	    if(returned_exception != nullptr && returned_exception != PTHREAD_CANCELED)
 	    {
