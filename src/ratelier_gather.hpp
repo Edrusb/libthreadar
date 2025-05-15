@@ -118,7 +118,7 @@ namespace libthreadar
 
 	    /// \param[out] ones is a list of continuously indexed objects which immediately follows the list
 	    /// provided by a previous call to gather().
-	    /// \param[out] flag is the purpose free signal give by the worker and associated to each data
+	    /// \param[out] flag is the purpose free signal transmitted by the workers and associated to each object
 	void gather(std::deque<std::unique_ptr<T> > & ones, std::deque<signed int> & flag);
 
 	    /// reset the object in its prestine state
