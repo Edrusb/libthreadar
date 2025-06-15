@@ -103,7 +103,7 @@ namespace libthreadar
 		throw exception_thread("Cannot change stack size while the thread is running");
 
 	    clear_stack();
-	    stack = new (nothrow) char[stack_size];
+	    stack = new (nothrow) char[val];
 	    if(stack == nullptr)
 	    {
 		stack_size = 0;
@@ -128,7 +128,7 @@ namespace libthreadar
 	switch(pthread_attr_init(&thread_attribs))
 	{
 	case 0:
-	    return;
+	    break;
 	case ENOMEM:
 	    throw exception_memory();
 	default:
@@ -160,7 +160,7 @@ namespace libthreadar
 					     stack_size))
 		{
 		case 0:
-		    return;
+		    break;
 		case EINVAL:
 		    throw exception_range("Stack size requested too small");
 		case EACCES:
