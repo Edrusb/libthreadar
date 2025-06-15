@@ -54,6 +54,8 @@ namespace libthreadar
 	running = false;
 	joignable = false;
 	do_cancel = false;
+	stack_size = 0;
+	stack = nullptr;
 	sigemptyset(&sigmask);
     }
 
@@ -70,23 +72,19 @@ namespace libthreadar
 		// such exceptions should have been generated earlier using join() if
 		// it had any importance to be taken care of
 	}
+	clear_stack();
     }
 
-    void thread::run()
+    void thread::reset_stack_size()
     {
 	field_control.lock();
-
 	try
 	{
 	    if(running)
-		throw exception_thread("Cannot run thread, object already running in a sperated thread");
-	    if(joignable)
-		throw exception_thread("Previous thread has not been joined and possibly returned exception is deleted");
-	    do_cancel = false;
-	    if(pthread_create(&tid, NULL, run_obj, this) != 0)
-		throw exception_system("Failed creating a new thread: ", errno);
-	    running = true;
-	    joignable = true;
+		throw exception_thread("Cannot change stack size while the thread is running");
+
+	    clear_stack();
+	    stack_size = 0;
 	}
 	catch(...)
 	{
@@ -94,6 +92,104 @@ namespace libthreadar
 	    throw;
 	}
 	field_control.unlock();
+    }
+
+    void thread::set_stack_size(unsigned int val)
+    {
+	field_control.lock();
+	try
+	{
+	    if(running)
+		throw exception_thread("Cannot change stack size while the thread is running");
+
+	    clear_stack();
+	    stack = new (nothrow) char[stack_size];
+	    if(stack == nullptr)
+	    {
+		stack_size = 0;
+		throw exception_memory();
+	    }
+	    else
+		stack_size = val;
+	}
+	catch(...)
+	{
+	    field_control.unlock();
+	    throw;
+	}
+	field_control.unlock();
+    }
+
+
+    void thread::run()
+    {
+	pthread_attr_t thread_attribs;
+
+	switch(pthread_attr_init(&thread_attribs))
+	{
+	case 0:
+	    return;
+	case ENOMEM:
+	    throw exception_memory();
+	default:
+	    throw THREADAR_BUG;
+	}
+
+	     // critical section for thread creation
+
+	field_control.lock();
+	try
+	{
+		// sanity checks
+
+	    if(running)
+		throw exception_thread("Cannot run thread, object already running in a sperated thread");
+	    if(joignable)
+		throw exception_thread("Previous thread has not been joined and possibly returned exception is deleted");
+
+
+		// attribute settings
+
+	    if(stack_size != 0)
+	    {
+		if(stack == nullptr)
+		    throw THREADAR_BUG;
+
+		switch(pthread_attr_setstack(&thread_attribs,
+					     stack,
+					     stack_size))
+		{
+		case 0:
+		    return;
+		case EINVAL:
+		    throw exception_range("Stack size requested too small");
+		case EACCES:
+		    throw THREADAR_BUG;
+			// man page for pthread_attr_set_stack mention this possible error
+			// when the provided stack is not both readable and writable by the
+			// caller, here this should always be the case
+		default:
+		    throw THREADAR_BUG;
+		}
+	    }
+
+
+		// thread creation
+
+	    do_cancel = false;
+	    if(pthread_create(&tid, &thread_attribs, run_obj, this) != 0)
+		throw exception_system("Failed creating a new thread: ", errno);
+	    running = true;
+	    joignable = true;
+	}
+	catch(...)
+	{
+	    field_control.unlock();
+	    (void)pthread_attr_destroy(&thread_attribs);
+	    throw;
+	}
+	field_control.unlock();
+	(void)pthread_attr_destroy(&thread_attribs);
     }
 
     bool thread::is_running(pthread_t & id) const
@@ -213,6 +309,15 @@ namespace libthreadar
 	    // this value
 	if(do_cancel)
 	    throw cancel_except();
+    }
+
+    void thread::clear_stack()
+    {
+	if(stack != nullptr)
+	{
+	    delete [] stack;
+	    stack = nullptr;
+	}
     }
 
     void *thread::run_obj(void *obj)

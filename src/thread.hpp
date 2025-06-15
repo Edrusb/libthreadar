@@ -110,6 +110,20 @@ namespace libthreadar
 	    /// destructor
 	virtual ~thread();
 
+	    /// reset the stack size to the system default value
+
+	    /// \note this is the default status, unless set_stack_size() has been called
+	    /// previously on this object
+	void reset_stack_size();
+
+	    /// set the stack size to non default value
+	void set_stack_size(unsigned int val);
+
+	    /// get the current stack size value
+
+	    /// \note zero is returned when a system default stack is used
+	unsigned int get_stack_size() const { return stack_size; };
+
 	    /// set signal mask for this object's when the thread will be run
 
 	    /// \note see sigsetops(3) for details on manipulating signal sets
@@ -163,7 +177,7 @@ namespace libthreadar
 	    ~cancel_except() = default;
 	};
 
-	    /// action to be performed in the separated thread
+	    /// action to be performed in the separated thread (implementation is expected in inherited classes)
 
 	    /// \note There is no argument to provide, because this is the responsibility of the inherited class
 	    /// to defined private/protected fields, methods and constructors to set their value
@@ -226,6 +240,11 @@ namespace libthreadar
 	bool joignable;                ///< whether exist status of thread has to be retrieved
 	mutable bool do_cancel;        ///< whether thread should cancel/stop
 	sigset_t sigmask;              ///< signal mask to use for the thread
+	unsigned int stack_size;       ///< stack size when non-default stack is used, 0 if system default stack is used
+	char* stack;                   ///< allocated stack when non-default size is requested
+
+
+	void clear_stack();
 
 	    // static members
 
