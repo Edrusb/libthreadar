@@ -30,13 +30,12 @@ class my_thread: public libthreadar::thread_signal
 {
 protected:
 
-    virtual void inherited_run() override { std::cout << "default thread size reported get_stacksize() from within stack: " << get_default_stack_size() << std::endl; };
+    virtual void inherited_run() override { std::cout << "default thread size reported get_stacksize() from within thread: " << get_default_stack_size() << std::endl; };
 };
 
 size_t get_default_stack_size()
 {
     size_t ret = 0;
-    void* ptr = nullptr;
     pthread_attr_t attr;
 
     switch(pthread_attr_init(&attr))
@@ -47,9 +46,8 @@ size_t get_default_stack_size()
 	return 0;
     }
 
-    pthread_attr_getstack(&attr,
-			  &ptr,
-			  &ret);
+    pthread_attr_getstacksize(&attr,
+			      &ret);
 
     pthread_attr_destroy(&attr);
 
