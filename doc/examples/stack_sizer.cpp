@@ -21,17 +21,62 @@
 //  to contact the author: dar.linux@free.fr
 /*********************************************************************/
 
+extern "C"
+{
+#include <unistd.h>
+#include <fcntl.h>
+}
+
 #include <iostream>
 #include "../../src/libthreadar.hpp"
 
 size_t get_default_stack_size();
+void read_proc_self_maps(const std::string & context);
+
 
 class my_thread: public libthreadar::thread_signal
 {
 protected:
 
-    virtual void inherited_run() override { std::cout << "default thread size reported get_stacksize() from within thread: " << get_default_stack_size() << std::endl; };
+    virtual void inherited_run() override
+    {
+	std::cout << "default thread size reported get_stacksize() from within thread: " << get_default_stack_size() << std::endl;
+	read_proc_self_maps("in a thread");
+    };
 };
+
+void read_proc_self_maps(const std::string & context)
+{
+    static const unsigned int buf_size = 1024*1024;
+
+    int fd = open("/proc/self/maps", O_RDONLY);
+    char buf[buf_size];
+    int lu = 0;
+
+    std::cout << " --------------------- " << context << "   [START]" << std::endl;
+    if(fd < 0)
+	return;
+    try
+    {
+	do
+	{
+	    lu = read(fd, buf, buf_size);
+	    if(lu > 0)
+	    {
+		buf[lu] = '\0';
+		std::cout << buf << std::flush;
+	    }
+	}
+	while(lu > 0);
+    }
+    catch(...)
+    {
+	close(fd);
+	throw;
+    }
+    close(fd);
+    std::cout << " --------------------- " << context << "   [END]" << std::endl;
+}
 
 size_t get_default_stack_size()
 {
@@ -59,6 +104,7 @@ int main()
     my_thread t1;
 
     std::cout << "default stack size is: " << get_default_stack_size() << std::endl;
+    read_proc_self_maps("in main thread");
 
     t1.run();
     t1.join();
