@@ -1,3 +1,7 @@
+From 1.5.x to 1.6.0
+- added feature: thread::set_stack_size() method added to set the stack
+  size of the thread to be run().
+
 From 1.5.1 to 1.5.2
 - condition::get_waiting_thread_count() passed as const method to
   be also available to const objects
