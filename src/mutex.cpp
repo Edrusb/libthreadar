@@ -53,7 +53,7 @@ namespace libthreadar
     mutex::~mutex()
     {
 	try_lock();
-	unlock();
+	unlock();  // we possibly unlock the mutex locked from another thread
 	(void)pthread_mutex_destroy(&mut);
     }
 
