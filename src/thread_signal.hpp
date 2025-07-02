@@ -79,7 +79,7 @@ namespace libthreadar
 	    /// \note this is a modified version of thread::set_signal_mask() that
 	    /// removes from the sigset_t the signal used to awake threads so no thread_signal
 	    //  will ignore it
-	void set_signal_mask(const sigset_t & mask);
+	virtual void set_signal_mask(const sigset_t & mask) override;
 
 	    /// change the signal used to awake threads
 

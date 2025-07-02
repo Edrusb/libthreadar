@@ -127,7 +127,7 @@ namespace libthreadar
 	    /// set signal mask for this object's when the thread will be run
 
 	    /// \note see sigsetops(3) for details on manipulating signal sets
-	void set_signal_mask(const sigset_t & mask) { sigmask = mask; };
+	virtual void set_signal_mask(const sigset_t & mask) { sigmask = mask; };
 
 	    /// launch the current object routing in a separated thread
 	void run();
