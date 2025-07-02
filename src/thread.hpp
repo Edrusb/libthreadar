@@ -219,7 +219,7 @@ namespace libthreadar
 	    /// }
 	    ///
 	    /// of course if the catch-all statement do rethrow all exception
-	    /// nothing special is to modified as the cancel_except exception
+	    /// nothing special is to be modified as the cancel_except exception
 	    /// will drive the thread cancellation to its end.
 	    ///
 	void cancellation_checkpoint() const;
@@ -229,8 +229,8 @@ namespace libthreadar
 	    /// inherited_run() than the cancellation_checkpoint() mechanism, or in complement to
 	    /// it. Attention should be taken to the fact the caller of cancel() is not likely to
 	    /// be the same thread as the one running inherited_run(), and mutex or other mechanism
-	    /// may be necessary to avoid concurrent access to some field of the object used to
-	    /// communicate the cancellation requested to the thread.
+	    /// may be necessary to avoid concurrent access to some fields in your inherited classes,
+	    /// fields used to communicate the cancellation requested to the thread.
 	virtual void inherited_cancel() {};
 
     private:
