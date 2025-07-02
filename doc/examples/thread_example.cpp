@@ -56,7 +56,7 @@ private:
 };
 
 
-main()
+int main()
 {
 	// we will play with two sub-threads
     my_thread t1, t2;

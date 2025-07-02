@@ -47,10 +47,10 @@ namespace libthreadar
 
 	/// Class freezer is a semaphore like construct that has no maximum value
 
-	/// initialized with a value of zero, any call to lock() reduces the value by one, any unlock() increases by one
-	/// a call lock() when the current value is zero or less suspends the calling thread. A call to unlock() when
+	/// initialized with a value of zero, any call to lock() reduces the value by one, any call to unlock() increases it by one.
+	/// A call to lock() when the current value is zero or less suspends the calling thread. A call to unlock() when
 	/// at least one thread is suspended on the freezer awakes exactly one thread. A call to unlock() when the freezer
-	/// value is zero or more does only increase the value the calling thread is not blocked.
+	/// value is zero or more does only increase the value, the calling thread is not blocked.
     class freezer
     {
     public:
@@ -78,13 +78,14 @@ namespace libthreadar
 
 	    /// Request a "resource"
 
-	    /// if the freezer value is zero or less, reduces the freezer by one and suspends the calling thread
-	    /// if the freezer value is strictly greater than zero, it only reduces the freezer value by one
+	    /// If the freezer value is zero or less, \ref lock() reduces the freezer by one and suspends the calling thread.
+	    /// If the freezer value is strictly greater than zero, it only reduces the freezer value by one, the
+	    /// calling thread is not locked.
 	void lock();
 
 	    /// Release a "resource"
 
-	    /// increase the freezer value by one. If at least one thread was suspended on the freezer exactly one thread
+	    /// increase the freezer value by one. If at least one thread was suspended on the freezer, exactly one thread
 	    /// is awaken
 	void unlock();
 

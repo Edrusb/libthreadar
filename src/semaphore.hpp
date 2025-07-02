@@ -47,20 +47,20 @@ namespace libthreadar
 
 	/// Class semaphore is an enhanced version of Posix semaphore
 
-	/// In addition to Posix Semaphore, this class let the calling thread to detect whether other
+	/// In addition to Posix Semaphore, this class let the calling thread able to know whether other
 	/// thread than the one currently having the lock are waiting for the semaphore to be released
     class semaphore
     {
     public:
 	    /// semaphore constuctor
 
-	    /// \param[in] max_value is the maximum number of thread that can concurrently request wait() without being suspended
+	    /// \param[in] max_value is the maximum number of thread that can concurrently call lock() without being suspended
 	    /// \note the initial value is set to the max value, calling lock() decrease the semaphore value by one, this can be done at will, but
 	    /// calling unlock() which increases the semaphore value, must not lead it to exceed maximum value. In other
 	    /// words there must not be more unlock() calls than lock() calls invoked so far.
 	    /// \note A thread calling lock() when the value is less than or equal to zero is suspended. For example, if the value is one before
 	    /// calling lock() the thread will not be suspended, but the next thread calling lock() now that the value is zero, will be suspended.
-	    /// If more than one thread was pending on a semaphore, unlock() awakes a single thread (I must *not* be assumed this will be the oldest
+	    /// If more than one thread was pending on a semaphore, unlock() awakes a single thread (It must *not* be assumed that it will be the oldest
 	    /// waiting on this semaphore).
 	semaphore(unsigned int max_value);
 
@@ -90,7 +90,7 @@ namespace libthreadar
 
 	    /// \note at most max_value (given at construction time) "resources" can be requested at a time.
 	    /// if no more "resource" is available the caller is suspended waiting for another thread to release
-	    /// a resource calling unlock(). The notion of "resource" is an abstraction, that's up to the developer
+	    /// a resource by calling unlock(). The notion of "resource" is an abstraction, that's up to the developer
 	    /// relying on that class to define what a "resource" is. The semaphore only assures that at most max_value
 	    /// resource will be used at the same time.
 	void lock();

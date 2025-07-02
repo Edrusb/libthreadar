@@ -26,10 +26,6 @@
 
     /// \file ratelier_scatter.hpp
     /// \brief defines structure that is suitable to dispatch between many workers taking job order in consideration
-    ///
-    /// many worker can get each one oject from the ratelier_scatter while a feeder thread adds
-    /// new objects ones in sequence. The sequence index can be used on a ratelier_gather to gather job result in
-    /// in the same order, whatever is the worker execution order (more details given with ratelier_gather's doc)
 
 #include "config.h"
 
@@ -49,16 +45,21 @@ extern "C"
 
 namespace libthreadar
 {
-        /// the class ratelier_scatter has a fixed length range of slots of arbitrary defined object type
 
-	/// the number of slot should be greater than the expected number of worker that
-	/// will fetch data from. This is not mandatory though.
-	/// Workers fetch an object, use it and "release" it once the job is completed with it.
-	/// While a single non-worker thread feeds
-	/// the ratelier_scatter with new objects. Each object taken from the ratelier by a worker is given an index
-	/// number for the worker can put this object in a given slot of a ratelier_gather object which
-	/// will be in charge to deliver the in-sequence result of the different jobs to a gathering thread
-	/// whatever was the execution order of workers.
+        /// The class ratelier_scatter's purpose it to scatter an ordered set of data to many worker threads
+
+	/// Each worker thread fetches a piece of work which is provided with an associated index. The index starts
+	/// at zero and increases by one for each new piece a worker fetches to keep the sequence order of the provided
+	/// data.
+	///
+	/// On the other end a scattering thread feeds the ratelier_scatter with data.
+	///
+	/// The original design for this class is to work in conjunction with a ratelier_gather structure to gather
+	/// job result with their associated index, which structure will provide to a gathering thread those results in order,
+	/// whatever is the effective order the workers completed their task. See ratelier_gather doc for more details.
+	///
+	/// The number of slot should be greater than the expected number of worker that
+	/// will fetch data, for they dont stay pending for the scattering thread to refill the structure with new data.
 
     template <class T> class ratelier_scatter
     {
@@ -70,27 +71,31 @@ namespace libthreadar
 	ratelier_scatter & operator = (ratelier_scatter && ref) noexcept = default;
 	virtual ~ratelier_scatter() = default;
 
-	    /// mean for the non-worker thread to provide data to the ratelier_scatter
-	    ///
+	    /// For the non-worker thread to provide data to the ratelier_scatter
+
 	    /// \param one an object to scatter to workers
 	    /// \param flag is a signal available to worker for any purpose it is associated
 	    /// to the provided object in this call
-	    /// \note the data is added to increasingly higher indexes of the virtually infininte
-	    /// list of object. However the caller may be suspended if the ratelier_scatter
-	    /// is full
+	    /// \note the data is added to increasingly higher indexes of the virtually infinite
+	    /// provided list of object, thus the index may overflow, this is not a problem unless you
+	    /// expect having more data in-fly than the maximum integer that an unsigned int may carry.
+	    /// Note also that the caller may be suspended if the ratelier_scatter
+	    /// is full (if no worker did fetch a job).
 	void scatter(std::unique_ptr<T> & one, signed int flag = 0);
 
-	    /// mean for a worker thread to obtain an object in the lowest slot available
-	    ///
+	    /// For a worker thread to obtain an object in the lowest slot available
+
 	    /// \param[out] slot the slot associated to the object obtained in return of this call
 	    /// \param[out] flag a signal associated to this object by from the scattering thread
-	    /// \return the next object available from the ratelier_scaller that has been give by
+	    /// \return the next object available from the ratelier_scaller that has been given by
 	    /// the non-worker thread calling the scatter() method
-	    /// \note this call may suspended the caller until the non-worker thread feeds
+	    /// \note this call may suspended the caller until the scattering thread feeds
 	    /// the ratelier_scatter with new data
 	std::unique_ptr<T> worker_get_one(unsigned int & slot, signed int & flag);
 
 	    /// reset the object in its prestine state
+
+	    /// \note this resets the index to zero.
 	void reset();
 
     private:

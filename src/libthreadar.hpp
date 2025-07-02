@@ -28,23 +28,45 @@
     /// \brief main header file of the library, only that file should be # included in your programs
 
     /// \mainpage
-    /// This is the documentation pages of Libthreadar, a C++ library that provides several classes to manipulate threads:
-    /// - class barrier
-    /// - class mutex
-    /// - class semaphore
-    /// - class fast_tampon
-    /// - class thread
-    /// - class thread_signal
-    /// - class freezer
-    /// - class condition
-    /// - class ratelier_gather
-    /// - class ratelier_scatter
+    /// \par Description
+    /// This is the documentation pages of Libthreadar, a C++ library which provides several classes to manipulate threads:
+    /// - \link libthreadar::barrier class barrier\endlink
+    /// - \link libthreadar::freezer class freezer\endlink
+    /// - \link libthreadar::mutex class mutex\endlink
+    /// - \link libthreadar::semaphore class semaphore\endlink
+    /// - \link libthreadar::fast_tampon class fast_tampon\endlink
+    /// - \link libthreadar::thread class thread\endlink
+    /// - \link libthreadar::thread_signal class thread_signal\endlink
+    /// - \link libthreadar::freezer class freezer\endlink
+    /// - \link libthreadar::condition class condition\endlink
+    /// - \link libthreadar::ratelier_gather class ratelier_gather\endlink
+    /// - \link libthreadar::ratelier_scatter class ratelier_scatter\endlink
     /// .
-    /// These classes are to be used independently from each others and are defined within the libthreadar namespace.
-    /// An example of use "hello word" is available in the example subdirectory of source package.
+    /// These classes are independent from each others (even if some inherit from some others like libthreadar::condition from libthreadar::mutex)
+    /// and are defined within the \ref libthreadar namespace.
+    /// Examples of use are available in the example subdirectory of source package.
     ///
-    /// source code download, support, discussion, and so on is available from sourceforge page at https://sourceforge.net/projects/libthreadar/
+    /// \par Source code
+    /// - GIT repository at <a href="https://sourceforge.net/p/libthreadar/code/">Sourceforge</a>
+    /// - GIT repository at <a href="">Github</a> (both GIT repos should be synchronized most of the time)
+    /// - packaged sources code at <a href="https://sourceforge.net/projects/libthreadar/files/">Sourceforge</a>
+    /// All packages sources and tags in git repos should be signed. See the Author below section to authenticate signatures.
     ///
+    /// \par Support
+    /// support can be requested using the <a href="https://github.com/Edrusb/libthreadar/issues">issues</a> at github.
+    ///
+    /// \par Copyright
+    /// Libthreadar library is licensed under the terms of the GNU Lesser General Public License v3.0
+    /// see the <a href="https://github.com/Edrusb/libthreadar/blob/master/COPYING">COPYING</a>
+    /// file in the source code for details
+    ///
+    /// \author All dar/libdar/webdar/libthreadar produced software packages should be authenticated using <a href="http://dar.linux.free.fr/doc/authentification.html">Denis's GPUPG signature</a>
+    /// \par History and origin
+    /// The code of libthreadar has been extracted from Webdar project near 2015, due to the fact it would be useful to dar/libdar
+    /// to implment parallel compression and parallel encryption in particular (where from this project name), while Webdar
+    /// was abandonned at that time (it has been ressurrected
+    /// in 2022 and should get its first release in 2025).
+
 #include "config.h"
 
 #include "mutex.hpp"

@@ -37,6 +37,10 @@ namespace libthreadar
 
 	/// Wrapper around the Posix pthread_cond_t object and its associated mutex
 
+	/// Class condition inherits from the \ref mutex class and thus provides the \ref lock(), \ref unlock()
+	/// and \ref try_lock() methods. These must be used around the \ref wait(), \ref signal() or \ref broadcast()
+	/// methods brought by this class, see details for each of them.
+
 	/// \note each object share a user defined set of condition on the same mutex
 	/// as defined at constructor time. wait() takes as argument the condition number
 	/// and will be awaken by a signal() or broadcast() having this same number as
@@ -71,25 +75,28 @@ namespace libthreadar
 	    /// put the calling thread on hold waiting for another thread to call signal()
 
 	    /// \param[in] instance the instance number to have the caller waiting on
-	    /// \note wait() must be called between lock() and unlock(). Once suspendend, the
-	    /// calling thread unlocks the mutex and acquires the mutex lock() again once
-	    /// awaken after another thread has called signal
+	    /// \note wait() must be called between lock() and unlock(). Once suspendend calling
+	    /// \ref wait(), the current object is transparently unlocked, for other thread to be able
+	    /// to use it. The mutex is re-acquires (transparently locked) once the thread exits the wait() call it was
+	    /// suspended on, which occurs if another thread calls \ref signal() with the same instance
+	    /// number
 	void wait(unsigned int instance = 0);
 
-	    /// awakes a single thread suspended after having called wait()
+	    /// awakes a single thread suspended for having called wait() on the condition given in argument
 
-	    /// \param[in] instance signal thread that have been waiting on that instance
+	    /// \param[in] instance the condition number to consider, only thread having called
+	    /// \ref wait() with this same instance as argument are eligible to be awaken here.
 	    /// \note signal() must be called between lock() and unlock(). This is only at
 	    /// the time unlock() is called that another thread exits from the suspended
 	    /// state.
 	void signal(unsigned int instance = 0);
 
-	    /// awakes all threads suspended after having called wait()
+	    /// awakes all threads suspended for having called wait() on the condition given in argument
 
 	    /// \param[in] instance broadcast threads that have been waiting on that instance
 	    /// \note broadcast() must be called between lock() and unlock(). This is only at
-	    /// the time unlock() is called that another thread exits from the suspended
-	    /// state.
+	    /// the time unlock() is called that other threads can exit from their suspended
+	    /// state, by returning from their \ref wait() call.
 	void broadcast(unsigned int instance = 0);
 
 	    /// return the number of thread currently waiting on that condition

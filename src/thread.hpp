@@ -59,16 +59,17 @@ namespace libthreadar
 	/// object does not immediately launch a thread. The inherited class can first provide any
 	/// fields necessary to the thread execution by mean of inherited class constructor or better
 	/// by using several customized method of the inherited class, which brings better readability
-	/// and ease code maintenance than having a call with a lot of argument as C++11 requests it
-	/// to be done.
+	/// and ease code maintenance than having a call with a lot of argument as C++11 thread managment
+	/// requests it to be done.
 	///
 	/// Inherited classes must only define the inherited_run() method, method that will be
-	/// run in its specific thread once the run() method will be called. The private field of
+	/// run in its specific thread once the run() method will be called on that object. The private field of
 	/// inherited classes can be used to host variables only accessible by the running thread.
 	/// Inherited class
 	/// may also implement method to communicate with the running thread, here too the private
 	/// (or protected) fields of the class can be used to host mutex if one is necessary to provide
-	/// consistent information from one thread to the other.
+	/// consistent information from the current thread to the other interacting with it by mean of
+	/// adhoc methods of the inherited class.
 	///
 	/// The join() method can be used by the run() caller to wait for thread termination.
 	/// If the corresponding thread has already ended, the join() method ends immediately.
@@ -77,20 +78,22 @@ namespace libthreadar
 	/// started or which has ended and for which join() has already been run, does nothing:
 	/// the join() method returns immediately.
 	///
-	/// \note Class thread object destruction kills the thread and could have generated an exception
-	/// from inherited_run(), but this one will be caught and ignored by the thread::thread parent
-	/// destructor. Under some context implementation (Cygwin) if a pthread has already started but
-	/// has not yet reached the time it calls inherited_run() method, when object destructor is
-	/// called, when the subthread calls the inherited_run() method, the system may report a SEGFAULT
+	/// \note the thread object destructor kills the thread if it was running, this could have
+	/// generated an exception thrown from inherited_run() in another context, but here (thread class
+	/// destructor), all are caught and ignored.
+	/// Under some operating systems (Cygwin), if a pthread has already started but
+	/// has not yet reached the time it has called the inherited_run() method when object destructor is
+	/// called, then, when the subthread calls the inherited_run() method, the system may report a SEGFAULT
 	/// in particular when the fields of the object that are from the inherited class do
 	/// not exist anymore. The kill() and join() present in the thread::~thread destructor, cannot
-	/// prevent this as when the execution pointer reach them, all inherited class fields do no more
-	/// exist.
+	/// prevent this because when the execution pointer reaches them, all inherited class fields do no more
+	/// exist anyway.
 	///
+	/// \par Important!
 	/// IT IS THUS IMPORTANT FOR ANY INHERITED CLASS TO INVOKE cancel() [or other mechanism to stop the
-	/// threand] and THEN join() IN THEIR DESTRUCTOR
+	/// thread] and THEN join() IN THEIR DESTRUCTOR
 	///
-	/// Once the thread is no more running a new call to run() is allowed if a join() call has been issued
+	/// Once the thread is no more running, a new call to run() is allowed but only if a join() call has been issued
 	/// since the thread was last run. This allows to run again a thread without having
 	/// to pass again all the possibly many arguments and datastructures requested by this thread.
 	///
@@ -112,20 +115,27 @@ namespace libthreadar
 
 	    /// reset the stack size to the system default value
 
-	    /// \note this is the default status, unless set_stack_size() has been called
-	    /// previously on this object
+	    /// this method must not be called when the current object has its
+	    /// thread running.
+	    /// \note this sets back the stack to the system default
 	void reset_stack_size();
 
 	    /// set the stack size to non default value
+
+	    /// this method must not be called when the current object has its
+	    /// thread running.
+	    /// \param[in] val size in bytes of the stack to allocate and use.
 	void set_stack_size(unsigned int val);
 
 	    /// get the current stack size value
 
-	    /// \note zero is returned when a system default stack is used
+	    /// \return zero when a system default stack is used, else the argument
+	    /// that has been provided to set_stack_size() method.
 	unsigned int get_stack_size() const { return stack_size; };
 
-	    /// set signal mask for this object's when the thread will be run
+	    /// set signal mask of the thread spawn by run()
 
+	    /// this value persists accros several run()/join() executions.
 	    /// \note see sigsetops(3) for details on manipulating signal sets
 	virtual void set_signal_mask(const sigset_t & mask) { sigmask = mask; };
 
@@ -156,7 +166,9 @@ namespace libthreadar
 	    /// the caller send a cancellation request to this object's running thread if any
 
 	    /// \note the thread will effectively end if it runs its cancellation_checkpoint()
-	    /// regularly in its loop(s), see below.
+	    /// regularly in its loop(s), see below. As an alternative, the inherited class can
+	    /// rely in the protected method inherited_cancel() to implement a mechanism to stop
+	    /// the possibly running thread.
 	void cancel();
 
 
@@ -180,48 +192,52 @@ namespace libthreadar
 	    /// action to be performed in the separated thread (implementation is expected in inherited classes)
 
 	    /// \note There is no argument to provide, because this is the responsibility of the inherited class
-	    /// to defined private/protected fields, methods and constructors to set their value
-	    /// and define whether fields are only accessed by the spawn or the calling thread
-	    /// or both and in that case which way to avoid concurrent access to such fields.
+	    /// to defined private/protected fields, methods and/or constructors to set their value.
+	    /// It is also the responsibility of the inherited class to define if a (private or protected) field is
+	    /// to be exclusively accessed
+	    /// from the thread running inherited_run() or by the thread calling this objects or by both (if for
+	    /// example the field is a mutex) to provide communication mean with the thread running the
+	    /// inherited_run() method.
 	virtual void inherited_run() = 0;
 
 	    /// available withing the inherited_run() method to eventually trigger thread cancellation
 
 	    /// \note since release 1.5.0 the kill() method has been renamed as cancel() and does no more
-	    /// rely on pthread_cancel which does not work well under C++ context since the NPTL implementation
+	    /// rely on pthread_cancel() which does not work well under C++ context since the NPTL implementation
 	    /// used under Linux. The cancellation point are thus defined manually by cancellation_checkpoint()
 	    /// which has to be called regularly in the implementation of your threads (see inherited_run()),
 	    /// if you want to be able to call the cancel() method to stop the thread properly. Thread
 	    /// cancellation relies on the libhtreadar::thread::cancel_except exception that should never
 	    /// be caught in your code, either by cathing explicitely other exceptions or by preventing
 	    /// it to be catch by a cath-all statement:
-	    /// void inherited_run()
-	    /// {
-	    ///   try
-	    ///   {
-	    ///     while(something)
-	    ///      {
-	    ///       ... // code to protect
-	    ///        cancellation_checkpoint();
-	    ///      }
-	    ///   }
-	    ///   catch(cancel_except &)
-	    ///   {
-	    ///        // eventually release some resource
-	    ///        // but propagate the exception!
-	    ///      throw;
-	    ///   }
-	    ///   catch(...)
-	    ///   {
-	    ///      // a catch-all statement you want/need
-	    ///      // not rethrowing the exception
-	    ///   }
-	    /// }
+	    /** \verbatim
+		void inherited_run()
+		{
+                    try
+		    {
+		        while(something)
+		        {
+		           ... // code to protect
+		           cancellation_checkpoint();
+		        }
+		    }
+		    catch(cancel_except &)
+		    {
+	                // eventually release some resource
+	                // but propagate the exception!
+		        throw;
+		    }
+		    catch(...)
+		    {
+			// a catch-all statement you want/need
+		        // not rethrowing the exception
+		    }
+		}
+	     \endverbatim **/
 	    ///
-	    /// of course if the catch-all statement do rethrow all exception
-	    /// nothing special is to be modified as the cancel_except exception
-	    /// will drive the thread cancellation to its end.
-	    ///
+	    /// Of course if the catch-all statement do rethrow all exceptions
+	    /// nothing special is to be done as the cancel_except exception
+	    /// will still be propagated upward and drive the thread cancellation to its end.
 	void cancellation_checkpoint() const;
 
 	    /// this method is called by cancel() even if the thread is not running()
@@ -230,7 +246,8 @@ namespace libthreadar
 	    /// it. Attention should be taken to the fact the caller of cancel() is not likely to
 	    /// be the same thread as the one running inherited_run(), and mutex or other mechanism
 	    /// may be necessary to avoid concurrent access to some fields in your inherited classes,
-	    /// fields used to communicate the cancellation requested to the thread.
+	    /// fields used to communicate the cancellation requested to the thread from the other thread
+	    /// calling cancel().
 	virtual void inherited_cancel() {};
 
     private:

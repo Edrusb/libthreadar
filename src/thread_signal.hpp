@@ -41,21 +41,21 @@
 namespace libthreadar
 {
 
-	/// Class thread_signal provide the same interface as class thread but relies on a signal to wakeup the tread if it was pending on a system call
+	/// Class thread_signal provides the same interface as class \ref thread but in addition relies on a signal to awake the tread if it was pending on a system call
 
-	/// this class derives from class libthread::thread and is used the same.
-	/// However a signal has to be reserved for the whole process and thus for
-	/// all threads to awake thread in case it would be pending on a system call.
-	/// In such situation system call return EINTR code and your thread should
+	/// This class derives from class libthreadar::thread and is used the same.
+	/// However a signal has to be reserved for the whole process for
+	/// any thread to be awaken in case it would be pending on a system call.
+	/// In such situation a system call returns EINTR code and your thread implementation should
 	/// consider this value as usually and probably retry the system call. Though,
-	/// this let your code invoke the cancellation_checkpoint() method that will
-	/// and only this will trigger the end of the thread by throwing an
+	/// before retrying, this let your code invoke the cancellation_checkpoint() method
+	/// to check whether an thread cancellation was requested, which method will in that case throw a
 	/// thread::cancel_except exception that should not be catched by the code
-	/// of inherited_run() method. The signal handle associated to this signal
-	/// does nothing, so if your code does not call cancellation_checkpoint() it will
-	/// continue to run transparently (except for system call that return EINTR in
-	/// that context).
-	/// \note the signal used can be set using the static method change_default_signal()
+	/// of inherited_run() method. The signal handle associated to this signal is implemented
+	/// in this class but does nothing. So if your code does not call cancellation_checkpoint() it will
+	/// continue to run normally, except for the point when the thread was pending on a system call
+	/// which will in that case return EINTR.
+	/// \note the signal used for this class can be set using the static method change_default_signal()
 
     class thread_signal: public thread
     {
@@ -75,27 +75,38 @@ namespace libthreadar
 	    /// set signal mask for this object's when the thread_signal will be run
 
 	    /// \note see sigsetops(3) for details on manipulating signal sets
-
+	    ///
 	    /// \note this is a modified version of thread::set_signal_mask() that
 	    /// removes from the sigset_t the signal used to awake threads so no thread_signal
-	    //  will ignore it
+	    ///  will ignore it
 	virtual void set_signal_mask(const sigset_t & mask) override;
 
 	    /// change the signal used to awake threads
 
 	    /// \note by default the signal used to awake a thread is SIGUSR2
+
+	    /// \note your program should not define any handle for that signal, this
+	    /// is the class, globally, that will define it at the time the first object
+	    /// of an inherited class will be constructed or at the next time an object
+	    /// is constructed if change_default_signal() is used to change the signal
+	    /// to use after an object has already been created.
+	    /// This call has thus no effect until a new object from an inherited class is created.
 	static void change_default_signal(int sig);
 
     protected:
 
-	    /// replaces thread::inherited_cancel()
+	    /// replaces thread::inherited_cancel() and should be used instead of it
 
-	    /// \note except the method name that changes, the purpose is the same
+	    /// \note except the method name that changes, the purpose is the same as inherited_cancel():
+	    /// you have the possibility to provide your own implementation of signaled_inherited_cancel()
+	    /// to implement an alternative method of cancelling a thread. This method will be invoked when
+	    /// the thread::cancel() method will be called, right before the signal is sent to the thread if it
+	    /// was running.
 	virtual void signaled_inherited_cancel() {};
 
     private:
 
-	    /// inherited from thread , made private
+	    /// inherited from thread, made private
 	    /// \note but this does not seem to prevent inherited
 	    /// classes to override the method thread::inherited_cancel() ...
 	    /// Compilation succeeded having an thread_signal derived

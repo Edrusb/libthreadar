@@ -26,48 +26,6 @@
 
     /// \file ratelier_gather.hpp
     /// \brief defines structure that is suitable to gather data from many workers
-    ///
-    /// each worker can fill its job result to the ratelier_gather with an index number.
-    /// This index is used for to provide the jobs in sequence to the gathering thread
-    /// and starts to zero. If a index is missing no data is delivered to the gathering
-    /// thread until a worker thread provide it. The gathering thread is thus garantied
-    /// that whatever the execution order of workers their resulting job is provided
-    /// in sequence to the gathering thread.
-    ///
-    /// the original design for this class is to work in conjunction
-    /// with a ratelier_scatter when a sequences data has to be processed
-    /// by many workers but the resulting of the process should also be
-    /// ordered following the original data the process worked in
-    ///
-    ///
-    ///       +--------------------+
-    ///       | scattering thread  |
-    ///       +--------------------+
-    ///                  |
-    ///                  |
-    ///                  V
-    ///         (ratelier_scatter)
-    ///         /        |       \
-    ///        /         |        \
-    ///   +-------+  +-------+  +-------+
-    ///   |worker1|  |worker2|  |worker3|
-    ///   +-------+  +-------+  +-------+
-    ///        \         |        /
-    ///         \        |       /
-    ///          V       V      V
-    ///         (ratelier_gather)
-    ///                  |
-    ///                  |
-    ///                  V
-    ///       +--------------------+
-    ///       | gathering  thread  |
-    ///       +--------------------+
-    ///
-    /// \note "ratelier" is a french word that translates here to "rack" in
-    /// the meaning of the structure where a soldier puts its weapon, or if
-    /// you prefer piece of metal that can hold and park a set of bicycles.
-
-
 
 #include "config.h"
 
@@ -87,12 +45,56 @@ extern "C"
 
 namespace libthreadar
 {
-        /// the class ratelier_gather has a fixed length range of slots of arbitrary defined object type
+        /// the class ratelier_gather's purpose it gather works from several worker threads
 
-	/// the number of slot should be greater than the number of workers that
-	/// fill the ratelier with data.
-	/// Workers put objects each at a given slot and a non-worker thread (or gathering thread)
-	/// get those objects in order, which releases the corresponding slots of the ratelier_gather object
+        /// Each worker has to send its job result to the ratelier_gather with an index number.
+	/// This index is used to provide the jobs in sequence to the gathering thread
+	/// and starts to zero. If a index is missing no data is delivered to the gathering
+	/// thread until a worker thread provides it. The gathering thread is thus garantied
+	/// that whatever the execution order of workers their resulting job is provided
+	/// in sequence to the gathering thread.
+	///
+	/// The original design for this class is to work in conjunction
+	/// with a ratelier_scatter when a sequence of data has to be processed
+	/// by many workers, but the resulting of the processed data should also be
+	/// ordered following the original data order whatever the speed or task complexity each
+	/// worker performed or addressed compared to the others.
+	///
+	/** \verbatim
+	       +--------------------+
+	       | scattering thread  |
+	       +--------------------+
+	                  |
+	                  |
+	                  V
+	         (ratelier_scatter)
+	         /        |       \
+                /         |        \
+	    +-------+  +-------+  +-------+
+	    |worker1|  |worker2|  |worker3|
+	    +-------+  +-------+  +-------+
+	        \         |        /
+	         \        |       /
+	          V       V      V
+	         (ratelier_gather)
+	                  |
+	                  |
+	                  V
+	       +--------------------+
+	       | gathering  thread  |
+	       +--------------------+
+
+	       \endverbatim **/
+	/// \note "ratelier" is a french word that translates here to "rack" in
+	/// the meaning of the structure where soldiers put their weapons, or if
+	/// you prefer piece of metal that can hold and park a set of bicycles.
+	///
+	/// The number of slots should be greater than the number of workers that
+	/// fill the ratelier with data to avoid having working pending for a slot.
+	/// Workers put objects each at a given slot and a non-worker thread (the gathering thread)
+	/// fetches those objects, which are provided in order, this releases the
+	/// corresponding slots of the ratelier_gather object for workers to drop
+	/// next results in it.
 
     template <class T> class ratelier_gather
     {
@@ -104,24 +106,28 @@ namespace libthreadar
 	ratelier_gather & operator = (ratelier_gather && ref) noexcept = default;
 	virtual ~ratelier_gather() = default;
 
-	    /// provides to a worker thread a mean to given data with its associated index to a gathering thread
+	    /// provides to a worker thread a mean to given data with its associated index to the gathering thread
 
 	    /// \param[in] slot is the slot number associated to the provided object "one"
 	    /// \param[in] one is the object to push to the gathering thread
 	    /// \param[in] flag is a purpose free signal to send to the gathering thread as associated to this object.
-	    /// \note if the slot is already full an exception is thrown
-	    /// \note if the ratelier_gather is full the caller will be suspended until the
-	    /// non-worker thread calls gather() to make some room
+	    /// \note if this slot number has already been provided an exception is thrown,
+	    /// \note if the ratelier_gather is full, the caller will be suspended until the
+	    /// non-worker gathering thread calls gather() to make some room.
 	void worker_push_one(unsigned int slot, std::unique_ptr<T> & one, signed int flag = 0);
 
-	    /// obtain the lowest continuous filled slots of the ratelier_gather and free them
+	    /// obtain the lowest continuous filled slots from the ratelier_gather and free them
 
 	    /// \param[out] ones is a list of continuously indexed objects which immediately follows the list
 	    /// provided by a previous call to gather().
 	    /// \param[out] flag is the purpose free signal transmitted by the workers and associated to each object
+	    /// \note the provided arguments, ones and flags, should always have the same size.
 	void gather(std::deque<std::unique_ptr<T> > & ones, std::deque<signed int> & flag);
 
 	    /// reset the object in its prestine state
+
+	    /// this restarts the index to zero. The next index that a worker should give
+	    /// for any data be provided to the gathering thread should be zero.
 	void reset();
 
     private:
