@@ -47,25 +47,25 @@
     /// Examples of use are available in the example subdirectory of source package.
     ///
     /// \par Source code
-    /// - GIT repository at <a href="https://sourceforge.net/p/libthreadar/code/">Sourceforge</a>
-    /// - GIT repository at <a href="">Github</a> (both GIT repos should be synchronized most of the time)
-    /// - packaged sources code at <a href="https://sourceforge.net/projects/libthreadar/files/">Sourceforge</a>
+    /// - GIT repository at <a target="_blank" href="https://sourceforge.net/p/libthreadar/code/">Sourceforge</a>
+    /// - GIT repository at <a target="_blank" href="">Github</a> (both GIT repos should be synchronized most of the time)
+    /// - packaged sources code at <a target="_blank" href="https://sourceforge.net/projects/libthreadar/files/">Sourceforge</a>
     /// All packages sources and tags in git repos should be signed. See the Author below section to authenticate signatures.
     ///
     /// \par Support
-    /// support can be requested using the <a href="https://github.com/Edrusb/libthreadar/issues">issues</a> at github.
+    /// support can be requested using the <a target="_blank" href="https://github.com/Edrusb/libthreadar/issues">issues</a> at github.
     ///
     /// \par Copyright
     /// Libthreadar library is licensed under the terms of the GNU Lesser General Public License v3.0
-    /// see the <a href="https://github.com/Edrusb/libthreadar/blob/master/COPYING">COPYING</a>
+    /// see the <a target="_blank" href="https://github.com/Edrusb/libthreadar/blob/master/COPYING">COPYING</a>
     /// file in the source code for details
     ///
-    /// \author All dar/libdar/webdar/libthreadar produced software packages should be authenticated using <a href="http://dar.linux.free.fr/doc/authentification.html">Denis's GPUPG signature</a>
+    /// \author All dar/libdar/webdar/libthreadar produced software packages should be authenticated using <a target="_blank" href="http://dar.linux.free.fr/doc/authentification.html">Denis's GNUPG signature</a>
     /// \par History and origin
     /// The code of libthreadar has been extracted from Webdar project near 2015, due to the fact it would be useful to dar/libdar
-    /// to implment parallel compression and parallel encryption in particular (where from this project name), while Webdar
+    /// to implement parallel compression and parallel encryption in particular (where from this project name), while Webdar
     /// was abandonned at that time (it has been ressurrected
-    /// in 2022 and should get its first release in 2025).
+    /// in 2022 and should get its first release in 2025, webdar also relies on libthreadar).
 
 #include "config.h"
 

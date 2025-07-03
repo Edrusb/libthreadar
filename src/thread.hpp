@@ -63,7 +63,7 @@ namespace libthreadar
 	/// requests it to be done.
 	///
 	/// Inherited classes must only define the inherited_run() method, method that will be
-	/// run in its specific thread once the run() method will be called on that object. The private field of
+	/// run in its specific thread once the run() method will be called on that object. The private fields of
 	/// inherited classes can be used to host variables only accessible by the running thread.
 	/// Inherited class
 	/// may also implement method to communicate with the running thread, here too the private
