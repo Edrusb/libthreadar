@@ -21,8 +21,8 @@
 //  to contact the author: dar.linux@free.fr
 /*********************************************************************/
 
-#ifndef LIBTHREADAR_TAMPON_H
-#define LIBTHREADAR_TAMPON_H
+#ifndef LIBTHREADAR_TAMPON_HPP
+#define LIBTHREADAR_TAMPON_HPP
 
     /// \file tampon.hpp
     /// \brief defines the tampon class that provides asynchronous pipe-like (unidirectional) communication between two threads
