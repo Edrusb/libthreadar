@@ -4,31 +4,30 @@
 
 In GIT you will only find source code, and no generated files. The configure
 script for example is generated from configure.ac file with autoconf tool,
-so you will not find it here an need specific tools to build this kind of files
-that are usually included in released packages.
+so you will not find it there an need specific tools to build this kind of
+files that are usually included in tarball released packages.
 
-For that reason, you need the following tools:
+For that reason, when using code from GIT, you need the following additional
+tools:
 - gnu M4  ( http://www.gnu.org/software/m4/ )
 - autoconf ( http://www.gnu.org/software/autoconf/ )
 - automake ( http://www.gnu.org/software/automake/ )
 - libtool ( http://www.gnu.org/software/libtool/ )
 
 If they are not present on your system, you must first install them.
-You can then use the following demo script (it may work or not on
-you system, that's more to be considered as a reminder of the different
-steps to follow to build the configure script and Makefiles):
+You can then use the following demo script (it may work or not on you system,
+that's more to be considered as a reminder of the different steps to follow
+to build the configure script and Makefiles):
 
 	misc/init
 
-Then you are ready to build dar as detailed in the documentation, in brief,
-the following commands should correspond to most needs:
+Once the configure and Makefile files have been generated, you are ready
+to build libthreadar as detailed in the documentation. in brief the following
+commands should correspond to most needs:
 
 	./configure
 	make
 	make install
-
-For your information the following diagram may help you. Be aware that this
-is a bit simplified.
 
 If you just want to build a fresh tarball simply use:
 
