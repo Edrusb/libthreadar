@@ -62,7 +62,7 @@
     ///
     /// \author All dar/libdar/webdar/libthreadar produced software packages should be authenticated using <a target="_blank" href="http://dar.linux.free.fr/doc/authentification.html">Denis's GNUPG signature</a>
     /// \par History and origin
-    /// The code of libthreadar has been extracted from Webdar project near 2015, due to the fact it would be useful to dar/libdar
+    /// The code of libthreadar has been extracted from Webdar project in 2014, due to the fact it would be useful to dar/libdar
     /// to implement parallel compression and parallel encryption in particular (where from this project name), while Webdar
     /// was abandonned at that time (it has been ressurrected
     /// in 2022 and should get its first release in 2025, webdar also relies on libthreadar).
