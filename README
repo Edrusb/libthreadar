@@ -1,25 +1,39 @@
-What is libthreadar
-        libthreadar provides C++ classes for manipulating threads and
-        propagating back exception from thread to parent thread when the
-        parent calls the join() method
 
-What it is relying on
+
+
+
+
+                        L I B T H R E A D A R
+			---------------------
+			    -------------
+			        -----
+
+
+
+
+
+What is libthreadar?
+        libthreadar is a library providing a set of C++ classes for manipulating
+	threads and propagating back exception from thread to parent thread when
+	the parent calls the join() method.
+
+What is it relying on?
         libthreadar relies on Posix thread for historical reason, this might
         change in the future to rely on C++11 thread without any impact on
         the API.
 
-Which compiler to use with libthreadar
+Which compiler to use with libthreadar?
         To propagate exception of any type libthreadar use C++11 specific
         construction, so it requires such compiler to be compiled and linked
         with.
 
-Why that strange name
+Why that strange name?
         libthreadar has been extracted from code initially part of webdar and
         also now used by dar and libdar, where from its "dar" ending name.
         However this library is not part of webdar, libdar or dar, is
         released separately and can be used independently of them.
 
-Example of use:
+Example of use
 
         class my_thread: public libthreadar::thread
         {
@@ -31,7 +45,10 @@ Example of use:
                 void set_time_to_wait(unsigned int t) { secs = t; };
 
             protected:
-                   // this is the code that will run in a separated thread
+	           // This method is inherited from class libthreadar::thread
+		   // and is the only one mandatory to implement in your class.
+                   // It contains the code that will run in a separated thread
+		   // when the libthreadar::thread::run() method will be called.
                 virtual void inherited_run() override { sleep(secs); };
 
            private:
@@ -40,14 +57,15 @@ Example of use:
 
         my_thread t1(10), t2, t3;
 
+	    // we modify the object after its creation but before the thread has been run
         t2.set_time_to_wait(20);
 
             // each of the following run() call returns almost immediately:
         t1.run();  // this fires the first thread which sleeps 10 seconds before it ends
-        t2.run();  // runs the second thread, it sleeps 20 seconds
-        t3.run();  // runs the third thread, which sleeps 5 seconds
+        t2.run();  // this runs the second thread, it sleeps 20 seconds
+        t3.run();  // last, this runs the third thread, which sleeps 5 seconds
 
-        t1.join(); // will wait ~10 seconds for t1 to complete
+        t1.join(); // the call will wait ~10 seconds for t1 to complete
         t2.join(); // should wait ~10 seconds more for t2 to complete its 20 seconds sleep
         t3.join(); // should return immediately as t3 has already finished its 5 secs sleep
 
@@ -65,13 +83,13 @@ Example of use:
         t3.join(); //
 
 
-Libthreadar advantage summary:
+Libthreadar advantage summary
           - your C++ Class inheriting from libthreadar::thread provides a shelter for
             thread dedicated data as private fields.
           - your C++ Class can provide many simple methods to setup the thread parameters
             rather than a long list of parameters provided to a function.
           - Over time it is easy to have a thread class getting new features without breaking
-            backward compatibility as it is just a matter of adding new method beside the others
+            backward compatibility as it is just a matter of adding new methods beside the others
             and setting default values/behavior for those new ones at object construction time.
           - private/protected fields of the class can also hold mutex, semaphores, conditions
             and other constructs to setup communication channels with the running thread, all
@@ -79,7 +97,7 @@ Libthreadar advantage summary:
             without having to know the implementation.
 
 
-Libthreadar Licensing:
+Libthreadar Licensing
         Libthreadar is released under the
 
                 GNU LESSER GENERAL PUBLIC LICENSE.
@@ -88,7 +106,7 @@ Libthreadar Licensing:
         COPYING and COPYING.LESSER files.
 
 Download
-        You can download from github or git at sourceforge but you will need
+        You can download from GIT repos at github and sourceforge but you will need
         the auto-tools (automake, autoconf, libtool...) to create the configure
         script. You can instead download ready for use source code (having an
         the configure script built) from sourceforge:
@@ -97,9 +115,11 @@ Download
 
         You will find signature beside those packages, see the "Authentication"
         paragraph at http://dar.linux.free.fr/ for signature validation.
+	No binary package is provided for any distro, ask your preferred disto
+	maintainers if needed.
 
-Detailed documentation documentation is available online here
+Detailed API documentation is available online at
 
           https://libthreadar.sourceforge.net/
 
-        it is built from Doxygen comments found in source code.
+        it is built from Doxygen comments found in source code

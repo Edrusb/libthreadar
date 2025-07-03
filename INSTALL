@@ -13,10 +13,10 @@
 
  2 -  compile running 'make'
 
- 3 -  once compilation succeeded, as root install by runing 'make install'
+ 3 -  once compilation succeeded, as root install by running 'make install'
 
- 3 -  You can also make use of DESTDIR variable to setup a package for your distro
-      make DESTDIR=/tmp install
+ 3 -  Distro package maintainer can make use of DESTDIR variable at step 3.
+
 
 
 
