@@ -50,7 +50,7 @@ void read_proc_self_maps(const std::string & context)
     static const unsigned int buf_size = 1024*1024;
 
     int fd = open("/proc/self/maps", O_RDONLY);
-    char buf[buf_size];
+    char buf[buf_size+1];
     int lu = 0;
 
     std::cout << " --------------------- " << context << "   [START]" << std::endl;
