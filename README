@@ -45,10 +45,10 @@ Example of use
                 void set_time_to_wait(unsigned int t) { secs = t; };
 
             protected:
-	           // This method is inherited from class libthreadar::thread
-		   // and is the only one mandatory to implement in your class.
+	               // This method is inherited from class libthreadar::thread
+		           // and is the only one mandatory to implement in your class.
                    // It contains the code that will run in a separated thread
-		   // when the libthreadar::thread::run() method will be called.
+		           // when the libthreadar::thread::run() method will be called.
                 virtual void inherited_run() override { sleep(secs); };
 
            private:
